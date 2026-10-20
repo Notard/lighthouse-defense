@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 11:34</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 12:13</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -352,6 +352,67 @@ article td img{margin:0 auto}
 <ol>
 <li>주아는 굵기가 하나라 <code>fontWeight: w700</code>이면 가짜 굵게 그려짐 → 굵기를 뺌</li>
 <li>reviewer: Codex를 <code>workspace-write</code>로 부르면 저장소 어디든 쓸 수 있음 → 카드 004에서 실행 뒤 <code>git status</code> 확인을 끝내는 조건에 넣기로</li>
+</ol>
+<h2>3. 카드 004: 그림 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: (그림 모음을 보고) "좋아 다음으로."</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>Codex로 그림 8개: 친구 <strong>해마·게·복어</strong>, 적 <strong>그림자 방울·먹물 오징어·그림자 해파리</strong>, <strong>등대</strong>(바위섬), <strong>밤바다</strong> 배경. 캐릭터는 모두 앞을 본다 (적이 사방에서 오므로). 해마를 먼저 그려 그림체 기준으로</li>
+<li>게임: 밤바다 그림 위 가운데에 등대 (한 변 200), 자리·빛·제목이 위에 겹침</li>
+<li>Codex 안전 관문: Codex 실행 전후 git 상태를 비교해 <code>art/</code> 밖이 바뀌면 멈춤. 8번 모두 통과</li>
+<li>사용자 승인 (배경이 위에서 본 바다가 아니라 수평선 풍경인 점을 알리고 그대로)</li>
+</ul>
+<p><img alt="그림 모음" src="preview/04_art_sheet.jpg" />
+<img alt="게임 화면" src="preview/04_game.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>리드</td>
+<td><code>data/art/prompts.json</code>: 그림체(굵은 남색 외곽선, 밤바다에서 잘 보이는 빛나는 색), 크로마 초록 배경 지시는 캐릭터·소품에만(배경 그림과 부딪히지 않게, 카드 003 리뷰), 캐릭터 6·소품 2. 설계 §3-2, T3-10~16, 인수 조건, 카드</td>
+</tr>
+<tr>
+<td>tester</td>
+<td><code>test/art_test.dart</code> 7개, <code>waitUntil</code>. 표에 없던 <code>sprite</code> 이름을 표 의문으로 → 리드가 설계에 정함</td>
+</tr>
+<tr>
+<td>implementer</td>
+<td>① 도구 고침과 <strong>안전 관문을 먼저</strong>, ② Codex 그림 한 장씩 (사용량 제한 429로 먹물 오징어·배경이 두 번씩 재시도), ③ 크로마 초록 빼기 다지기(테두리 청록 줄 없애기), ④ <code>prep_props</code>(크기 한도 넘으면 품질 낮춰 다시), ⑤ 게임 표시·<code>SheetAction</code>·실패한 읽기 캐시 안 함</td>
+</tr>
+<tr>
+<td>관문</td>
+<td>테스트 파일의 쓰지 않는 import → implementer 보고만 → tester 정리</td>
+</tr>
+<tr>
+<td>사용자</td>
+<td>그림 모음·게임 화면 보고 승인</td>
+</tr>
+<tr>
+<td>reviewer</td>
+<td>승인. 안전 관문 사각지대(Codex가 커밋·stash하면 못 잡음, <code>art/</code> 안 다른 그림 덮어쓰기) 등 → 카드 005</td>
+</tr>
+</tbody>
+</table>
+<h3>검증</h3>
+<ul>
+<li>관문: 분석 문제 없음, 테스트 40/40, 범위 통과(24개), 웹 빌드 통과</li>
+<li>리드: 작업 트리 깨끗, 브랜치 변경이 모두 예상 폴더 안, <code>git ls-files art/ref</code> 8개 (원본 18 MB, 확인용 <code>_check</code>는 무시)</li>
+<li>그림 파일: <code>night_sea.webp</code> 83 KB, <code>lighthouse.webp</code> 31 KB</li>
+</ul>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>Codex 사용량 제한(429)으로 두 장이 실패 → 같은 그림 최대 2번 다시 (배경은 5분 기다린 뒤)</li>
+<li>실제 그림에서 크로마 초록이 테두리에 남음 → 배경과 이어진 초록·둘러싸인 초록 틈·빛이 비친 초록 띠를 나눠 지움, 번짐은 G를 (R+B)/2로</li>
+<li>배경 원본이 941 × 1672로 작게 나옴 → 1080 × 1920으로 키워 씀 (사용자 승인, 설계에 적음)</li>
+<li>리드 실수: 설계를 고친 뒤 tester 범위 관문을 돌려 리드 변경이 함께 잡힘 → 관문을 먼저 돌리고 고치기</li>
 </ol></article>
 </div>
 </body>
