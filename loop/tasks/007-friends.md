@@ -9,7 +9,7 @@
   - [x] `bash tools/loop/check.sh implementer` 통과
   - [x] `python tools/gen_tables.py --check` 통과
   - [x] reviewer 승인
-  - [ ] 사용자 확인 (A5-3~5)
+  - [x] 사용자 확인 (A5-3~5, "응" + 빛이 친구도 강하게 하자 → 카드 008)
 - **바퀴**: 2 / 3
 
 ## implementer 참고
