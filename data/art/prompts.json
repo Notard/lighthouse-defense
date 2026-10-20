@@ -1,8 +1,51 @@
 {
-  "_설명": "그림 프롬프트 (리드 소유, docs/design.md §3). tools/gen_art.py가 읽는다. 캐릭터·소품 내용은 카드 004에서 채운다.",
-  "style": "Cute 2D cartoon game sprite for a cozy night-sea lighthouse defense game. Chibi proportions, thick dark-navy outline (#1B2340) of even width, soft two-tone cel shading, glowing gentle colors that read well on a dark navy night-sea background, clean flat colors, no texture noise, no text, no ground shadow, no background scenery.",
-  "background": "plain flat chroma-green background (#00FF00) filling the whole image, nothing else",
+  "_설명": "그림 프롬프트 (리드 소유, docs/design.md §3·§3-2). tools/gen_art.py가 읽는다. 캐릭터는 사방에서 오고 가므로 모두 앞(보는 사람 쪽)을 본다.",
+  "style": "Cute 2D cartoon game art for a cozy night-sea lighthouse defense game. Chibi proportions (big head, small body), thick dark-navy outline (#1B2340) of even width, soft two-tone cel shading, gentle glowing colors that read well on a dark navy night sea, clean flat colors, no texture noise, no text, no letters, no watermark.",
+  "background": "One single isolated subject centered on a plain flat chroma-green (#00FF00) background that fills the whole image. No scenery, no ground, no cast shadow, nothing else in the image. Do not use pure green (#00FF00) anywhere on the subject itself.",
   "frame_size": 1254,
-  "characters": {},
-  "props": {}
+  "style_ref": "seahorse",
+  "characters": {
+    "seahorse": {
+      "name": "해마",
+      "description": "A small friendly seahorse, the basic bubble-shooting friend. Front three-quarter view facing the viewer, upright. Soft aqua-teal body with pale mint belly ridges, a neatly curled tail, a small fin crest behind the head, big shiny dark eyes with white highlights, rosy cheeks, a cute tube snout with one tiny round bubble at its tip. Calm, brave little smile. A faint soft cyan glow along the edges."
+    },
+    "crab": {
+      "name": "게",
+      "description": "A chubby little coral-red crab, the close-range pincer friend. Front view facing the viewer. Rounded coral-orange shell with a lighter peach underside, two big raised pincers (the right one slightly bigger), short stubby legs, eyes on short stalks with big shiny pupils, a determined cute smile."
+    },
+    "pufferfish": {
+      "name": "복어",
+      "description": "A round pufferfish friend, fully puffed up, front three-quarter view facing the viewer. Pale lemon-yellow body with a soft white belly, small rounded spikes evenly all around the body (clearly separated), tiny side fins and tail fin, big round eyes, puffed cheeks, a grumpy-cute pout."
+    },
+    "shadow_blob": {
+      "name": "그림자 방울",
+      "description": "A small shadow blob monster of the dark sea, the basic enemy. Front view facing the viewer. A wobbly droplet-shaped blob of deep indigo-purple shadow with a slightly darker core, a soft violet rim light, two glowing pale-yellow round eyes and a tiny mischievous grin. Cute, not scary."
+    },
+    "ink_squid": {
+      "name": "먹물 오징어",
+      "description": "A small dark ink squid, the fast enemy. Front view facing the viewer, slightly leaning forward as if darting. Midnight blue-black body with a violet rim light, pointed mantle, short wavy tentacles below, two glowing magenta eyes, a cheeky grin, two or three little black ink droplets beside it. Cute and mischievous."
+    },
+    "shadow_jelly": {
+      "name": "그림자 해파리",
+      "description": "A floating shadow jellyfish enemy. Front view facing the viewer. A translucent dark purple dome bell with a faint inner glow, wavy frilled tentacles hanging down, two sleepy glowing lilac eyes on the bell. Gentle floating pose. Cute, a little spooky."
+    }
+  },
+  "props": {
+    "lighthouse": {
+      "prompt": "A cute stubby lighthouse standing on a small round rocky islet, seen from a slight top-down three-quarter view. White tower with red stripes, a dark-navy lantern room with a warm glowing yellow lamp, a small balcony railing, a round islet of grey-blue rocks with a little white sea foam around the base. The whole lighthouse and islet fit inside the square.",
+      "square": true,
+      "size": [
+        400,
+        400
+      ]
+    },
+    "night_sea": {
+      "prompt": "Background art for a portrait mobile game: a calm night sea seen from above at a slight angle, filling the whole portrait frame edge to edge. Deep navy and indigo water with gentle stylized wave lines, scattered small sparkles of reflected starlight, a few soft lighter ripples. Only the very top edge shows a thin band of starry night sky at the horizon. Keep the middle of the image calm and empty (a lighthouse will be placed there later). No islands, no lighthouse, no boats, no creatures, no text.",
+      "opaque": true,
+      "size": [
+        1080,
+        1920
+      ]
+    }
+  }
 }

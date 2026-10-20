@@ -82,4 +82,32 @@
 - 카드 003에서는 도구만 가져온다. 실제 그림 만들기는 카드 004
 - `data/art/prompts.json`의 `frame_size`는 **Codex 기준 그림 캔버스 한 변(px)**. 렌더 프레임 크기는 리그의 `canvas.frame_px`
 
+## 3-2. 그림 (카드 004)
+
+### 그림 목록 (프롬프트 `data/art/prompts.json`)
+| 이름 | 종류 | 무엇 | 쓰는 곳 |
+|---|---|---|---|
+| `seahorse` 해마 · `crab` 게 · `pufferfish` 복어 | 캐릭터 기준 그림 (`art/ref/<이름>.png`) | 친구 셋 | 컷아웃 애니메이션은 카드 005 |
+| `shadow_blob` 그림자 방울 · `ink_squid` 먹물 오징어 · `shadow_jelly` 그림자 해파리 | 캐릭터 기준 그림 | 적 셋 | 카드 005 |
+| `night_sea` | 배경 (꽉 찬 세로 9:16) | 밤바다 | `assets/images/night_sea.webp` 1080 × 1920 |
+| `lighthouse` | 소품 (정사각) | 작은 바위섬 위 등대 | `assets/images/lighthouse.webp` 400 × 400 |
+
+- 캐릭터는 사방에서 오가므로 모두 **앞(보는 사람 쪽)**을 본다. `seahorse`를 먼저 그려 그림체 기준(`style_ref`)으로 삼는다
+- 그림이 마음에 드는지는 **사용자가 정한다** (다시 그리기는 프롬프트를 리드가 고쳐서)
+
+### 게임에 보이기
+- 바다 바탕(`SeaBackdrop`)은 `night_sea` 그림을 판 전체(0, 0, 720 × 1280)에 그린다 (임시 그러데이션 대신)
+- 등대(`LighthouseSpot`)는 `lighthouse` 그림을 가운데 (360, 660)에 **한 변 `GameConfig.lighthouseSize` = 200**으로 그린다 (안쪽 자리 원과 겹치지 않음: 150 − 44 = 106 > 100)
+- 그리는 순서: 바다 → 빛 → 자리 → 등대 → 제목 (2단계와 같음)
+- `pubspec.yaml` assets에 `assets/images/`
+
+### 시트 읽기 다지기 (카드 003 리뷰)
+- `SheetAction.fromJson(Map)` (`lib/game/art.dart`): 시트 JSON의 동작 하나. `frames`는 꼭 있어야 한다(없거나 정수가 아니면 `FormatException`). `fps` 없으면 12, `loop` 없으면 false, `event` 없으면 null
+- `CharacterArt.load`가 실패하면 캐시에 남기지 않는다 (다음에 다시 읽는다). 확인용 `CharacterArt.isCached(name)`
+- `tools/pack_sheets.py`: 리그 동작에 `frames`·`fps`·`loop`가 없으면 알아보기 쉬운 오류로 멈춘다. 첫 프레임이 완전히 투명하면 트레이스백 대신 알림
+- `tools/gen_art.py prompt ref <이름>`은 `based_on` 그림이 없어도 끝나지 않고 프롬프트를 보여 준다
+
+### Codex 안전 관문 (카드 003 리뷰 ①)
+- `tools/gen_art.py`는 Codex를 부르기 전과 후의 `git status --porcelain`을 비교해, **`art/` 밖에 새로 생기거나 바뀐 파일이 있으면** 그 목록을 보여 주고 종료 코드 3으로 멈춘다 (Codex가 저장소의 다른 곳을 고쳤는지 사람이 보기 전에 기계가 잡는다)
+
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)
