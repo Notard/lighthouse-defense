@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 15:05</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 15:23</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -614,6 +614,54 @@ article td img{margin:0 auto}
 <li>그 규칙이 친구에 빠짐 → reviewer가 잡음 (2바퀴)</li>
 <li>쟁반 영역이 2단계 테스트의 바다 누르기 점과 겹침 → 단추를 가운데에 모음</li>
 <li>미룸: T5-11(거품이 다른 적을 맞히지 않음)을 다른 적을 두고 더 단단히</li>
+</ol>
+<h2>5. 카드 008: 빛 속 친구가 힘을 얻음 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "등대 빛은 아군을 조금 더 강하게 해주는 효과가 좋지 않을까?" → (스크린숏) "응"</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>빛 속 친구(자리 가운데가 빛 속)는 쉬는 시간이 <code>friend_haste</code>(1.5)배 빨리 줄어 더 자주 공격 (<code>beam.csv</code> 새 칸)</li>
+<li>빛 속 친구는 자리 원에 금빛 고리가 숨쉬고, 후광·발밑 빛·떠오르는 반짝이</li>
+<li>빛을 적 쪽(느리고 약하게)과 친구 쪽(빠르게) 중 어디로 돌릴지 고르는 재미</li>
+<li>카드 007에서 미룬 T5-11 강화: 터진 거품이 바로 옆 다른 적을 맞히지 않음(T8-05)</li>
+</ul>
+<p><img alt="빛 속 친구" src="preview/08_beam_boost.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>리드</td>
+<td>beam.csv friend_haste, 설계 §5-2, T8-01~05, A8</td>
+</tr>
+<tr>
+<td>tester</td>
+<td>T8-01~05. 표의 시간 계산 실수 둘을 짚음 (방울이 두 번째에 죽음, 쉬는 시간이 끝나 다시 공격) → 리드가 표 고침</td>
+</tr>
+<tr>
+<td>implementer</td>
+<td>89/89</td>
+</tr>
+<tr>
+<td>리드</td>
+<td>웹 확인: 발밑 금빛이 빛줄기 노란빛에 묻힘 → implementer가 고리·후광·반짝이로 다듬음 → 다시 확인</td>
+</tr>
+<tr>
+<td>reviewer · 사용자</td>
+<td>승인</td>
+</tr>
+</tbody>
+</table>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>테스트 표의 시간 계산 실수 → tester가 숫자로 따져 잡아냄 (표가 정답이어도 표가 틀릴 수 있음: tester의 "모호하면 보고" 규칙이 효과)</li>
+<li>같은 색 계열(빛줄기 노랑 위 금빛)이라 안 보임 → 진한 주황 금빛 + 흰 금빛 선으로 대비</li>
 </ol></article>
 </div>
 </body>
