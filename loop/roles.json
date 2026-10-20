@@ -3,23 +3,69 @@
   "maxFiles": 30,
   "roles": {
     "implementer": {
-      "allow": ["lib/**", "tools/**", "assets/**", "pubspec.yaml", "pubspec.lock", "web/**", "windows/**", "art/**"],
-      "deny": ["test/**", "docs/**", "data/**", "loop/**", "tools/balance/**", "tools/loop/**", "balance/**", ".claude/**", "plan.md", "CLAUDE.md"]
+      "allow": [
+        "lib/**",
+        "tools/**",
+        "assets/**",
+        "pubspec.yaml",
+        "pubspec.lock",
+        "web/**",
+        "windows/**",
+        "art/**",
+        "preview/05_*.gif"
+      ],
+      "deny": [
+        "test/**",
+        "docs/**",
+        "data/**",
+        "loop/**",
+        "tools/balance/**",
+        "tools/loop/**",
+        "balance/**",
+        ".claude/**",
+        "plan.md",
+        "CLAUDE.md"
+      ]
     },
     "tester": {
-      "allow": ["test/**", "dart_test.yaml"],
-      "deny": ["lib/**", "tools/**", "docs/**", "data/**", "loop/**", "balance/**", ".claude/**"]
+      "allow": [
+        "test/**",
+        "dart_test.yaml"
+      ],
+      "deny": [
+        "lib/**",
+        "tools/**",
+        "docs/**",
+        "data/**",
+        "loop/**",
+        "balance/**",
+        ".claude/**"
+      ]
     },
     "balancer": {
-      "allow": ["tools/balance/**", "balance/**", "test/balance/**"],
-      "deny": ["lib/**", "data/**", "docs/**", "loop/**", ".claude/**"]
+      "allow": [
+        "tools/balance/**",
+        "balance/**",
+        "test/balance/**"
+      ],
+      "deny": [
+        "lib/**",
+        "data/**",
+        "docs/**",
+        "loop/**",
+        ".claude/**"
+      ]
     },
     "reviewer": {
       "allow": [],
-      "deny": ["**"]
+      "deny": [
+        "**"
+      ]
     },
     "lead": {
-      "allow": ["**"],
+      "allow": [
+        "**"
+      ],
       "deny": []
     }
   }
