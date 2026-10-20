@@ -74,9 +74,15 @@ def main() -> int:
            "-c", f"sandbox_workspace_write.writable_roots={roots}",
            "--json", "-o", str(report), "-"]
 
+    # 샌드박스는 다른 Windows 사용자(CodexSandboxOffline)로 돈다. flutter 저장소(C:/flutter)와 이 저장소의 소유자가 달라
+    # git이 "dubious ownership"으로 멈추므로, 이 실행에만 safe.directory를 환경 변수로 준다 (사용자 git 설정은 그대로)
+    env = dict(os.environ, GIT_CONFIG_COUNT="2",
+               GIT_CONFIG_KEY_0="safe.directory", GIT_CONFIG_VALUE_0="C:/flutter",
+               GIT_CONFIG_KEY_1="safe.directory", GIT_CONFIG_VALUE_1=str(ROOT).replace("\\", "/"))
+
     before = snapshot()
     with events.open("w", encoding="utf-8") as out:
-        proc = subprocess.run(cmd, cwd=ROOT, input=prompt, stdout=out, stderr=subprocess.STDOUT,
+        proc = subprocess.run(cmd, cwd=ROOT, input=prompt, stdout=out, stderr=subprocess.STDOUT, env=env,
                               text=True, encoding="utf-8", timeout=TIMEOUT)
     after = snapshot()
 
