@@ -236,7 +236,7 @@
 - 판의 한 번 `update`는 **최대 0.1초**(`GameConfig.maxFrameDt`)만 흘린다. 더 큰 dt(탭을 숨겼다 돌아옴 등)는 0.1로 자른다 (남는 시간은 버림)
 
 ### 카드 006 리뷰에서 온 작은 일
-- 닿는 거리 안쪽에서 나타난 적(`spawnEnemy`의 `distance` < 닿는 거리): 첫 `update`에 닿는 거리로 옮겨지고(밖으로) 갉기 상태가 되며, **그 프레임에 갉지 않는다**. 첫 갉기는 그때부터 `bite_interval` 뒤 (남은 시간 이월은 0 ~ dt로 묶는다)
+- 닿는 거리 안쪽에서 나타난 적(`spawnEnemy`의 `distance` < 닿는 거리): 첫 `update`에 닿는 거리로 옮겨지고(밖으로) 갉기 상태가 되며, **그 프레임에 갉지 않는다**. 첫 갉기는 그 update가 끝난 때부터 `bite_interval` 뒤 (이때 이월하는 남은 시간은 0. 밖에서 걸어와 닿는 보통 경우의 이월은 0 ~ dt로 묶는다)
 - 갉는 그림과 피해를 맞춘다: 갉기 중 attack 동작 한 바퀴가 `bite_interval`이 되게 늘리고, 이벤트 프레임(3)이 피해 순간에 오게 (그림만, 규칙은 §4 타이머 그대로)
 - 그림을 읽기 전에 받은 피해의 `hit` 동작은 그림이 온 뒤 재생하지 않는다
 - `cut_parts.py` 도움말의 "(친구 셋)"을 지금 사실(여섯 리그 모두)로
@@ -251,7 +251,7 @@
 | `Tables.friends`: `Map<String, FriendStats>` | `id`, `attack`(String `shot`/`melee`/`burst`), `range`, `damage`, `interval`, `projectileSpeed` (double) |
 | `Friend` (`lib/game/friend.dart`) | `id`, `stats`, `slot`(`Slot`), `position`(Vector2, 자리 가운데), `cooldown`(double, 남은 쉬는 시간), `isAttacking`(공격 시작~효과 사이), `target`(`Enemy?`, 지금 과녁), `enemiesInRange()` → `List<Enemy>` |
 | `Friend.windupSeconds` = 1/3 | 공격 시작에서 효과까지 |
-| `game.placeFriend(String id, Slot slot)` → `Friend?` | 빈 자리면 놓고 돌려줌, 차 있으면 null (아무 일 없음) |
+| `game.placeFriend(String id, Slot slot)` → `Friend?` | 빈 자리면 놓고 돌려줌, 차 있거나 판이 멈췄으면(꺼짐) null (아무 일 없음) |
 | `game.friends` | 놓인 친구 `List<Friend>` (놓은 순서) |
 | `slot.friend` | 그 자리의 친구 (`Friend?`) |
 | `game.tray` | `FriendTray` (`lib/game/tray.dart`): `buttons`(`List<TrayButton>`, 해마·게·복어 순서), `held`(`String?`, 든 친구 id) |
