@@ -368,6 +368,7 @@
 - 그 웨이브의 적이 **모두 나왔고** 판에 쓰러지는 중이 아닌 적이 **하나도 없으면** 웨이브를 깸. 그러면 `rest`초 쉬고 다음 웨이브 시작
 - 마지막 웨이브(표의 가장 큰 번호, 지금 10)를 깨면 **이김 (새벽)**
 - 웨이브 시간·쉬는 시간은 멈춤(카드 창·놓기·꺼짐) 동안 흐르지 않는다
+- **때 맞춤 (tester 질문)**: 웨이브가 시작된 뒤 **첫 update부터** 웨이브 시간이 흐르고, delay 0인 적은 그 첫 update에서 나온다 (`startWave` 안에서는 나오지 않음, 그 직후 `waveSpawned` 0). 깸은 update에서 판정한다 (쓰러뜨린 뒤 첫 update). 쉬는 시간은 깬 update의 **다음 update부터** 센다
 - 웨이브가 시작되면 가운데에 알림 `banner_seconds`초: "웨이브 n" (보스가 있는 웨이브는 "보스가 와요!")
 - 제목 자리에 웨이브 글: "웨이브 n / 10" (첫 웨이브 전에는 n = 1). 웨이브 판에서는 제목(`TitleText`)을 그리지 않는다
 
@@ -398,11 +399,11 @@
 | `game.waveSpawned` | 이번 웨이브에서 지금까지 나온 적 수 (int) |
 | `game.startWave(int n)` | (테스트·개발) 지금 바로 웨이브 n을 시작 (쉬는 시간·남은 스폰은 버림) |
 | `game.banner` | 떠 있는 알림 글 (`String?`) |
-| `game.result` | `GameResult?` (`won`, `lost`) |
+| `game.result` | `GameResult?` (`won`, `lost`), enum은 `lighthouse_game.dart`에 |
 | `game.defeated`, `game.elapsed` | 위 |
 | `game.resultPanel` | `ResultPanel?` (`lib/game/result_panel.dart`): `restartButton`의 `position`·`size` (게임 좌표 왼쪽 위), `lines` (`List<String>`, 보이는 글 줄들) |
 | `WaveLabel` (`hud.dart`) | 웨이브 글 컴포넌트, `text` |
-| `Strings.wave(n, total)`, `Strings.bossComing`, `Strings.dawn`, `Strings.restart`, `Strings.resultWave(n, total)`, `Strings.resultDefeated(n)`, `Strings.resultLevel(n)`, `Strings.resultTime(초)` | "웨이브 3 / 10" / "Wave 3 / 10", "보스가 와요!" / "A boss is coming!", "새벽이 왔어요!" / "Dawn has come!", "다시 하기" / "Play again", 결과 줄들 (시간은 m:ss) |
+| `Strings.wave(n, total)`, `Strings.bossComing`, `Strings.dawn`, `Strings.restart`, `Strings.resultWave(n, total)`, `Strings.resultDefeated(n)`, `Strings.resultLevel(n)`, `Strings.resultTime(double 초)` | "웨이브 3 / 10" / "Wave 3 / 10", "보스가 와요!" / "A boss is coming!", "새벽이 왔어요!" / "Dawn has come!", "다시 하기" / "Play again", 결과 줄들 (시간은 m:ss) |
 
 ### 카드 009 리뷰에서 온 작은 일
 - `gen_tables.py`: progression의 xp_base·shard_speed·absorb_distance > 0, xp_step ≥ 0, waves의 count ≥ 1·interval > 0·delay ≥ 0·enemy가 enemies에 있음, enemies의 art가 characters에 있음·scale > 0·boss 0/1 — 어기면 표·줄·칸을 짚어 종료 1
