@@ -18,4 +18,7 @@ abstract final class Strings {
 
   /// 제목 아래 한 줄.
   static String get subtitle => _pick('밤바다 등대를 지켜요', 'Keep the lighthouse shining');
+
+  /// 등대 불빛이 꺼졌을 때 가운데 문구 (design.md §4).
+  static String get lightOut => _pick('불빛이 꺼졌어요', 'The light went out');
 }

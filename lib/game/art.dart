@@ -2,6 +2,23 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/painting.dart' show decodeImageFromList;
+
+/// `assets/images/<file>`을 읽어 판의 그림 캐시(`game.images`)에 넣고 돌려준다.
+///
+/// `game.images.load`는 읽기에 실패하면 캐시 안쪽 Future의 오류가 처리되지 않은 채 남아(테스트에서는 실패로 보고된다)
+/// 직접 읽어 디코딩한 뒤 캐시에 넣는다. 실패하면 이 Future만 오류로 끝난다 (부르는 쪽이 임시 모양으로 계속 그린다).
+Future<Image> loadGameImage(FlameGame game, String file) async {
+  if (game.images.containsKey(file)) return game.images.load(file);
+  final image = await decodeImageFromList(await game.assets.readBinaryFile('images/$file'));
+  if (game.images.containsKey(file)) {
+    // 그사이 다른 쪽이 먼저 넣었다
+    image.dispose();
+    return game.images.load(file);
+  }
+  game.images.add(file, image);
+  return image;
+}
 
 /// 시트 JSON(`actions.<동작>`)의 동작 하나 (design.md §3-2 시트 읽기 다지기).
 class SheetAction {
@@ -140,7 +157,7 @@ class CharacterArt {
     );
     final images = <String, Image>{
       for (final action in actions.keys)
-        action: await game.images.load('$name/$action.webp'),
+        action: await loadGameImage(game, '$name/$action.webp'),
     };
     Vector2 vec(List<dynamic> v) => Vector2((v[0] as num).toDouble(), (v[1] as num).toDouble());
     final b = (json['bbox'] as List).map((v) => (v as num).toDouble()).toList();

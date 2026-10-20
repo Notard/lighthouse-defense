@@ -1,6 +1,7 @@
 {
   "_설명": "해마 컷아웃 리그 (친구, 거품 쏘기). art/ref/seahorse.png(1254×1254) 픽셀 기준. parts는 앞 → 뒤 순서. 픽셀은 다각형에 든 가장 앞 부위가 가진다. 뒤 부위는 fill_band(px)만큼 가려진 곳을 채워 움직일 때 틈이 덜 보이게 한다.",
   "ref": "art/ref/seahorse.png",
+  "strip_rim": true,
   "anchor_point": [650, 1222],
   "muzzle_point": [945, 515],
   "parts": [

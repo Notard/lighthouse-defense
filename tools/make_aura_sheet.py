@@ -4,10 +4,12 @@
     python tools/make_aura_sheet.py --help
 
 - 캐릭터·편(kind)·이름은 data/tables/characters.csv, 오라 색·넓이는 data/art/aura.json
-- 그림: art/ref/<id>.png → 크로마 초록 빼기(load_rgba) → 청록 테두리 빛 걷기(strip_rim) → CELL px로 줄임 → 오라
+- 그림: art/ref/<id>.png → 크로마 초록 빼기(load_rgba) → 청록 테두리 빛 걷기(strip_rim, 리그에 "strip_rim": true일 때만)
+  → CELL px로 줄임 → 오라
 - 오라 넓이·흐림은 256 px 프레임 기준이라 칸 크기에 맞춰 늘린다
 - 밤바다 색 바탕에 친구 줄, 적 줄
 """
+import json
 import sys
 
 from art_common import ROOT, add_aura, load_aura, load_characters, load_rgba, setup_console, strip_rim, usage, wants_help
@@ -22,7 +24,10 @@ OUT = ROOT / "art" / "ref" / "_check" / "_aura_sheet.png"
 def cell(cid: str, kind: str, name: str, aura: dict):
     from PIL import Image, ImageDraw, ImageFont
 
-    im, _ = strip_rim(load_rgba(ROOT / "art" / "ref" / f"{cid}.png"))
+    im = load_rgba(ROOT / "art" / "ref" / f"{cid}.png")
+    rig = ROOT / "tools" / "rigs" / f"{cid}.json"
+    if rig.exists() and json.loads(rig.read_text(encoding="utf-8")).get("strip_rim") is True:
+        im, _ = strip_rim(im)  # 시트(cut_parts.py)와 같은 규칙
     inner = round(CELL * 0.86)
     s = inner / max(im.size)
     im = im.resize((round(im.width * s), round(im.height * s)), Image.LANCZOS)

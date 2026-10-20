@@ -45,12 +45,34 @@ abstract final class GameConfig {
   /// 등대 가운데에서 이 거리 안에서 끌 때는 빛 방향을 바꾸지 않는다.
   static const double beamDeadZone = 40;
 
-  // ---- 빛 (2단계는 모양만, 4단계에서 data/tables로 옮긴다) ----
+  // ---- 빛 (폭·길이·효과는 숫자 표 data/tables/beam.csv → Tables.beam) ----
 
   /// 처음 빛 방향 (위).
   static const double startBeamAngle = 270;
 
-  /// 빛 부채꼴 폭(도)과 길이.
-  static const double beamWidthDeg = 40;
-  static const double beamLength = 640;
+  // ---- 적 (규칙 숫자는 data/tables/enemies.csv → Tables.enemies) ----
+
+  /// 그림을 읽기 전 적을 그리는 임시 원 색 (보라).
+  static const Color enemyPlaceholder = Color(0xFF8A5CD6);
+
+  /// 피해를 받았을 때 밝게 번쩍이는 색과 시간 (초, 그동안 점점 옅어진다).
+  static const Color enemyHitFlash = Color(0xCCFFFFFF);
+  static const double enemyHitFlashSeconds = 0.3;
+
+  // ---- 위쪽 표시 (design.md §4 등대 불빛) ----
+
+  /// 불빛 막대 전체 (왼쪽 위 기준, 판 위쪽 100 px 안).
+  static const double lightBarX = 60;
+  static const double lightBarY = 36;
+  static const double lightBarWidth = 600;
+  static const double lightBarHeight = 28;
+
+  /// 불빛 막대 색: 채운 쪽(따뜻한 노란빛), 빈 쪽, 테두리.
+  static const Color lightBarFill = Color(0xFFFFD66B);
+  static const Color lightBarEmpty = Color(0x66101C38);
+  static const Color lightBarBorder = Color(0xCCFFF4DC);
+
+  /// 꺼짐 문구 글자 크기와 색.
+  static const double lightOutFontSize = 56;
+  static const Color lightOutColor = Color(0xFFFFF4DC);
 }

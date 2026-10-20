@@ -1,6 +1,7 @@
 {
   "_설명": "그림자 방울 컷아웃 리그 (적, 기본, 연두 젤리). art/ref/shadow_blob.png(1254×1254) 픽셀 기준 (카드 005 2바퀴 새 그림). parts는 앞 → 뒤 순서. 위쪽 꼭지(tip)만 떼고 나머지는 한 덩어리로 늘었다 줄며 움직인다.",
   "ref": "art/ref/shadow_blob.png",
+  "strip_rim": true,
   "anchor_point": [625, 1120],
   "parts": [
     {"name": "tip", "parent": "body", "pivot": [620, 380], "polygon": [[430, 90], [810, 90], [810, 330], [710, 382], [520, 382], [430, 330]]},

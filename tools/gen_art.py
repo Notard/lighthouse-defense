@@ -18,7 +18,7 @@
 - 안전 관문: Codex를 부르기 전과 후의 `git rev-parse HEAD`, `git stash list`, `git status --porcelain`
   (+ 바뀐 파일의 내용 해시)을 비교한다. HEAD·stash가 바뀌었거나, 이번 출력 파일(과 그 _check 그림) 말고
   다른 파일이 새로 생기거나 바뀌었으면(art/ 안이라도) 목록을 보여 주고 종료 코드 3으로 멈춘다 (design.md §3-2·§3-3).
-  환경 변수 CODEX_BIN으로 codex 대신 다른 명령을 부를 수 있다 (관문 시험용).
+  환경 변수 CODEX_BIN은 **시험 전용**이다: 가짜 Codex로 안전 관문을 시연할 때만 쓴다 (그림을 만들 때는 비워 둔다).
   .gitignore로 빠진 파일(logs/*.log 등)은 git이 보지 않으므로 비교하지 않는다
 - 필요: Codex CLI (`npm install -g @openai/codex`), ChatGPT 계정 로그인
 - 모델: 기본 `gpt-5.6-sol`. 바꾸려면 환경 변수 CODEX_MODEL
@@ -161,7 +161,7 @@ def gate_problems(before: dict, after: dict, allowed: set[str]) -> list[str]:
 
 
 def run_codex(prompt: str, out: Path, images: list[Path], log_name: str) -> None:
-    # CODEX_BIN: 다른 실행 파일로 바꿔 부른다 (안전 관문을 가짜 명령으로 시험할 때)
+    # CODEX_BIN은 시험 전용: 가짜 Codex로 안전 관문을 시연할 때만 다른 실행 파일로 바꿔 부른다 (평소에는 비워 둔다)
     codex = os.environ.get("CODEX_BIN") or shutil.which("codex") or shutil.which("codex.cmd")
     if codex is None:
         sys.exit("codex CLI를 찾을 수 없습니다 (npm install -g @openai/codex)")

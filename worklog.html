@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 13:59</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 14:29</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -483,7 +483,71 @@ article td img{margin:0 auto}
 <li>그림체 기준(해마)의 "청록 빛" 설명이 다른 캐릭터에 옮겨 가 모두 같은 테두리 빛 → 편을 가르기 어려움 → 걷어내고 편 오라</li>
 <li>연두 방울이 크로마 초록 배경과 가까움 → 진한 외곽선 덕에 몸 안 반투명 0개 확인</li>
 <li>테스트 읽기 방식(프리멀티플라이) 문제 → 위 2바퀴</li>
-</ol></article>
+</ol>
+<h2>4. 카드 006: 사방에서 오는 적·등대 불빛·빛줄기 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "응 4단계" → (스크린숏 확인) "응"</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>첫 숫자 표 넷: <code>enemies.csv</code>(체력·속도·갉는 양·간격·몸 반지름), <code>beam.csv</code>(폭 40°·길이 640·느려짐 0.5·피해 1.5배), <code>lighthouse.csv</code>(불빛 100·나타나는 거리 780), <code>practice.csv</code>(2초마다, 최대 8). <code>tools/gen_tables.py</code>가 <code>lib/game/tables.g.dart</code>를 만듦 (<code>--check</code>)</li>
+<li>적이 화면 밖 사방에서 나타나 등대로 곧장 오고, 닿으면 멈춰 불빛을 갉음. 빛 속 적은 느려지고 받는 피해가 커짐. 쓰러지면 0.8초 뒤 사라짐</li>
+<li>위쪽 불빛 막대, 0이 되면 판이 멈추고 "불빛이 꺼졌어요"</li>
+<li>앱은 연습 스폰을 켬 (7단계 웨이브 전까지 확인용)</li>
+<li>카드 005 리뷰 도구 일: 오라 배율 frame_px/256, strip_rim 리그 옵션, CODEX_BIN 시험 전용 문구</li>
+</ul>
+<p><img alt="연습 판" src="preview/06_practice.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>리드</td>
+<td>표 넷, 설계 §4 (코드 이름 표), T4-01~15, A4-1~7, 카드</td>
+</tr>
+<tr>
+<td>tester</td>
+<td>T4-01~15 (숫자는 CSV를 직접 읽음). 모호한 점 둘(꺼짐 문구 붙는 프레임, 막대 크기 뜻) → 리드가 설계에 적음</td>
+</tr>
+<tr>
+<td>implementer</td>
+<td>변환기 → 적·빛 속·불빛·꺼짐 → 연습 스폰 → 적 그림 → 글꼴 → 도구 일. 결정 요청 셋을 근거와 함께 보고</td>
+</tr>
+<tr>
+<td>리드</td>
+<td>적 리그도 strip_rim 켬(시트 그대로 나오게), 빛 경계 여유 1e-3, 웹에서 직접 확인·스크린숏</td>
+</tr>
+<tr>
+<td>reviewer</td>
+<td>승인 (꼭 고칠 것 없음, 미룰 것 다섯)</td>
+</tr>
+<tr>
+<td>사용자</td>
+<td>승인</td>
+</tr>
+</tbody>
+</table>
+<h3>검증</h3>
+<ul>
+<li>관문: 분석 문제 없음, 테스트 65/65, 범위, 웹 빌드. <code>gen_tables.py --check</code> 같음</li>
+<li>웹 연습 판: 적이 오고 갉음, 막대 줄어듦, 빛 끌기, 꺼짐 멈춤</li>
+<li>시트 불변: 도구를 고친 뒤 여섯 캐릭터를 다시 만들어 바이트 비교</li>
+</ul>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>설계의 빛 경계 여유 1e-6: Flame <code>Vector2</code>가 32비트라 경계 점이 1.7e-6° 밀림 → 1e-3으로</li>
+<li>설계 이름 <code>beam.contains</code>·<code>Enemy.distance</code>가 Flame 이름과 겹침 → contains는 인자를 넓혀 원래 뜻 유지, Enemy는 Component로</li>
+<li>strip_rim을 친구만 켜니 적 시트가 조금 바뀜 (예전 도구가 적도 조금 걷었음) → 여섯 모두 켜서 그대로</li>
+<li>테스트 환경에서 Flame 이미지 캐시의 처리 안 된 오류 → 그림을 직접 읽어 캐시에 넣는 <code>loadGameImage</code></li>
+<li>웹 첫 실행에서 적이 늦게 보임: 첫 적은 2초 뒤 화면 밖 780에서 출발해 화면에 들어오기까지 시간이 걸림 (정상)</li>
+</ol>
+<h3>다음 카드로 넘긴 것 (reviewer)</h3>
+<p>탭을 숨겼다 돌아올 때 큰 dt, 닿는 거리 안 스폰 시 남은 시간, 그림 전 hit, cut_parts 도움말, gen_tables inf·nan, 갉기 타이머와 attack 이벤트 프레임</p></article>
 </div>
 </body>
 </html>
