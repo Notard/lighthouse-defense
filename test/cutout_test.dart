@@ -200,7 +200,7 @@ void main() {
         final frame = nums(sheet(id)['frame']);
         final codec = await instantiateImageCodec(file.readAsBytesSync());
         final image = (await codec.getNextFrame()).image;
-        final data = (await image.toByteData(format: ImageByteFormat.rawRgba))!;
+        final data = (await image.toByteData(format: ImageByteFormat.rawStraightRgba))!;
         final own = rgb(table[kind] as String);
         final opposite = rgb(table[other] as String);
         var ownCount = 0, otherCount = 0;
