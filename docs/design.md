@@ -50,4 +50,35 @@
 | `LighthouseGame.beam` | 빛 컴포넌트 (`Beam`, `lib/game/beam.dart`), `beam.angleDeg`(double, 0 이상 360 미만) |
 | `angleFromLighthouse(Vector2 p)` (`lib/game/geometry.dart`) | 등대 가운데에서 p 쪽 각도 (위 규칙) |
 
+## 3. 글꼴·문구·그림 도구 (3단계, 카드 003)
+
+### 글꼴
+- **주아(Jua)**, SIL OFL 1.1 (사용자 선택). 원본(약 2 MB)은 저장소에 넣지 않고, 쓰는 글자만 남긴 파일을 `assets/fonts/Jua.ttf`에 둔다. 라이선스 `assets/fonts/OFL.txt`
+- 남기는 글자: `lib/` 아래 `.dart` 문자열에 쓰인 글자 전부 + 영문·숫자·기본 기호(U+0020~U+007E) + 몇몇 기호(원본에 있는 것만)
+- 만드는 도구: `python tools/subset_font.py <원본 Jua-Regular.ttf 경로>` (숲 지키기 도구를 고쳐서). 문구를 바꾸면 다시 돌린다
+- 글꼴 이름(family) `Jua`, 코드에서는 `GameConfig.fontFamily`
+
+### 문구
+- 화면 글은 모두 `lib/game/strings.dart`의 `Strings`에서 (코드에 한글 글을 바로 쓰지 않는다)
+- 처음부터 두 언어: `enum Lang { ko, en }`, `Strings.lang`(기본 `Lang.ko`). 기기 언어 따르기와 설정 창은 10단계
+- 지금 쓰는 글
+
+| 이름 | 한국어 | 영어 |
+|---|---|---|
+| `Strings.title` | 등대 지키기 | Lighthouse Keepers |
+| `Strings.subtitle` | 밤바다 등대를 지켜요 | Keep the lighthouse shining |
+
+- 1단계의 제목(`TitleText`)은 `Strings.title`을 `GameConfig.fontFamily` 글꼴로 그린다 (지금 네모로 나오는 것을 고침)
+
+### 그림 도구 (숲 지키기에서 가져와 고침)
+| 도구 | 하는 일 |
+|---|---|
+| `tools/gen_art.py` | Codex CLI로 기준 그림(`art/ref/<이름>.png`)과 배경·소품 그림. 프롬프트는 **`data/art/prompts.json`** (리드 소유, 그림체·캐릭터 설명) |
+| `tools/cut_parts.py`, `tools/blender_cutout.py`, `tools/pack_sheets.py`, `tools/build_sprites.sh` | 부위 자르기(`tools/rigs/<이름>.json`) → Blender 컷아웃 렌더 → 시트(`assets/images/<이름>/<이름>.json` + 동작별 `.webp`) |
+| `tools/prep_props.py`, `tools/make_art_preview.py`, `tools/rig_helper.py` | 소품 다듬기, 그림 미리보기 페이지, 리그 도우미 |
+| `lib/game/art.dart` | `CharacterArt`: 시트 JSON + 동작별 그림을 Flame 애니메이션으로 (숲 지키기와 같은 형식) |
+
+- 숲 지키기 전용 내용(숲·도토리·레인, 가로 화면, 파일 경로·캐릭터 이름)은 지운다. 세로 판, 밤바다에 맞는 기본값으로
+- 카드 003에서는 도구만 가져온다. 실제 그림 만들기는 카드 004
+
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)
