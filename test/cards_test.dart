@@ -60,6 +60,16 @@ void main() {
     };
   }
 
+  /// 카드 판 시작: 공짜 친구 놓기 상태(`start.csv`)면 O6에 놓는다 (그 뒤 첫 친구 창이 열린다).
+  void placeFree(LighthouseGame game) {
+    final free = Tables.start.freeFriend;
+    if (free == null) return;
+    expect(game.placing, free);
+    game.tapAt(slotOf(game, 'O6').center.clone());
+    expect(game.placing, isNull);
+    game.update(0);
+  }
+
   /// 창의 [index]번째 카드를 고르고, 놓기 상태면 빈 자리 하나를 눌러 놓는다.
   void pickAndPlace(LighthouseGame game, int index) {
     game.pickCard(index);
@@ -71,6 +81,7 @@ void main() {
 
   /// 첫 친구 창에서 [index]번째 친구를 골라 [slotId]에 놓는다.
   void firstFriend(LighthouseGame game, int index, String slotId) {
+    placeFree(game);
     game.pickCard(index);
     expect(game.placing, isNotNull);
     game.tapAt(slotOf(game, slotId).center.clone());
@@ -79,9 +90,9 @@ void main() {
   }
 
   /// 해파리 다섯이 닿게 두고 불빛이 꺼질 때까지 (길어도 120초) 흘린다.
-  void lightOut(LighthouseGame game) {
+  void lightOut(LighthouseGame game, {String enemy = 'shadow_jelly'}) {
     for (final a in const [18.0, 90.0, 162.0, 234.0, 306.0]) {
-      spawn(game, 'shadow_jelly', a);
+      spawn(game, enemy, a);
     }
     var t = 0.0;
     while (game.light > 0 && !game.isPaused && t < 120) {
@@ -177,6 +188,7 @@ void main() {
     () => LighthouseGame(cards: true),
     (game) async {
       game.update(0);
+      placeFree(game);
       game.pickCard(0);
       game.tapAt(slotOf(game, 'I0').center.clone());
       expect(game.isPaused, isFalse);
@@ -244,6 +256,7 @@ void main() {
     () => LighthouseGame(cards: true),
     (game) async {
       game.update(0);
+      placeFree(game); // 공짜 친구를 놓은 뒤의 창을 본다
       expect(game.choice, ['friend_seahorse', 'friend_crab', 'friend_pufferfish']);
       expect(game.isPaused, isTrue);
       expect(game.tray, isNull);
@@ -258,6 +271,7 @@ void main() {
     () => LighthouseGame(cards: true),
     (game) async {
       game.update(0);
+      placeFree(game);
       game.pickCard(1);
       expect(game.choice, isNull);
       expect(game.placing, 'crab');
@@ -286,6 +300,9 @@ void main() {
       game.aimBeamAt(Vector2(360, 1000));
       expect(game.beam.angleDeg, closeTo(270, 1e-6));
 
+      placeFree(game); // 창이 열려 있어도 멈춤
+      tickGame(game, 1);
+      expect(blob.distance, closeTo(spawnDist, 1e-6));
       pickAndPlace(game, 0);
       expect(game.isPaused, isFalse);
       tickGame(game, 1);
@@ -299,7 +316,7 @@ void main() {
     (game) async {
       game.update(0);
       firstFriend(game, 0, 'I3');
-      final horse = game.friends.single;
+      final horse = game.friends.last; // 공짜 해마(O6) 다음에 놓은 해마
       final blob = spawn(game, 'shadow_blob', 90);
       game.addXp(xpBase);
       expect(game.choice, isNotNull);
@@ -496,6 +513,10 @@ void main() {
     'T6-18 카드 셋은 판 안에서 겹치지 않고, 카드를 누르고 자리를 누르면 놓인다',
     verify: (game, tester) async {
       await tester.pump();
+      if (Tables.start.freeFriend != null) {
+        final o6 = slotOf(game, 'O6').center;
+        await tapGame(tester, game, o6.x, o6.y);
+      }
       final views = game.cardPanel!.views;
       expect(views, hasLength(3));
       final rects = [for (final v in views) Rect.fromLTWH(v.position.x, v.position.y, v.size.x, v.size.y)];
@@ -525,7 +546,7 @@ void main() {
     (game) async {
       game.update(0);
       firstFriend(game, 1, 'O1');
-      lightOut(game);
+      lightOut(game, enemy: 'boss_jelly'); // hp가 커서 해마가 못 쓰러뜨림 (레벨이 먼저 오르지 않게)
       final level = game.level;
       game.addXp(game.xpNeeded);
       expect(game.level, level + 1);

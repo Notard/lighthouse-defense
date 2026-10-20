@@ -68,8 +68,19 @@ void main() {
     }
   }
 
+  /// 카드 판 시작: 공짜 친구 놓기 상태(`start.csv`)면 O6에 놓는다 (그 뒤 첫 친구 창이 열린다).
+  void placeFree(LighthouseGame game) {
+    final free = Tables.start.freeFriend;
+    if (free == null) return;
+    expect(game.placing, free);
+    game.tapAt(slotOf(game, 'O6').center.clone());
+    expect(game.placing, isNull);
+    game.update(0);
+  }
+
   /// 첫 친구 창에서 [index]번째를 골라 [slotId]에 놓는다.
   void firstFriend(LighthouseGame game, int index, String slotId) {
+    placeFree(game);
     game.pickCard(index);
     expect(game.placing, isNotNull);
     game.tapAt(slotOf(game, slotId).center.clone());
@@ -400,6 +411,7 @@ void main() {
     () => LighthouseGame(cards: true, waves: true),
     (game) async {
       game.update(0);
+      placeFree(game);
       game.pickCard(0);
       expect(game.placing, isNotNull);
       tickGame(game, 10);
@@ -477,6 +489,7 @@ void main() {
     () => LighthouseGame(cards: true),
     (game) async {
       game.update(0);
+      placeFree(game);
       game.pickCard(1);
       expect(game.placing, 'crab');
       final blob = spawn(game, 'shadow_blob', 0, distance: Tables.lighthouse.spawnDistance);
@@ -491,6 +504,32 @@ void main() {
       final hp = b.hp;
       clockOf(practice)(windup + 0.05);
       expect(b.hp, closeTo(hp - Tables.friends['crab']!.damage * value, 1e-9));
+    },
+  );
+
+  testWithGame<LighthouseGame>(
+    'T7-20 카드 판은 공짜 친구 놓기 상태로 시작하고, 놓으면 첫 친구 창이 열린다',
+    () => LighthouseGame(cards: true),
+    (game) async {
+      game.update(0);
+      final free = Tables.start.freeFriend;
+      if (free == null) {
+        expect(game.choice, isNotNull);
+        return;
+      }
+      expect(game.placing, free);
+      expect(game.choice, isNull);
+      expect(game.isPaused, isTrue);
+      expect(game.picks.values.every((v) => v == 0), isTrue);
+
+      game.tapAt(Vector2(100, 1200));
+      expect(game.placing, free);
+      expect(game.choice, isNull);
+
+      game.tapAt(slotOf(game, 'O6').center.clone());
+      expect(slotOf(game, 'O6').friend?.id, free);
+      expect(game.placing, isNull);
+      expect(game.choice, [for (final r in readCsv('cards.csv')) if (r['kind'] == 'friend') r['id']!]);
     },
   );
 }
