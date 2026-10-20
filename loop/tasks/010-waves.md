@@ -8,7 +8,7 @@
   - [x] T7-01~20 테스트 있고 통과 (전체 통과)
   - [x] `bash tools/loop/check.sh implementer` 통과, `gen_tables.py --check` 통과
   - [x] reviewer 승인
-  - [ ] 사용자 확인 (A7-3~5)
+  - [x] 사용자 확인 (A7-3~6, "응")
 - **바퀴**: 1 / 3
 
 ## 참고
