@@ -1,6 +1,7 @@
 # 5단계 친구 놓기·자동 공격 테스트 표 (카드 007)
 
 > 설계: `docs/design.md` §5 (와 §4). 숫자는 테스트에 박지 말고 **CSV를 직접 읽어** 쓴다 (괄호 안은 지금 값의 예). 시간은 `game.update(0.05)` 되풀이, 시간 경계는 ±0.05초 바깥에서 본다. 판은 `LighthouseGame()` (연습 스폰 꺼짐, 빛 270°). 좌표 허용 오차 ±0.5.
+> 2바퀴(리뷰 반영): T5-16을 설계(꺼진 뒤 놓기 null)에 맞춤, T5-18·19 더함.
 > "닿게 둔 적" = `spawnEnemy(id, 각도, distance: 그 적의 닿는 거리)` (움직이지 않고 갉는 적이라 과녁 시험에 쓴다). `I3` = 아래 안쪽 자리 (360, 810).
 
 | 번호 | 주어진 것 | 행동 | 기대값 |
@@ -20,5 +21,7 @@
 | T5-13 | 새 판 | 게를 I3에, 방울을 90°에 닿게. 방울이 쓰러질 때까지(길어도 10초) 흘림. 그 뒤 deathSeconds + 0.1초 | 쓰러지는 데 든 공격 횟수 = ceil(방울 hp ÷ damage). 쓰러진 뒤 게 `target`은 쓰러진 방울이 아님(null), `isAttacking` 거짓으로 남음. deathSeconds 뒤 방울은 `enemies`에 없음 |
 | T5-14 | 새 판 | 방울을 0°에 (빛 밖, 움직임). `game.update(5.0)` 한 번 | distance = spawn_distance − speed × maxFrameDt (5초가 아니라 0.1초만) |
 | T5-15 | 새 판 | 방울을 0°, 거리 = 닿는 거리 − 20에서. update(0.05) 한 번, 그 뒤 흘림 | 첫 update 뒤 distance = 닿는 거리, 상태 biting, 불빛 그대로. 첫 update 뒤부터 센 시간으로 bite_interval − 0.05초에 불빛 그대로, bite_interval + 0.05초에 처음 − bite |
-| T5-16 | 새 판 | 해파리 다섯을 18°·90°·162°·234°·306°에 닿게, 불빛이 꺼질 때까지(길어도 120초). 꺼진 뒤 `placeFriend('crab', I3)` 하고 3초 | 90° 해파리 hp 그대로, 게 `isAttacking` 거짓, `bubbles` 비어 있음 |
+| T5-16 | 새 판 | 해파리 다섯을 18°·90°·162°·234°·306°에 닿게, 불빛이 꺼질 때까지(길어도 120초). 꺼진 뒤 `placeFriend('crab', I3)` 하고 3초 | `placeFriend`는 null, I3은 빈 채로(`I3.friend` null), `friends` 비어 있음, 90° 해파리 hp 그대로 |
 | T5-17 | 새 판 (위젯) | 꺼진 뒤(T5-16처럼) 게 단추 누름 | `held` 그대로 (null) |
+| T5-18 | 새 판 | 게를 I3에, 방울을 90°에 닿게. `update(0)` 다섯 번, 그 뒤 `update(0.05)` 한 번 | update(0) 뒤: 게 `target` null, `isAttacking` 거짓, `cooldown` 0, 방울 hp 그대로. update(0.05) 뒤 `isAttacking` 참, `target` = 방울 |
+| T5-19 | 새 판 | 게를 I3에, 해마를 I0에 놓고, 해파리 다섯을 T5-16처럼 닿게. 불빛이 꺼질 때까지(길어도 120초) 흘리고, 꺼진 그때 모든 적 hp, 친구마다 `cooldown`·`isAttacking`, 모든 거품 위치를 적어 둔 뒤 3초 더 | 3초 뒤 모두 꺼진 그때와 같다 (쓰러지는 중인 적의 사라짐도 멈춤: `enemies` 수 그대로). 꺼지기 전 해마가 거품을 한 번 이상 쏘았다 |
