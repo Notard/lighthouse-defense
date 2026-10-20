@@ -204,4 +204,59 @@
 - 청록 테두리 빛 걷기(`strip_rim`)는 리그 JSON의 옵션 (`"strip_rim": true`)일 때만. 지금 시트가 그것으로 만들어졌으므로 여섯 리그 모두 켜 둔다 (적 셋도 조금 걷혀 있었음, 끄면 시트가 바뀜). 새 캐릭터는 끈 채로. 시트를 다시 만들면 지금과 같아야 한다
 - `gen_art.py`의 `CODEX_BIN` 환경 변수는 **시험 전용**(가짜 Codex로 안전 관문 시연)이라고 도움말·주석에 적는다
 
+## 5. 친구 놓기와 자동 공격 (5단계, 카드 007)
+
+### 친구 놓기 (연습용 쟁반, 6단계 카드가 오면 바뀐다)
+- 판 아래쪽(y 1100~1260, 바깥 고리 아래)에 **친구 쟁반**: 친구 셋(해마·게·복어)의 단추가 가로로. 단추에는 친구 그림과 이름(`characters.csv`의 이름, 지금 언어)
+- 단추를 누르면 그 친구를 **들고** 있게 된다 (단추 강조). 같은 단추를 다시 누르면 내려놓음(안 듦), 다른 단추를 누르면 그 친구로 바뀜
+- 친구를 든 채 **빈 자리**를 누르면 거기에 그 친구를 놓는다. 든 것은 그대로 (여러 자리에 이어 놓을 수 있음). 놓은 뒤 고른 자리는 없음
+- 친구를 든 채 **친구가 있는 자리**를 누르면 아무 일도 없다 (바꾸기·팔기는 나중)
+- 친구를 들지 않았을 때 자리 누르기는 2단계 그대로 (고르기·풀기). 쟁반 단추를 누르는 것은 자리 고르기를 바꾸지 않는다
+- 놓을 수 있는 수는 연습이라 제한 없음. 적은 친구를 공격하지 않는다 (친구 맞음·쓰러짐은 나중)
+- 친구는 자리 가운데에 몸 가운데가 오게, 키 `display_height`로. 앞을 본다 (뒤집지 않음)
+
+### 자동 공격 (`data/tables/friends.csv`)
+- **사거리 안 적**: 자리 가운데에서 적 몸 가운데까지 거리 ≤ `range` 이고 쓰러지는 중이 아닌 적
+- **과녁 고르기**: 사거리 안 적 중 **등대에 가장 가까운**(`distance`가 가장 작은) 적. 같으면 친구에게 더 가까운 적
+- 친구마다 **쉬는 시간**이 있고 처음엔 0 (바로 쏠 수 있음). 쉬는 시간이 0이고 사거리 안 적이 있으면 **공격 시작**: 과녁을 정하고, 쉬는 시간 = `interval`, `attack` 동작
+- 공격 시작에서 **`windupSeconds` = 1/3초 뒤**(attack 이벤트 프레임 5: (5 − 1) ÷ 12fps)에 효과가 난다. 그 사이 쉬는 시간도 흐른다 (다음 공격은 시작에서 `interval` 뒤)
+  - `shot`(해마): 거품 하나를 주둥이(`muzzle`, 그림이 없으면 자리 가운데)에서 과녁으로 쏜다. 효과가 날 때 과녁이 쓰러졌거나 사라졌으면 그때 사거리 안의 새 과녁(위 규칙)으로, 없으면 쏘지 않는다
+  - `melee`(게): 과녁이 쓰러지지 않았고 사라지지 않았으면 `damage`. 아니면 헛침
+  - `burst`(복어): 그때 사거리 안의 모든 적에게 `damage`
+- 피해는 언제나 `enemy.takeDamage(damage)` (빛 속이면 커짐, §4)
+- 판이 멈추면(꺼짐) 친구도 멈춘다
+
+### 거품 (해마의 탄)
+- 1초에 `projectile_speed`로 과녁의 **지금** 몸 가운데를 향해 날아간다 (따라감)
+- 과녁 몸 가운데에서 과녁 `radius` 안에 들면 맞음: `damage`를 주고 사라짐
+- 날아가는 중에 과녁이 쓰러지거나 사라지면 과녁의 마지막 자리까지 가서 **피해 없이** 터져 사라진다 (다른 적을 맞히지 않음)
+- 작은 반투명 물방울 (그림 대신 그리기). 판이 멈추면 멈춘다
+
+### 프레임 시간 (카드 006 리뷰)
+- 판의 한 번 `update`는 **최대 0.1초**(`GameConfig.maxFrameDt`)만 흘린다. 더 큰 dt(탭을 숨겼다 돌아옴 등)는 0.1로 자른다 (남는 시간은 버림)
+
+### 카드 006 리뷰에서 온 작은 일
+- 닿는 거리 안쪽에서 나타난 적(`spawnEnemy`의 `distance` < 닿는 거리): 첫 `update`에 닿는 거리로 옮겨지고(밖으로) 갉기 상태가 되며, **그 프레임에 갉지 않는다**. 첫 갉기는 그때부터 `bite_interval` 뒤 (남은 시간 이월은 0 ~ dt로 묶는다)
+- 갉는 그림과 피해를 맞춘다: 갉기 중 attack 동작 한 바퀴가 `bite_interval`이 되게 늘리고, 이벤트 프레임(3)이 피해 순간에 오게 (그림만, 규칙은 §4 타이머 그대로)
+- 그림을 읽기 전에 받은 피해의 `hit` 동작은 그림이 온 뒤 재생하지 않는다
+- `cut_parts.py` 도움말의 "(친구 셋)"을 지금 사실(여섯 리그 모두)로
+- `gen_tables.py`: 숫자 칸에 inf·nan·빈 값이 있으면 표 이름·줄·칸을 짚어 실패(종료 1)
+
+### 그리는 순서
+바다 → 빛 → 자리 → 등대 → 친구 → 적 → 거품 → 제목 → 불빛 막대 → 쟁반 → 꺼짐 문구
+
+### 코드 이름 (tester·implementer가 같이 쓰는 약속)
+| 이름 | 뜻 |
+|---|---|
+| `Tables.friends`: `Map<String, FriendStats>` | `id`, `attack`(String `shot`/`melee`/`burst`), `range`, `damage`, `interval`, `projectileSpeed` (double) |
+| `Friend` (`lib/game/friend.dart`) | `id`, `stats`, `slot`(`Slot`), `position`(Vector2, 자리 가운데), `cooldown`(double, 남은 쉬는 시간), `isAttacking`(공격 시작~효과 사이), `target`(`Enemy?`, 지금 과녁), `enemiesInRange()` → `List<Enemy>` |
+| `Friend.windupSeconds` = 1/3 | 공격 시작에서 효과까지 |
+| `game.placeFriend(String id, Slot slot)` → `Friend?` | 빈 자리면 놓고 돌려줌, 차 있으면 null (아무 일 없음) |
+| `game.friends` | 놓인 친구 `List<Friend>` (놓은 순서) |
+| `slot.friend` | 그 자리의 친구 (`Friend?`) |
+| `game.tray` | `FriendTray` (`lib/game/tray.dart`): `buttons`(`List<TrayButton>`, 해마·게·복어 순서), `held`(`String?`, 든 친구 id) |
+| `TrayButton` | `friendId`, `position`·`size`(Vector2, 게임 좌표, 왼쪽 위 기준) |
+| `game.bubbles` | 날아가는 거품 `List<Bubble>` (`lib/game/bubble.dart`): `position`, `target`(`Enemy`), 사라지면 빠짐 |
+| `GameConfig.maxFrameDt` = 0.1 | 한 번 update의 최대 시간 |
+
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)

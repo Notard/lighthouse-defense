@@ -1,0 +1,4 @@
+id,attack,range,damage,interval,projectile_speed
+seahorse,shot,260,8,1.0,420
+crab,melee,90,14,1.2,0
+pufferfish,burst,110,6,1.5,0
