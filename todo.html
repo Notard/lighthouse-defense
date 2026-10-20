@@ -60,11 +60,11 @@ th{color:var(--muted)}
 <body>
 <div class="wrap">
   <h1>🗼 등대 지키기 · 할 일 목록</h1>
-  <p class="muted">원본: TODO.md · 상세 계획: <a href="plan.html">plan.html</a> · 게임 미리보기: <a href="preview.html">preview.html</a> · 아트 미리보기: <a href="art_preview.html">art_preview.html</a> · 작업 기록: <a href="worklog.html">worklog.html</a> · 결과 보고서: <a href="report.html">report.html</a> · 마지막 갱신 2026-10-20 10:44</p>
+  <p class="muted">원본: TODO.md · 상세 계획: <a href="plan.html">plan.html</a> · 게임 미리보기: <a href="preview.html">preview.html</a> · 아트 미리보기: <a href="art_preview.html">art_preview.html</a> · 작업 기록: <a href="worklog.html">worklog.html</a> · 결과 보고서: <a href="report.html">report.html</a> · 마지막 갱신 2026-10-20 10:50</p>
 
   <div class="hero">
-    <div class="big">55% <small>6 / 11 완료</small></div>
-    <div class="bar"><i style="width:55%"></i></div>
+    <div class="big">83% <small>10 / 12 완료</small></div>
+    <div class="bar"><i style="width:83%"></i></div>
   </div>
 
   
@@ -77,27 +77,27 @@ th{color:var(--muted)}
   <div class="sbar"><i style="width:67%"></i></div>
   <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">장르·테마·화면·그림·공개 방식 정하기 (사용자 선택: 사방 로그라이크 · 밤바다 등대 · 세로 · Codex 컷아웃 · 공개 저장소)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">plan.md 작성 (한 판 흐름, 카드, 친구, 어둠 생물, 밤 셋, 다시 쓰는 것, 단계)</span></li><li class="item gate"><span class="box" aria-hidden="true"></span><span class="txt">사용자 계획 확인<span class="tag">완료 기준</span></span></li></ul>
 </section>
-<section class="stage active">
+<section class="stage complete">
   <div class="shead">
     <span class="n">1</span>
     <h2>프로젝트·저장소·자동 배포</h2>
-    <span class="cnt">4 / 5</span>
+    <span class="cnt">5 / 5</span>
   </div>
-  <div class="sbar"><i style="width:80%"></i></div>
-  <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">Flutter 3.44 + Flame 1.38 프로젝트 (웹·Windows), 세로 720 × 1280 빈 판 (밤바다·등대 자리·제목)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">웹 제목·PWA 이름 &quot;등대 지키기&quot;, 세로 고정 / Windows 창 540 × 960, 한글 제목(ASCII 이스케이프)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">숲 지키기 문서 도구(<code>make_todo_html.py</code>, <code>serve_web.py</code>) 가져와 이름 바꾸기</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">테스트 1개, Windows 빌드</span></li><li class="item gate"><span class="box" aria-hidden="true"></span><span class="txt">공개 저장소 <code>Notard/lighthouse-defense</code>, Pages 자동 배포, 실제 사이트 확인<span class="tag">완료 기준</span></span></li></ul>
+  <div class="sbar"><i style="width:100%"></i></div>
+  <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">Flutter 3.44 + Flame 1.38 프로젝트 (웹·Windows), 세로 720 × 1280 빈 판 (밤바다·등대 자리·제목)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">웹 제목·PWA 이름 &quot;등대 지키기&quot;, 세로 고정 / Windows 창 540 × 960, 한글 제목(ASCII 이스케이프)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">숲 지키기 문서 도구(<code>make_todo_html.py</code>, <code>serve_web.py</code>) 가져와 이름 바꾸기</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">테스트 1개, Windows 빌드</span></li><li class="item done gate"><span class="box" aria-hidden="true"></span><span class="txt">공개 저장소 <code>Notard/lighthouse-defense</code>, Pages 자동 배포, 실제 사이트 확인  (한글 제목은 글꼴이 없어 네모 → 3단계)<span class="tag">완료 기준</span></span></li></ul>
 </section>
-<section class="stage ">
+<section class="stage active">
   <div class="shead">
     <span class="n">1-1</span>
     <h2>여러 에이전트 + 루프 엔지니어링 구조 (사용자 요청)</h2>
-    <span class="cnt">0 / 3</span>
+    <span class="cnt">3 / 4</span>
   </div>
-  <div class="sbar"><i style="width:0%"></i></div>
-  <ul><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">루프 엔지니어링 조사</span></li><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">에이전트 넷(implementer · tester · balancer · reviewer) 정의, 고칠 수 있는 곳·손대면 안 되는 곳</span></li><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">한 바퀴 흐름(표 → 테스트 → 구현 → 검증 → 리뷰 → 판단·커밋)과 자동 검사</span></li></ul>
+  <div class="sbar"><i style="width:75%"></i></div>
+  <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">루프 엔지니어링 조사 (Kilo · IBM · SK AX(Addy Osmani 요약) · cobusgreyling/loop-engineering)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">에이전트 넷 <code>.claude/agents/</code> (implementer Opus · tester Sonnet · balancer Sonnet · reviewer Opus, 읽기만), 범위 표 <code>loop/roles.json</code></span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">한 바퀴 흐름 <code>docs/loop.md</code>, 관문 <code>tools/loop/check.sh</code>(분석·테스트·범위·웹 빌드)·<code>gate.py</code>, 상태 <code>loop/STATE.md</code>·<code>run-log.md</code>, 작업 카드 틀, 테스트 표 쓰는 법, <code>CLAUDE.md</code></span></li><li class="item gate"><span class="box" aria-hidden="true"></span><span class="txt">사용자 구조 확인 → 첫 바퀴(2단계 카드)로 실제로 돌려 보기<span class="tag">완료 기준</span></span></li></ul>
 </section>
 
   <h3>완료 기록</h3>
-  <p class="muted">아직 완료된 항목이 없습니다.</p>
+  <table><tr><th>날짜</th><th>단계</th><th>메모</th></tr><tr><td>2026-10-20</td><td>0. 기획</td><td>질문 넷으로 방향, plan.md</td></tr><tr><td>2026-10-20</td><td>1. 프로젝트·저장소</td><td>Flutter + Flame 세로 빈 판, 공개 저장소, Pages 자동 배포, 실제 사이트 확인</td></tr><tr><td>2026-10-20</td><td>1-1. 루프 구조</td><td>조사, 에이전트 넷, 범위 관문, 상태 파일</td></tr></table>
 </div>
 </body>
 </html>

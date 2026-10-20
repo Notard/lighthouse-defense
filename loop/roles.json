@@ -1,0 +1,26 @@
+{
+  "_comment": "역할마다 고칠 수 있는 경로(allow)와 손대면 안 되는 경로(deny). tools/loop/gate.py가 git 변경 목록을 이 표와 대조한다. deny가 allow보다 먼저다. docs/loop.md 참고.",
+  "maxFiles": 30,
+  "roles": {
+    "implementer": {
+      "allow": ["lib/**", "tools/**", "assets/**", "pubspec.yaml", "pubspec.lock", "web/**", "windows/**", "art/**"],
+      "deny": ["test/**", "docs/**", "data/**", "loop/**", "tools/balance/**", "tools/loop/**", "balance/**", ".claude/**", "plan.md", "CLAUDE.md"]
+    },
+    "tester": {
+      "allow": ["test/**", "dart_test.yaml"],
+      "deny": ["lib/**", "tools/**", "docs/**", "data/**", "loop/**", "balance/**", ".claude/**"]
+    },
+    "balancer": {
+      "allow": ["tools/balance/**", "balance/**", "test/balance/**"],
+      "deny": ["lib/**", "data/**", "docs/**", "loop/**", ".claude/**"]
+    },
+    "reviewer": {
+      "allow": [],
+      "deny": ["**"]
+    },
+    "lead": {
+      "allow": ["**"],
+      "deny": []
+    }
+  }
+}

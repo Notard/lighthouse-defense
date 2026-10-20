@@ -12,12 +12,13 @@
 - [x] 웹 제목·PWA 이름 "등대 지키기", 세로 고정 / Windows 창 540 × 960, 한글 제목(ASCII 이스케이프)
 - [x] 숲 지키기 문서 도구(`make_todo_html.py`, `serve_web.py`) 가져와 이름 바꾸기
 - [x] 테스트 1개, Windows 빌드
-- [ ] 공개 저장소 `Notard/lighthouse-defense`, Pages 자동 배포, 실제 사이트 확인 ✅ 완료 기준
+- [x] 공개 저장소 `Notard/lighthouse-defense`, Pages 자동 배포, 실제 사이트 확인 ✅ 완료 기준 (한글 제목은 글꼴이 없어 네모 → 3단계)
 
 ## 1-1. 여러 에이전트 + 루프 엔지니어링 구조 (사용자 요청)
-- [ ] 루프 엔지니어링 조사
-- [ ] 에이전트 넷(implementer · tester · balancer · reviewer) 정의, 고칠 수 있는 곳·손대면 안 되는 곳
-- [ ] 한 바퀴 흐름(표 → 테스트 → 구현 → 검증 → 리뷰 → 판단·커밋)과 자동 검사
+- [x] 루프 엔지니어링 조사 (Kilo · IBM · SK AX(Addy Osmani 요약) · cobusgreyling/loop-engineering)
+- [x] 에이전트 넷 `.claude/agents/` (implementer Opus · tester Sonnet · balancer Sonnet · reviewer Opus, 읽기만), 범위 표 `loop/roles.json`
+- [x] 한 바퀴 흐름 `docs/loop.md`, 관문 `tools/loop/check.sh`(분석·테스트·범위·웹 빌드)·`gate.py`, 상태 `loop/STATE.md`·`run-log.md`, 작업 카드 틀, 테스트 표 쓰는 법, `CLAUDE.md`
+- [ ] 사용자 구조 확인 → 첫 바퀴(2단계 카드)로 실제로 돌려 보기 ✅ 완료 기준
 
 ---
 
@@ -25,3 +26,6 @@
 
 | 날짜 | 단계 | 메모 |
 |---|---|---|
+| 2026-10-20 | 0. 기획 | 질문 넷으로 방향, plan.md |
+| 2026-10-20 | 1. 프로젝트·저장소 | Flutter + Flame 세로 빈 판, 공개 저장소, Pages 자동 배포, 실제 사이트 확인 |
+| 2026-10-20 | 1-1. 루프 구조 | 조사, 에이전트 넷, 범위 관문, 상태 파일 |

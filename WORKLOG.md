@@ -44,6 +44,37 @@
 
 ### 검증
 - `flutter analyze` 문제 없음, `flutter test` 1/1, `flutter build windows` 성공
+- 공개 저장소 https://github.com/Notard/lighthouse-defense 생성·푸시, Pages(GitHub Actions 방식) 켬 → 첫 배포 build·deploy 성공, https://notard.github.io/lighthouse-defense/ 200, 제목 "등대 지키기"
+- 실제 사이트 화면: 세로 판·밤바다·등대 자리 확인. **한글 제목이 네모로** 보임 (글꼴 없음, `--no-web-resources-cdn`이라 대체 글꼴도 안 받음) → 3단계 글꼴에서
+
+![1단계 실제 사이트](preview/01_blank.jpg)
 
 ### 발생한 문제와 해결
 1. 창 제목을 한글 이스케이프로 넣으려 했는데 셸(heredoc)과 편집 도구가 `\uB4F1`을 실제 한글로 풀어 넣었다 (C++ 소스에 한글 → 빌드 실패) → 파이썬 스크립트 파일에서 바이트로 바꿔 넣음. 처음에는 주석이 조건문 괄호 안에 들어가기도 했다
+
+## 1-1. 여러 에이전트 + 루프 엔지니어링 구조 (2026-10-20)
+
+> 사용자 (역할 표와 함께): "본격적인 개발은 이렇게 나눠서 하고 루프 엔지니어링 개념을 네가 조사해와서 여러 에이전트가 일하고 루프 엔지니어링으로 하는 구조로 가자."
+
+### 결과 요약
+- 조사: 루프 엔지니어링 = 에이전트가 계획 → 변경 → 관찰 → 고침을 반복하도록 **반복 구조(상태, 검증 관문, 끝내는 조건, 역할 분리, 상한, 사람 개입 지점)를 설계**하는 일. 정리는 [docs/loop.md](docs/loop.md)
+- 사용자 표를 Flutter 프로젝트에 맞게 옮김: implementer(`lib/`·`tools/`) · tester(`test/`만) · balancer(`tools/balance/`·`balance/`, 표 숫자는 제안만) · reviewer(읽기만, 기본 거절) · 리드(문서·표·판단·커밋)
+- 한 바퀴: 리드 표 → tester(빨간 불) → implementer(최대 3번) → 관문 → (balancer) → reviewer → 리드 판단·커밋. 카드 하나 최대 3바퀴, 넘으면 사용자에게
+
+### 진행 방식
+| 파일 | 내용 |
+|---|---|
+| `docs/loop.md` | 조사 요약(출처), 역할 표, 사람이 쓰는 것, 한 바퀴 그림, 상한·정지·자율성, 숲 지키기 교훈 → 관문 |
+| `.claude/agents/{implementer,tester,balancer,reviewer}.md` | 역할별 지시·범위·순서·보고 형식, 모델(Opus·Sonnet), reviewer는 Read·Grep·Glob만 |
+| `loop/roles.json` + `tools/loop/gate.py` | 역할별 고칠 수 있는 곳(allow)·금지(deny)·한 번에 30개 상한. git 변경 목록과 대조 |
+| `tools/loop/check.sh` | 관문 1 분석·테스트, 2 범위, 3 웹 빌드 |
+| `loop/STATE.md`, `loop/run-log.md`, `loop/tasks/_template.md` | 상태(정지 스위치 포함), 덧붙이기만 하는 기록, 작업 카드 틀 |
+| `docs/design.md`, `docs/tests/README.md`, `data/tables/README.md`, `CLAUDE.md` | 설계 정답 뼈대, 테스트 표 쓰는 법, 숫자 표 소유, 프로젝트 규칙 |
+
+### 검증
+- `gate.py` 지금 변경(리드 문서 15개): lead 통과, implementer·tester·reviewer 거절
+- 가짜 변경 10가지(역할마다 범위 안·밖): 모두 기대대로 통과/거절
+
+### 발생한 문제와 해결
+1. 조사 자료 중 wikidocs 글은 403으로 읽지 못함 → 나머지 넷으로 정리. "backpressure"·`PROGRESS.md` 같은 말은 읽은 자료에 없어 쓰지 않음
+
