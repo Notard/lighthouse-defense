@@ -145,6 +145,75 @@ abstract final class GameConfig {
   static const Color trayNameColor = Color(0xFFFFF4DC);
   static const Color trayHeldNameColor = Color(0xFF142A52);
 
+  // ---- 빛 조각 (design.md §6, 규칙 숫자는 data/tables/progression.csv → Tables.progression) ----
+
+  /// 작은 노란 별빛: 별 끝 반지름, 허리 반지름(끝에 곱함), 둘레 번짐 반지름, 색(별·번짐), 반짝이는 한 바퀴(초).
+  static const double shardSize = 9;
+  static const double shardWaist = 0.35;
+  static const double shardGlowRadius = 14;
+  static const Color shardColor = Color(0xFFFFF2A8);
+  static const Color shardGlow = Color(0x80FFD24A);
+  static const double shardTwinklePeriod = 0.5;
+
+  /// 반짝일 때 별이 작아지는 정도 (0~1, 가장 작을 때 크기 = 1 − 이 값).
+  static const double shardTwinkleDepth = 0.3;
+
+  // ---- 카드 창 (design.md §6) ----
+
+  /// 창에 보이는 카드 수 (고를 수 있는 카드가 적으면 그만큼).
+  static const int cardChoiceCount = 3;
+
+  /// 판을 어둡게 덮는 색.
+  static const Color cardDim = Color(0xB0050D1F);
+
+  /// 창 제목: 가운데 y, 글자 크기, 색.
+  static const double cardTitleY = 260;
+  static const double cardTitleFontSize = 56;
+  static const Color cardTitleColor = Color(0xFFFFE9A8);
+
+  /// 카드 (세로로 쌓음): 첫 카드 위쪽 y, 카드 크기, 카드 사이 간격 (가로 가운데 맞춤).
+  static const double cardTop = 340;
+  static const double cardWidth = 600;
+  static const double cardHeight = 190;
+  static const double cardGap = 28;
+
+  /// 카드 모양: 모서리 반지름, 테두리 굵기, 바탕 색.
+  static const double cardCorner = 26;
+  static const double cardEdgeWidth = 5;
+  static const Color cardFill = Color(0xF0142A52);
+
+  /// 카드 안: 여백, 왼쪽 그림 칸 너비, 그림 키, 이름·설명 글자 크기, 이름과 설명 사이, 글 색.
+  static const double cardPadding = 22;
+  static const double cardArtBox = 140;
+  static const double cardArtHeight = 120;
+  static const double cardNameFontSize = 38;
+  static const double cardDescFontSize = 26;
+  static const double cardLineGap = 10;
+  static const Color cardNameColor = Color(0xFFFFF4DC);
+  static const Color cardDescColor = Color(0xFFD8E6F5);
+
+  /// 종류별 테두리·그림 색: friend 금빛, upgrade 주황, beam 연노랑, lighthouse 따뜻한 빨강.
+  static const Color cardFriendColor = Color(0xFFFFC85A);
+  static const Color cardUpgradeColor = Color(0xFFFF8A3D);
+  static const Color cardBeamColor = Color(0xFFFFF0A0);
+  static const Color cardLighthouseColor = Color(0xFFFF6B6B);
+
+  /// 그림 없는 카드(빛·등대)의 그림 칸 표시: 부채꼴 반지름·폭(도), 등대 불빛 원 반지름.
+  static const double cardIconRadius = 56;
+  static const double cardIconFanDeg = 50;
+  static const double cardIconGlowRadius = 40;
+
+  /// 업그레이드 카드 그림 위 "+" 표시 크기와 굵기.
+  static const double cardPlusSize = 22;
+  static const double cardPlusWidth = 7;
+
+  // ---- 놓기 안내 (design.md §6) ----
+
+  /// 판 가운데 위 안내 글: 가운데 y, 글자 크기, 색.
+  static const double placeHintY = 230;
+  static const double placeHintFontSize = 40;
+  static const Color placeHintColor = Color(0xFFFFE9A8);
+
   // ---- 위쪽 표시 (design.md §4 등대 불빛) ----
 
   /// 불빛 막대 전체 (왼쪽 위 기준, 판 위쪽 100 px 안).
@@ -157,6 +226,22 @@ abstract final class GameConfig {
   static const Color lightBarFill = Color(0xFFFFD66B);
   static const Color lightBarEmpty = Color(0x66101C38);
   static const Color lightBarBorder = Color(0xCCFFF4DC);
+
+  /// 불빛 막대·조각 막대 테두리 굵기.
+  static const double barBorderWidth = 2;
+
+  /// 조각 막대 (불빛 막대 아래, 판 위쪽 130 px 안): 막대 전체(왼쪽 위 기준), 옆 레벨 글자 크기.
+  static const double xpBarX = 60;
+  static const double xpBarY = 76;
+  static const double xpBarWidth = 500;
+  static const double xpBarHeight = 18;
+  static const double xpLevelFontSize = 30;
+
+  /// 조각 막대 색: 채운 쪽(맑은 하늘빛), 빈 쪽, 테두리, 레벨 글자.
+  static const Color xpBarFill = Color(0xFF8FE3FF);
+  static const Color xpBarEmpty = Color(0x66101C38);
+  static const Color xpBarBorder = Color(0xCCFFF4DC);
+  static const Color xpLevelColor = Color(0xFFFFF4DC);
 
   /// 꺼짐 문구 글자 크기와 색.
   static const double lightOutFontSize = 56;

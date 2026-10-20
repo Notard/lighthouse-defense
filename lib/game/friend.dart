@@ -90,7 +90,7 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
 
   @override
   void update(double dt) {
-    if (game.isOver) return; // 판이 멈춤: 공격·그림 모두 그대로
+    if (game.isStopped) return; // 판이 멈춤(꺼짐·카드 창·놓기): 공격·그림 모두 그대로
     if (dt <= 0) return; // 시간이 흐르지 않은 프레임에는 공격을 시작하지도 진행하지도 않는다 (design.md §5 프레임 시간)
     // 빛 속이면 쉬는 시간이 friend_haste배 빨리 준다 (windup은 그대로, design.md §5-2)
     cooldown = math.max(0, cooldown - dt * (inBeam ? Tables.beam.friendHaste : 1));
@@ -118,17 +118,19 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
   /// 효과: shot은 거품, melee는 과녁에 damage(쓰러졌으면 헛침), burst는 사거리 안 모두에게 damage.
   void _strike() {
     final t = _target;
+    // 피해 = 표의 damage × 그 친구 종류의 강화 배율 (upgrade 카드, design.md §6)
+    final damage = stats.damage * game.damageMultiplier(id);
     _attacking = false;
     _target = null;
     switch (stats.attack) {
       case 'shot':
         final aim = _alive(t) ? t : _pickTarget();
-        if (aim != null) game.shootBubble(muzzle, aim, stats.damage, stats.projectileSpeed);
+        if (aim != null) game.shootBubble(muzzle, aim, damage, stats.projectileSpeed);
       case 'melee':
-        if (_alive(t)) t!.takeDamage(stats.damage);
+        if (_alive(t)) t!.takeDamage(damage);
       case 'burst':
         for (final e in enemiesInRange()) {
-          e.takeDamage(stats.damage);
+          e.takeDamage(damage);
         }
     }
   }

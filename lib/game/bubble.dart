@@ -37,7 +37,7 @@ class Bubble extends Component with HasGameReference<LighthouseGame> {
 
   @override
   void update(double dt) {
-    if (_done || game.isOver || dt <= 0) return;
+    if (_done || game.isStopped || dt <= 0) return;
     final alive = _targetAlive;
     if (alive) _lastSeen.setFrom(target.position);
     // 맞음 판정은 움직이기 전에 본다: 나간 프레임에는 판정하지 않고, 과녁에 닿은 모습이 한 프레임 보인 뒤 터진다

@@ -9,11 +9,12 @@
      (줄마다 `//` 뒤는 주석으로 보고 뺀다. test/font_test.dart T3-04와 같은 규칙)
   2. 영문·숫자·기본 기호 (U+0020~U+007E)
   3. 게임에 쓸 만한 몇몇 기호 (EXTRA_SYMBOLS 중 원본에 있는 것만)
-  4. 캐릭터 이름 (data/tables/characters.csv의 name_ko·name_en). lib/game/tables.g.dart는 이름을 유니코드 이스케이프로
-     적어 1번 규칙에 잡히지 않으므로 표에서 직접 읽는다
+  4. 표의 글: 캐릭터 이름(data/tables/characters.csv의 name_ko·name_en)과 카드 이름·설명(data/tables/cards.csv의
+     name_ko·name_en·desc_ko·desc_en). lib/game/tables.g.dart는 글을 유니코드 이스케이프로 적어 1번 규칙에 잡히지
+     않으므로 표에서 직접 읽는다
 `--all-hangul`을 붙이면 한글 2,350자(KS X 1001 완성형)와 호환 자모(ㄱ~ㅣ)도 모두 남긴다 (파일이 커진다).
 
-문구(lib/game/strings.dart)를 바꾸면 이 스크립트를 다시 돌린다. 빠뜨리면 test/font_test.dart T3-04가 실패한다.
+문구(lib/game/strings.dart)나 표의 글(characters.csv·cards.csv)을 바꾸면 이 스크립트를 다시 돌린다. 빠뜨리면 test/font_test.dart T3-04가 실패한다.
 원본 글꼴은 저장소에 넣지 않는다. 라이선스(OFL.txt)는 assets/fonts/OFL.txt에 함께 둔다.
   받는 곳: https://github.com/google/fonts/tree/main/ofl/jua  (Jua-Regular.ttf, OFL.txt)
 """
@@ -56,14 +57,24 @@ def used_in_code() -> set[str]:
     return chars
 
 
+# 글자를 모을 표와 칸 (data/tables/ 아래, 표가 없으면 건너뛴다)
+TABLE_TEXT = {
+    "characters.csv": ("name_ko", "name_en"),
+    "cards.csv": ("name_ko", "name_en", "desc_ko", "desc_en"),
+}
+
+
 def used_in_tables() -> set[str]:
-    """캐릭터 이름 글자 (data/tables/characters.csv, 없으면 빈 모음)."""
-    path = ROOT / "data" / "tables" / "characters.csv"
-    if not path.exists():
-        return set()
-    with path.open(encoding="utf-8-sig", newline="") as f:
-        names = "".join(r.get("name_ko", "") + r.get("name_en", "") for r in csv.DictReader(f))
-    return {ch for ch in names if ord(ch) > 0x7E}
+    """표의 글 글자 (캐릭터 이름, 카드 이름·설명)."""
+    chars = set()
+    for name, columns in TABLE_TEXT.items():
+        path = ROOT / "data" / "tables" / name
+        if not path.exists():
+            continue
+        with path.open(encoding="utf-8-sig", newline="") as f:
+            text = "".join("".join(r.get(c) or "" for c in columns) for r in csv.DictReader(f))
+        chars |= {ch for ch in text if ord(ch) > 0x7E}
+    return chars
 
 
 def main() -> None:
@@ -87,15 +98,21 @@ def main() -> None:
     hangul = ks_x_1001_hangul() if all_hangul else set()
     jamo = {chr(cp) for cp in range(0x3131, 0x3164)} if all_hangul else set()
     ascii_ = {chr(cp) for cp in range(0x20, 0x7F)}
-    code = used_in_code() | used_in_tables()
+    in_code = used_in_code()
+    in_tables = used_in_tables()
+    code = in_code | in_tables
     wanted = hangul | jamo | ascii_ | set(EXTRA_SYMBOLS) | code
 
     font = TTFont(src)
     cmap = font.getBestCmap()
     missing = sorted(ch for ch in wanted if ord(ch) not in cmap)
-    missing_in_code = sorted(ch for ch in code if ord(ch) not in cmap)
+    missing_in_code = sorted(ch for ch in in_code if ord(ch) not in cmap)
     if missing_in_code:
         sys.exit(f"게임 코드에 쓰인 글자가 원본 글꼴에 없음: {''.join(missing_in_code)}")
+    # 표의 글은 리드 소유라 도구가 고칠 수 없다: 멈추지 않고 크게 알린다 (게임에서는 네모로 보인다)
+    missing_in_tables = sorted(ch for ch in in_tables - in_code if ord(ch) not in cmap)
+    if missing_in_tables:
+        print(f"경고: 표(data/tables)의 글에 쓰인 글자가 원본 글꼴에 없음: {''.join(missing_in_tables)} — 표의 글을 바꿔야 합니다")
 
     options = subset.Options()
     options.layout_features = ["*"]  # 커닝 등 배치 정보 유지

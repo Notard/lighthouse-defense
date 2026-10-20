@@ -1,9 +1,9 @@
 // 만든 파일, 고치지 말 것. data/tables/*.csv를 바꾸고 `python tools/gen_tables.py`로 다시 만든다.
 // (design.md §4 "숫자 표와 변환기". 뜻은 data/tables/README.md)
 
-/// 적 하나 (enemies.csv 한 줄). speed는 게임 px/초, bite_interval은 초.
+/// 적 하나 (enemies.csv 한 줄). speed는 게임 px/초, bite_interval은 초, xp는 떨어뜨리는 빛 조각 값.
 class EnemyStats {
-  const EnemyStats({required this.id, required this.hp, required this.speed, required this.bite, required this.biteInterval, required this.radius});
+  const EnemyStats({required this.id, required this.hp, required this.speed, required this.bite, required this.biteInterval, required this.radius, required this.xp});
 
   /// `id`
   final String id;
@@ -17,6 +17,8 @@ class EnemyStats {
   final double biteInterval;
   /// `radius`
   final double radius;
+  /// `xp`
+  final double xp;
 }
 
 /// 등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율, friend_haste는 빛 속 친구의 쉬는 시간이 흐르는 배율.
@@ -89,13 +91,55 @@ class FriendStats {
   final double projectileSpeed;
 }
 
+/// 레벨과 빛 조각 (progression.csv). 레벨 n에서 다음 레벨에 드는 양 = xp_base + xp_step × (n − 1), shard_delay는 초, shard_speed는 게임 px/초, absorb_distance는 게임 px.
+class ProgressionStats {
+  const ProgressionStats({required this.xpBase, required this.xpStep, required this.shardDelay, required this.shardSpeed, required this.absorbDistance});
+
+  /// `xp_base`
+  final double xpBase;
+  /// `xp_step`
+  final double xpStep;
+  /// `shard_delay`
+  final double shardDelay;
+  /// `shard_speed`
+  final double shardSpeed;
+  /// `absorb_distance`
+  final double absorbDistance;
+}
+
+/// 레벨업 카드 하나 (cards.csv 한 줄). kind는 friend·upgrade·beam·lighthouse, max_picks 0은 제한 없음, weight는 뽑힐 무게.
+class CardStats {
+  const CardStats({required this.id, required this.kind, required this.target, required this.value, required this.maxPicks, required this.weight, required this.nameKo, required this.nameEn, required this.descKo, required this.descEn});
+
+  /// `id`
+  final String id;
+  /// `kind`
+  final String kind;
+  /// `target`
+  final String target;
+  /// `value`
+  final double value;
+  /// `max_picks`
+  final int maxPicks;
+  /// `weight`
+  final double weight;
+  /// `name_ko`
+  final String nameKo;
+  /// `name_en`
+  final String nameEn;
+  /// `desc_ko`
+  final String descKo;
+  /// `desc_en`
+  final String descEn;
+}
+
 /// 숫자 표 전체.
 abstract final class Tables {
   /// enemies.csv (id → 값, 표 순서).
   static const Map<String, EnemyStats> enemies = {
-    'shadow_blob': EnemyStats(id: 'shadow_blob', hp: 30.0, speed: 50.0, bite: 2.0, biteInterval: 1.0, radius: 26.0),
-    'ink_squid': EnemyStats(id: 'ink_squid', hp: 20.0, speed: 80.0, bite: 1.0, biteInterval: 0.8, radius: 24.0),
-    'shadow_jelly': EnemyStats(id: 'shadow_jelly', hp: 60.0, speed: 35.0, bite: 3.0, biteInterval: 1.2, radius: 28.0),
+    'shadow_blob': EnemyStats(id: 'shadow_blob', hp: 30.0, speed: 50.0, bite: 2.0, biteInterval: 1.0, radius: 26.0, xp: 2.0),
+    'ink_squid': EnemyStats(id: 'ink_squid', hp: 20.0, speed: 80.0, bite: 1.0, biteInterval: 0.8, radius: 24.0, xp: 1.0),
+    'shadow_jelly': EnemyStats(id: 'shadow_jelly', hp: 60.0, speed: 35.0, bite: 3.0, biteInterval: 1.2, radius: 28.0, xp: 3.0),
   };
 
   /// beam.csv
@@ -122,5 +166,22 @@ abstract final class Tables {
     'seahorse': FriendStats(id: 'seahorse', attack: 'shot', range: 260.0, damage: 8.0, interval: 1.0, projectileSpeed: 420.0),
     'crab': FriendStats(id: 'crab', attack: 'melee', range: 90.0, damage: 14.0, interval: 1.2, projectileSpeed: 0.0),
     'pufferfish': FriendStats(id: 'pufferfish', attack: 'burst', range: 110.0, damage: 6.0, interval: 1.5, projectileSpeed: 0.0),
+  };
+
+  /// progression.csv
+  static const ProgressionStats progression = ProgressionStats(xpBase: 5.0, xpStep: 3.0, shardDelay: 0.3, shardSpeed: 360.0, absorbDistance: 40.0);
+
+  /// cards.csv (id → 값, 표 순서).
+  static const Map<String, CardStats> cards = {
+    'friend_seahorse': CardStats(id: 'friend_seahorse', kind: 'friend', target: 'seahorse', value: 1.0, maxPicks: 0, weight: 10.0, nameKo: '\uD574\uB9C8', nameEn: 'Seahorse', descKo: '\uAC70\uD488\uC744 \uC3D8\uB294 \uCE5C\uAD6C\uB97C \uB193\uC544\uC694', descEn: 'Place a bubble-shooting friend'),
+    'friend_crab': CardStats(id: 'friend_crab', kind: 'friend', target: 'crab', value: 1.0, maxPicks: 0, weight: 10.0, nameKo: '\uAC8C', nameEn: 'Crab', descKo: '\uAC00\uAE4C\uC6B4 \uC801\uC744 \uC9D1\uB294 \uCE5C\uAD6C\uB97C \uB193\uC544\uC694', descEn: 'Place a pinching friend'),
+    'friend_pufferfish': CardStats(id: 'friend_pufferfish', kind: 'friend', target: 'pufferfish', value: 1.0, maxPicks: 0, weight: 10.0, nameKo: '\uBCF5\uC5B4', nameEn: 'Pufferfish', descKo: '\uB458\uB808\uB97C \uCC0C\uB974\uB294 \uCE5C\uAD6C\uB97C \uB193\uC544\uC694', descEn: 'Place a spiky friend'),
+    'upgrade_seahorse': CardStats(id: 'upgrade_seahorse', kind: 'upgrade', target: 'seahorse', value: 1.3, maxPicks: 2, weight: 8.0, nameKo: '\uD574\uB9C8 \uAC15\uD654', nameEn: 'Seahorse Up', descKo: '\uD574\uB9C8 \uBAA8\uB450 \uD53C\uD574 +30%', descEn: 'All seahorses +30% damage'),
+    'upgrade_crab': CardStats(id: 'upgrade_crab', kind: 'upgrade', target: 'crab', value: 1.3, maxPicks: 2, weight: 8.0, nameKo: '\uAC8C \uAC15\uD654', nameEn: 'Crab Up', descKo: '\uAC8C \uBAA8\uB450 \uD53C\uD574 +30%', descEn: 'All crabs +30% damage'),
+    'upgrade_pufferfish': CardStats(id: 'upgrade_pufferfish', kind: 'upgrade', target: 'pufferfish', value: 1.3, maxPicks: 2, weight: 8.0, nameKo: '\uBCF5\uC5B4 \uAC15\uD654', nameEn: 'Pufferfish Up', descKo: '\uBCF5\uC5B4 \uBAA8\uB450 \uD53C\uD574 +30%', descEn: 'All pufferfish +30% damage'),
+    'beam_wide': CardStats(id: 'beam_wide', kind: 'beam', target: 'width_deg', value: 10.0, maxPicks: 3, weight: 6.0, nameKo: '\uB113\uC740 \uBE5B', nameEn: 'Wide Beam', descKo: '\uBE5B\uC904\uAE30 \uD3ED +10\uB3C4', descEn: 'Beam width +10 degrees'),
+    'beam_long': CardStats(id: 'beam_long', kind: 'beam', target: 'length', value: 80.0, maxPicks: 3, weight: 6.0, nameKo: '\uBA3C \uBE5B', nameEn: 'Long Beam', descKo: '\uBE5B\uC904\uAE30 \uAE38\uC774 +80', descEn: 'Beam length +80'),
+    'light_up': CardStats(id: 'light_up', kind: 'lighthouse', target: 'max_hp', value: 20.0, maxPicks: 5, weight: 6.0, nameKo: '\uBC1D\uC740 \uB4F1\uB300', nameEn: 'Brighter Light', descKo: '\uBD88\uBE5B \uCD5C\uB300 +20 (\uADF8\uB9CC\uD07C \uCC44\uC6C0)', descEn: 'Max light +20 (and refill that much)'),
+    'light_regen': CardStats(id: 'light_regen', kind: 'lighthouse', target: 'regen', value: 0.5, maxPicks: 3, weight: 5.0, nameKo: '\uB418\uC0B4\uC544\uB098\uB294 \uBD88\uBE5B', nameEn: 'Light Regen', descKo: '\uBD88\uBE5B\uC774 1\uCD08\uC5D0 0.5\uC529 \uCC28\uC694', descEn: 'Light recovers 0.5 per second'),
   };
 }

@@ -88,6 +88,8 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
       _state = EnemyState.dying;
       _deathTimer = 0;
       _flash = 0;
+      // 쓰러지는 순간 그 자리에 빛 조각 하나 (쓰러진 적은 피해를 더 받지 않으니 한 번만, design.md §6)
+      game.dropShard(position, stats.xp);
     } else {
       _flash = GameConfig.enemyHitFlashSeconds;
       // 그림을 읽기 전에 받은 피해의 hit는 그림이 온 뒤 재생하지 않는다 (번쩍만)
@@ -115,7 +117,7 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
 
   @override
   void update(double dt) {
-    if (game.isOver) return; // 판이 멈춤: 움직임·갉기·그림 모두 그대로
+    if (game.isStopped) return; // 판이 멈춤(꺼짐·카드 창·놓기): 움직임·갉기·그림 모두 그대로
     // 시간이 흐르지 않은 프레임(판에 붙는 update(0) 등)에는 아무 일도 없다.
     // 닿는 거리 안쪽에서 나타난 적도 시간이 흐르는 첫 update에 밖으로 옮겨진다 (design.md §5)
     if (dt <= 0) return;
@@ -156,7 +158,7 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
 
   void _bite(double dt) {
     _biteTimer += dt;
-    while (_biteTimer >= stats.biteInterval && !game.isOver) {
+    while (_biteTimer >= stats.biteInterval && !game.isStopped) {
       _biteTimer -= stats.biteInterval;
       game.biteLight(stats.bite);
     }
