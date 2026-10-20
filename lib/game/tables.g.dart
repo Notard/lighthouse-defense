@@ -149,7 +149,7 @@ abstract final class Tables {
   static const LighthouseStats lighthouse = LighthouseStats(hp: 100.0, spawnDistance: 780.0);
 
   /// practice.csv
-  static const PracticeStats practice = PracticeStats(interval: 2.0, maxAlive: 8);
+  static const PracticeStats practice = PracticeStats(interval: 3.5, maxAlive: 4);
 
   /// characters.csv (id → 값, 표 순서).
   static const Map<String, CharacterStats> characters = {
@@ -169,7 +169,7 @@ abstract final class Tables {
   };
 
   /// progression.csv
-  static const ProgressionStats progression = ProgressionStats(xpBase: 5.0, xpStep: 3.0, shardDelay: 0.3, shardSpeed: 360.0, absorbDistance: 40.0);
+  static const ProgressionStats progression = ProgressionStats(xpBase: 3.0, xpStep: 3.0, shardDelay: 0.3, shardSpeed: 360.0, absorbDistance: 40.0);
 
   /// cards.csv (id → 값, 표 순서).
   static const Map<String, CardStats> cards = {
