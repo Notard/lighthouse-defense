@@ -8,7 +8,7 @@
            name, parent(없으면 null), pivot [x, y], polygon [[x, y], …], fill_band(선택), color_key(선택)
   variants (선택) 부위 조각 위에 선을 그려 바꿔 끼울 그림 (예: 금 간 몸통)
            {"name": "body_cracked", "base": "body", "lines": [[[x, y], …], …], "width": 10, "color": "#1B2340"}
-  strip_rim (선택) true면 그림 둘레의 청록 테두리 빛을 걷는다 (그림체 기준 해마에서 옮겨 온 빛, 친구 셋).
+  strip_rim (선택) true면 그림 둘레의 청록 테두리 빛을 걷는다 (그림체 기준 해마에서 옮겨 온 빛. 지금 여섯 리그(친구 셋·적 셋) 모두 켜 둠, 새 캐릭터는 끈 채로).
            새로 그리는 그림은 테두리 빛 없이 그리므로 빼 둔다 (design.md §3-3·§4)
   canvas, actions …  Blender 렌더·시트 묶기에서 쓴다 (tools/blender_cutout.py, tools/pack_sheets.py)
   좌표는 모두 기준 그림 픽셀 기준

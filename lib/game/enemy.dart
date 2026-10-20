@@ -90,7 +90,8 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
       _flash = 0;
     } else {
       _flash = GameConfig.enemyHitFlashSeconds;
-      _play('hit', restart: true);
+      // 그림을 읽기 전에 받은 피해의 hit는 그림이 온 뒤 재생하지 않는다 (번쩍만)
+      if (_art != null) _play('hit', restart: true);
     }
     return dealt;
   }
@@ -115,6 +116,9 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
   @override
   void update(double dt) {
     if (game.isOver) return; // 판이 멈춤: 움직임·갉기·그림 모두 그대로
+    // 시간이 흐르지 않은 프레임(판에 붙는 update(0) 등)에는 아무 일도 없다.
+    // 닿는 거리 안쪽에서 나타난 적도 시간이 흐르는 첫 update에 밖으로 옮겨진다 (design.md §5)
+    if (dt <= 0) return;
     switch (_state) {
       case EnemyState.moving:
         _move(dt);
@@ -140,12 +144,14 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
       _place();
       return;
     }
-    // 닿는 거리에서 멈추고(넘어가지 않음) 갉기. 닿은 뒤 남은 시간은 갉기 시간으로
+    // 닿는 거리에서 멈추고(넘어가지 않음) 갉기. 걸어와 닿았으면 닿은 뒤 남은 시간(0 ~ dt)을 갉기 시간으로.
+    // 닿는 거리 안쪽에서 나타났으면(left < 0) 밖으로 옮기고 이월은 0 (그 프레임에 갉지 않는다, design.md §5)
     _distance = contactDistance;
     _place();
     _state = EnemyState.biting;
     _biteTimer = 0;
-    _bite(speed > 0 ? dt - left / speed : 0);
+    final carry = left < 0 || speed <= 0 ? 0.0 : (dt - left / speed).clamp(0.0, dt);
+    _bite(carry);
   }
 
   void _bite(double dt) {
@@ -172,11 +178,28 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
   }
 
   void _animate(double dt) {
-    if (_art == null) return;
+    final art = _art;
+    if (art == null) return;
     final current = _action;
     final hitting = current == 'hit' && _state != EnemyState.dying && !(_tickers['hit']?.done() ?? true);
     if (!hitting) _play(_baseAction);
-    _tickers[_action]?.update(dt);
+    if (_action == 'attack') {
+      _syncBite(art);
+    } else {
+      _tickers[_action]?.update(dt);
+    }
+  }
+
+  /// 갉는 그림을 피해와 맞춘다 (design.md §5): attack 한 바퀴 = bite_interval, 이벤트 프레임이 갉는 순간에 시작.
+  /// 그림만 맞추고 규칙(갉기 타이머)은 그대로다. 프레임은 갉기 타이머에서 바로 계산한다.
+  void _syncBite(CharacterArt art) {
+    final ticker = _tickers['attack'];
+    if (ticker == null) return;
+    final frames = art.frameCount('attack');
+    final event = (art.eventFrame('attack') ?? 1) - 1;
+    final step = stats.biteInterval / frames;
+    final passed = step > 0 ? (_biteTimer / step).floor() : 0;
+    ticker.currentIndex = (event + passed) % frames;
   }
 
   @override

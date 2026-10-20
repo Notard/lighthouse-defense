@@ -1,3 +1,5 @@
+import 'tables.g.dart';
+
 /// 화면에 나오는 글 (design.md §3). 코드에 한글 글을 바로 쓰지 않고 여기서만 꺼내 쓴다.
 ///
 /// 처음부터 두 언어. 기기 언어 따르기와 설정 창은 10단계.
@@ -21,4 +23,7 @@ abstract final class Strings {
 
   /// 등대 불빛이 꺼졌을 때 가운데 문구 (design.md §4).
   static String get lightOut => _pick('불빛이 꺼졌어요', 'The light went out');
+
+  /// 캐릭터 이름 (characters.csv의 name_ko·name_en, 지금 언어).
+  static String characterName(CharacterStats c) => _pick(c.nameKo, c.nameEn);
 }

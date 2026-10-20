@@ -8,15 +8,18 @@ import 'package:flutter/painting.dart';
 import 'art.dart';
 import 'beam.dart';
 import 'board_input.dart';
+import 'bubble.dart';
 import 'config.dart';
 import 'enemy.dart';
+import 'friend.dart';
 import 'geometry.dart';
 import 'hud.dart';
 import 'slots.dart';
 import 'strings.dart';
 import 'tables.g.dart';
+import 'tray.dart';
 
-/// 한 판 (밤바다, 등대, 둘레 자리 18개, 빛 방향 끌기, 사방에서 오는 적과 등대 불빛).
+/// 한 판 (밤바다, 등대, 둘레 자리 18개, 빛 방향 끌기, 사방에서 오는 적과 등대 불빛, 친구 놓기와 자동 공격).
 ///
 /// [practice]면 연습 스폰을 켠다 (앱은 켜고 테스트 기본 판은 끈다). [seed]는 연습 스폰 무작위 씨앗.
 class LighthouseGame extends FlameGame {
@@ -42,6 +45,23 @@ class LighthouseGame extends FlameGame {
   /// 판에 있는 적 (쓰러지는 중 포함, 사라지면 빠짐).
   List<Enemy> get enemies => List.unmodifiable(_enemies);
 
+  /// 친구가 들어가는 층 (등대 위, 적 아래).
+  final Component _friendLayer = Component();
+  final List<Friend> _friends = [];
+
+  /// 놓인 친구 (놓은 순서).
+  List<Friend> get friends => List.unmodifiable(_friends);
+
+  /// 거품이 들어가는 층 (적 위, 제목 아래).
+  final Component _bubbleLayer = Component();
+  final List<Bubble> _bubbles = [];
+
+  /// 날아가는 거품 (사라지면 빠짐).
+  List<Bubble> get bubbles => List.unmodifiable(_bubbles);
+
+  /// 아래쪽 친구 쟁반.
+  late final FriendTray tray = FriendTray();
+
   /// 처음 불빛 (표의 등대 hp).
   final double maxLight = Tables.lighthouse.hp;
   late double _light = maxLight;
@@ -66,14 +86,30 @@ class LighthouseGame extends FlameGame {
   @override
   Future<void> onLoad() async {
     camera.viewfinder.anchor = Anchor.topLeft;
-    // 그리는 순서: 바다 → 빛 → 자리 → 등대 → 적 → 제목 → 불빛 막대 (→ 꺼짐 문구는 꺼질 때 맨 뒤에). 입력 층은 그리지 않는다
-    await world.addAll([SeaBackdrop(), beam, ...slots, LighthouseSpot(), _enemyLayer, TitleText(), lightBar, BoardInput()]);
+    // 그리는 순서: 바다 → 빛 → 자리 → 등대 → 친구 → 적 → 거품 → 제목 → 불빛 막대 → 쟁반
+    // (→ 꺼짐 문구는 꺼질 때 맨 뒤에). 입력 층은 그리지 않는다.
+    // 친구 층이 적 층보다 먼저라 한 프레임 안에서 친구가 먼저 움직인다 (새 거품은 다음 프레임부터 난다)
+    await world.addAll([
+      SeaBackdrop(),
+      beam,
+      ...slots,
+      LighthouseSpot(),
+      _friendLayer,
+      _enemyLayer,
+      _bubbleLayer,
+      TitleText(),
+      lightBar,
+      tray,
+      BoardInput(),
+    ]);
   }
 
   @override
   void update(double dt) {
-    super.update(dt);
-    if (!_over) spawner?.tick(this, dt);
+    // 한 번에 흘리는 시간은 maxFrameDt까지 (남는 시간은 버린다, design.md §5)
+    final step = math.min(dt, GameConfig.maxFrameDt);
+    super.update(step);
+    if (!_over) spawner?.tick(this, step);
   }
 
   /// 적 [id]를 등대 가운데에서 [angleDeg] 쪽, [distance](없으면 표의 spawn_distance)에 바로 넣는다 (판에는 다음 프레임에 붙는다).
@@ -86,6 +122,26 @@ class LighthouseGame extends FlameGame {
 
   /// 쓰러진 적이 사라질 때 [enemies]에서 뺀다 (Enemy가 부른다).
   void forgetEnemy(Enemy e) => _enemies.remove(e);
+
+  /// 친구 [id]를 [slot]에 놓는다 (판에는 다음 프레임에 붙는다). 차 있거나 판이 멈췄으면 아무 일 없이 null.
+  Friend? placeFriend(String id, Slot slot) {
+    if (_over || slot.friend != null) return null;
+    final f = Friend(id, slot);
+    slot.friend = f;
+    _friends.add(f);
+    _friendLayer.add(f);
+    return f;
+  }
+
+  /// 거품 하나를 [from]에서 [target]으로 쏜다 (Friend가 부른다).
+  void shootBubble(Vector2 from, Enemy target, double damage, double speed) {
+    final b = Bubble(from, target, damage, speed);
+    _bubbles.add(b);
+    _bubbleLayer.add(b);
+  }
+
+  /// 거품이 터지거나 맞아 사라질 때 [bubbles]에서 뺀다 (Bubble이 부른다).
+  void forgetBubble(Bubble b) => _bubbles.remove(b);
 
   /// 적이 등대 불빛을 [amount]만큼 갉는다. 0이 되면 꺼짐: 판이 멈추고 가운데 문구.
   void biteLight(double amount) {
@@ -111,10 +167,23 @@ class LighthouseGame extends FlameGame {
     return best;
   }
 
-  /// 누르기: 자리를 고르고, 고른 자리를 다시 누르거나 바다를 누르면 고르기를 푼다. 빛은 그대로.
+  /// 누르기 (design.md §2·§5). 빛은 그대로.
+  /// - 쟁반 단추: 친구를 들거나 내려놓는다 (자리 고르기는 그대로)
+  /// - 친구를 든 채 자리: 빈 자리면 놓고(든 것은 그대로, 고른 자리는 없음), 친구가 있으면 아무 일 없음
+  /// - 그 밖: 자리를 고르고, 고른 자리를 다시 누르거나 바다를 누르면 고르기를 푼다
   void tapAt(Vector2 p) {
     if (_over) return; // 꺼진 뒤 입력은 무시
+    final button = tray.buttonAt(p);
+    if (button != null) {
+      tray.press(button);
+      return;
+    }
     final s = slotAt(p);
+    final held = tray.held;
+    if (held != null && s != null) {
+      if (placeFriend(held, s) != null) _select(null);
+      return;
+    }
     _select(s == _selectedSlot ? null : s);
   }
 

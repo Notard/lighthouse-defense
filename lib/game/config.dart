@@ -59,6 +59,42 @@ abstract final class GameConfig {
   static const Color enemyHitFlash = Color(0xCCFFFFFF);
   static const double enemyHitFlashSeconds = 0.3;
 
+  // ---- 프레임 시간 (design.md §5) ----
+
+  /// 한 번 update가 흘리는 최대 시간 (초). 더 큰 dt(탭을 숨겼다 돌아옴 등)는 여기로 자르고 남는 시간은 버린다.
+  static const double maxFrameDt = 0.1;
+
+  // ---- 친구 (규칙 숫자는 data/tables/friends.csv → Tables.friends, design.md §5) ----
+
+  /// 그림을 읽기 전 친구를 그리는 임시 원 색 (금빛).
+  static const Color friendPlaceholder = Color(0xFFFFC85A);
+
+  /// 거품 (해마의 탄): 반지름과 색 (작은 반투명 물방울).
+  static const double bubbleRadius = 9;
+  static const Color bubbleFill = Color(0x6699E6FF);
+  static const Color bubbleEdge = Color(0xCCE8FBFF);
+
+  // ---- 친구 쟁반 (design.md §5, 판 아래쪽 y 1100~1260) ----
+
+  /// 단추 셋을 가로로: 위쪽 y, 단추 크기, 단추 사이 간격 (가로 가운데 맞춤: x 104~616).
+  /// 양옆은 비워 둔다: 왼쪽 아래 바다(예: (100, 1200), 테스트 T2-12)를 누르면 고르기를 푸는 2단계 규칙이 그대로 먹게.
+  static const double trayY = 1100;
+  static const double trayButtonWidth = 160;
+  static const double trayButtonHeight = 160;
+  static const double trayButtonGap = 16;
+
+  /// 단추 안 친구 그림 키와 이름 글자 크기.
+  static const double trayArtHeight = 80;
+  static const double trayNameFontSize = 28;
+
+  /// 단추 색: 바탕·테두리, 든 단추의 바탕·테두리, 이름 글자.
+  static const Color trayButtonFill = Color(0x80142A52);
+  static const Color trayButtonEdge = Color(0x907FC8E8);
+  static const Color trayHeldFill = Color(0xB0FFE9A8);
+  static const Color trayHeldEdge = Color(0xFFFFFFFF);
+  static const Color trayNameColor = Color(0xFFFFF4DC);
+  static const Color trayHeldNameColor = Color(0xFF142A52);
+
   // ---- 위쪽 표시 (design.md §4 등대 불빛) ----
 
   /// 불빛 막대 전체 (왼쪽 위 기준, 판 위쪽 100 px 안).
