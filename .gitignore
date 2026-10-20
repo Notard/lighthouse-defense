@@ -50,3 +50,6 @@ art/render/
 art/blend/
 logs/
 tools/__pycache__/
+
+# 투명 처리 확인용 (gen_art.py check로 다시 만듦, 카드 004)
+art/ref/_check/
