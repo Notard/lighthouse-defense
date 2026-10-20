@@ -7,6 +7,7 @@ import 'board_input.dart';
 import 'config.dart';
 import 'geometry.dart';
 import 'slots.dart';
+import 'strings.dart';
 
 /// 한 판 (2단계: 밤바다, 등대, 둘레 자리 18개, 빛 방향 끌기).
 class LighthouseGame extends FlameGame {
@@ -102,9 +103,9 @@ class LighthouseSpot extends PositionComponent {
 class TitleText extends TextComponent {
   TitleText()
       : super(
-          text: '등대 지키기',
+          text: Strings.title,
           anchor: Anchor.topCenter,
           position: Vector2(GameConfig.width / 2, 120),
-          textRenderer: TextPaint(style: const TextStyle(fontSize: 64, color: Color(0xFFFFF4DC), fontWeight: FontWeight.w700)),
+          textRenderer: TextPaint(style: const TextStyle(fontFamily: GameConfig.fontFamily, fontSize: 64, color: Color(0xFFFFF4DC))),
         );
 }

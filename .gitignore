@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 그림 도구 중간 산출물 (카드 003): 부위 조각·Blender 렌더·장면, 실행 기록
+art/parts/
+art/render/
+art/blend/
+logs/
+tools/__pycache__/

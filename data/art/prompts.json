@@ -1,0 +1,8 @@
+{
+  "_설명": "그림 프롬프트 (리드 소유, docs/design.md §3). tools/gen_art.py가 읽는다. 캐릭터·소품 내용은 카드 004에서 채운다.",
+  "style": "Cute 2D cartoon game sprite for a cozy night-sea lighthouse defense game. Chibi proportions, thick dark-navy outline (#1B2340) of even width, soft two-tone cel shading, glowing gentle colors that read well on a dark navy night-sea background, clean flat colors, no texture noise, no text, no ground shadow, no background scenery.",
+  "background": "plain flat chroma-green background (#00FF00) filling the whole image, nothing else",
+  "frame_size": 1254,
+  "characters": {},
+  "props": {}
+}
