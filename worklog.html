@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>등대 지키기 작업 기록</title>
+<style>
+:root{
+  --bg:#faf6f0; --surface:#fff; --ink:#2b2420; --muted:#7a6d64; --line:#eadfd3;
+  --fox:#5f8f3a; --fox-soft:#e6efd9; --ok:#4f9a34; --ok-soft:#e3f1da;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1715; --surface:#252020; --ink:#f1e9e2; --muted:#b0a39a; --line:#3a322d;
+    --fox-soft:#26331c; --ok:#7cc55c; --ok-soft:#24331c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1715; --surface:#252020; --ink:#f1e9e2; --muted:#b0a39a; --line:#3a322d;
+  --fox-soft:#26331c; --ok:#7cc55c; --ok-soft:#24331c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+  font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em}
+.muted{color:var(--muted);font-size:.9rem}
+a{color:var(--fox)}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0 28px}
+.hero .big{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.hero .big small{font-size:1rem;color:var(--muted);font-weight:500}
+.bar{height:14px;background:var(--fox-soft);border-radius:999px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--fox);border-radius:999px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.stage.complete{border-color:var(--ok)}
+.shead{display:flex;align-items:center;gap:10px}
+.shead h2{font-size:1.08rem;margin:0;flex:1}
+.n{background:var(--fox);color:#fff;min-width:28px;height:28px;border-radius:6px;display:inline-grid;place-items:center;font-weight:700;font-size:.9rem}
+.stage.complete .n{background:var(--ok)}
+.cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem}
+.sbar{height:4px;background:var(--fox-soft);border-radius:4px;margin:10px 0 6px;overflow:hidden}
+.sbar i{display:block;height:100%;background:var(--fox)}
+.stage.complete .sbar i{background:var(--ok)}
+ul{list-style:none;margin:0;padding:0}
+.item{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+.item:last-child{border-bottom:0}
+.box{flex:none;width:18px;height:18px;border:2px solid var(--line);border-radius:5px;margin-top:2px;display:grid;place-items:center}
+.item.done .box{background:var(--ok);border-color:var(--ok)}
+.item.done .box::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.item.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.item.gate .txt{font-weight:600}
+.tag{display:inline-block;margin-left:8px;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--ok-soft);color:var(--ok);text-decoration:none}
+code{background:var(--fox-soft);padding:1px 6px;border-radius:4px;font-size:.86em}
+h3{margin:36px 0 12px;font-size:1.1rem}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.92rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--muted)}
+
+article h1{font-size:1.9rem;margin:0 0 8px;letter-spacing:-.02em}
+article h2{font-size:1.25rem;margin:36px 0 14px;padding-top:24px;border-top:2px solid var(--fox)}
+article h3{font-size:1.02rem;margin:24px 0 10px;color:var(--fox)}
+article blockquote{margin:0 0 16px;color:var(--muted);font-size:.92rem;border-left:3px solid var(--line);padding-left:12px}
+article blockquote p{margin:0}
+article pre{background:var(--fox-soft);padding:14px;border-radius:8px;overflow-x:auto;font-size:.86rem}
+article pre code{background:none;padding:0}
+article table{margin:8px 0 16px}
+article ol,article ul{padding-left:22px}
+article hr{display:none}
+article img{max-width:100%;border-radius:10px;display:block}
+article td img{margin:0 auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 10:44</p>
+  <article><h1>등대 지키기 작업 기록</h1>
+<h2>0. 기획 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "이 게임은 여기까지 하고 다음엔 어떤 디펜스 게임을 만들면 좋을까? 지금과는 완전 다른 종류의 디펜스 게임이 좋겠는데"
+→ 네 가지 중 "A로 하고 밤바다 등대를 지키는 바다 생물들 로 해서 새 폴더를 만들고 새 프로젝트로 하자."</p>
+</blockquote>
+<h3>결과 요약</h3>
+<table>
+<thead>
+<tr>
+<th>질문</th>
+<th>고른 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>종류</td>
+<td>A. 사방 로그라이크 디펜스 (가운데를 360도로 지키고, 웨이브마다 카드 3장 중 하나)</td>
+</tr>
+<tr>
+<td>테마</td>
+<td>밤바다 등대를 지키는 바다 생물들</td>
+</tr>
+<tr>
+<td>폴더·이름</td>
+<td><code>C:\lighthouse_defense</code> · 등대 지키기 (Lighthouse Keepers)</td>
+</tr>
+<tr>
+<td>화면</td>
+<td>웹(PWA) 세로 먼저</td>
+</tr>
+<tr>
+<td>그림</td>
+<td>숲 지키기처럼 Codex 카툰 + 컷아웃</td>
+</tr>
+<tr>
+<td>공개</td>
+<td>새 공개 저장소 + Pages 자동 배포</td>
+</tr>
+</tbody>
+</table>
+<p>계획서 <a href="plan.html">plan.md</a>: 숲 지키기와 확실히 다르게 <strong>등대 빛을 손가락으로 끌어 돌리는 조작</strong>을 핵심으로 (빛 속의 어둠 생물은 느려지고 약해짐), 고리 자리(안쪽 6 · 바깥 12)에 친구, 빛 조각(경험치)으로 카드, 진주로 판 밖 성장, 밤 셋.</p>
+<h3>진행 방식</h3>
+<p>숲 지키기 마무리 뒤 같은 대화에서 질문 넷으로 방향을 정하고 계획서를 썼다.</p>
+<h3>검증</h3>
+<p>사용자 확인 대기.</p>
+<h3>발생한 문제와 해결</h3>
+<p>없음.</p>
+<h2>1. 프로젝트·저장소·자동 배포 (2026-10-20)</h2>
+<h3>결과 요약</h3>
+<ul>
+<li><code>flutter create</code> (웹·Windows), Flame 추가. 세로 720 × 1280 고정 해상도 판에 밤바다 그러데이션, 가운데 등대 자리(임시 원), 제목</li>
+<li>웹: <code>&lt;title&gt;</code>·PWA 이름 "등대 지키기", 세로(<code>portrait</code>), 바다색 / Windows: 창 540 × 960, 제목 "등대 지키기"</li>
+<li>숲 지키기에서 <code>make_todo_html.py</code>, <code>serve_web.py</code>, <code>dart_test.yaml</code>, Pages 배포 설정을 가져와 이름·경로(<code>/lighthouse-defense/</code>)를 바꿈</li>
+</ul>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>파일</th>
+<th>내용</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>lib/game/config.dart</code></td>
+<td>720 × 1280, 등대 자리 (360, 660), 바다색</td>
+</tr>
+<tr>
+<td><code>lib/game/lighthouse_game.dart</code></td>
+<td><code>LighthouseGame</code>(고정 해상도 카메라), 바다 바탕, 등대 자리, 제목</td>
+</tr>
+<tr>
+<td><code>lib/main.dart</code></td>
+<td>판 하나</td>
+</tr>
+<tr>
+<td><code>windows/runner/main.cpp</code></td>
+<td>세로 창, 한글 제목을 <code>\uXXXX</code>로 (소스는 ASCII여야 한다: /WX가 C4819를 오류로)</td>
+</tr>
+<tr>
+<td><code>.github/workflows/pages.yml</code></td>
+<td>main 푸시마다 테스트 → 웹 빌드(<code>--base-href /lighthouse-defense/</code>) → Pages</td>
+</tr>
+</tbody>
+</table>
+<h3>검증</h3>
+<ul>
+<li><code>flutter analyze</code> 문제 없음, <code>flutter test</code> 1/1, <code>flutter build windows</code> 성공</li>
+</ul>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>창 제목을 한글 이스케이프로 넣으려 했는데 셸(heredoc)과 편집 도구가 <code>\uB4F1</code>을 실제 한글로 풀어 넣었다 (C++ 소스에 한글 → 빌드 실패) → 파이썬 스크립트 파일에서 바이트로 바꿔 넣음. 처음에는 주석이 조건문 괄호 안에 들어가기도 했다</li>
+</ol></article>
+</div>
+</body>
+</html>

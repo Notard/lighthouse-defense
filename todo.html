@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>등대 지키기 할 일</title>
+<style>
+:root{
+  --bg:#faf6f0; --surface:#fff; --ink:#2b2420; --muted:#7a6d64; --line:#eadfd3;
+  --fox:#5f8f3a; --fox-soft:#e6efd9; --ok:#4f9a34; --ok-soft:#e3f1da;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1b1715; --surface:#252020; --ink:#f1e9e2; --muted:#b0a39a; --line:#3a322d;
+    --fox-soft:#26331c; --ok:#7cc55c; --ok-soft:#24331c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1b1715; --surface:#252020; --ink:#f1e9e2; --muted:#b0a39a; --line:#3a322d;
+  --fox-soft:#26331c; --ok:#7cc55c; --ok-soft:#24331c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55;
+  font-family:"Pretendard","Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+.wrap{max-width:880px;margin:0 auto;padding:40px 16px 80px}
+h1{font-size:1.9rem;margin:0 0 4px;letter-spacing:-.02em}
+.muted{color:var(--muted);font-size:.9rem}
+a{color:var(--fox)}
+.hero{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0 28px}
+.hero .big{font-size:2.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.hero .big small{font-size:1rem;color:var(--muted);font-weight:500}
+.bar{height:14px;background:var(--fox-soft);border-radius:999px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--fox);border-radius:999px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+.stage.complete{border-color:var(--ok)}
+.shead{display:flex;align-items:center;gap:10px}
+.shead h2{font-size:1.08rem;margin:0;flex:1}
+.n{background:var(--fox);color:#fff;min-width:28px;height:28px;border-radius:6px;display:inline-grid;place-items:center;font-weight:700;font-size:.9rem}
+.stage.complete .n{background:var(--ok)}
+.cnt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.9rem}
+.sbar{height:4px;background:var(--fox-soft);border-radius:4px;margin:10px 0 6px;overflow:hidden}
+.sbar i{display:block;height:100%;background:var(--fox)}
+.stage.complete .sbar i{background:var(--ok)}
+ul{list-style:none;margin:0;padding:0}
+.item{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.95rem}
+.item:last-child{border-bottom:0}
+.box{flex:none;width:18px;height:18px;border:2px solid var(--line);border-radius:5px;margin-top:2px;display:grid;place-items:center}
+.item.done .box{background:var(--ok);border-color:var(--ok)}
+.item.done .box::after{content:"";width:5px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.item.done .txt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line)}
+.item.gate .txt{font-weight:600}
+.tag{display:inline-block;margin-left:8px;font-size:.72rem;font-weight:700;padding:1px 7px;border-radius:999px;background:var(--ok-soft);color:var(--ok);text-decoration:none}
+code{background:var(--fox-soft);padding:1px 6px;border-radius:4px;font-size:.86em}
+h3{margin:36px 0 12px;font-size:1.1rem}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.92rem}
+th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🗼 등대 지키기 · 할 일 목록</h1>
+  <p class="muted">원본: TODO.md · 상세 계획: <a href="plan.html">plan.html</a> · 게임 미리보기: <a href="preview.html">preview.html</a> · 아트 미리보기: <a href="art_preview.html">art_preview.html</a> · 작업 기록: <a href="worklog.html">worklog.html</a> · 결과 보고서: <a href="report.html">report.html</a> · 마지막 갱신 2026-10-20 10:44</p>
+
+  <div class="hero">
+    <div class="big">55% <small>6 / 11 완료</small></div>
+    <div class="bar"><i style="width:55%"></i></div>
+  </div>
+
+  
+<section class="stage active">
+  <div class="shead">
+    <span class="n">0</span>
+    <h2>기획</h2>
+    <span class="cnt">2 / 3</span>
+  </div>
+  <div class="sbar"><i style="width:67%"></i></div>
+  <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">장르·테마·화면·그림·공개 방식 정하기 (사용자 선택: 사방 로그라이크 · 밤바다 등대 · 세로 · Codex 컷아웃 · 공개 저장소)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">plan.md 작성 (한 판 흐름, 카드, 친구, 어둠 생물, 밤 셋, 다시 쓰는 것, 단계)</span></li><li class="item gate"><span class="box" aria-hidden="true"></span><span class="txt">사용자 계획 확인<span class="tag">완료 기준</span></span></li></ul>
+</section>
+<section class="stage active">
+  <div class="shead">
+    <span class="n">1</span>
+    <h2>프로젝트·저장소·자동 배포</h2>
+    <span class="cnt">4 / 5</span>
+  </div>
+  <div class="sbar"><i style="width:80%"></i></div>
+  <ul><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">Flutter 3.44 + Flame 1.38 프로젝트 (웹·Windows), 세로 720 × 1280 빈 판 (밤바다·등대 자리·제목)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">웹 제목·PWA 이름 &quot;등대 지키기&quot;, 세로 고정 / Windows 창 540 × 960, 한글 제목(ASCII 이스케이프)</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">숲 지키기 문서 도구(<code>make_todo_html.py</code>, <code>serve_web.py</code>) 가져와 이름 바꾸기</span></li><li class="item done"><span class="box" aria-hidden="true"></span><span class="txt">테스트 1개, Windows 빌드</span></li><li class="item gate"><span class="box" aria-hidden="true"></span><span class="txt">공개 저장소 <code>Notard/lighthouse-defense</code>, Pages 자동 배포, 실제 사이트 확인<span class="tag">완료 기준</span></span></li></ul>
+</section>
+<section class="stage ">
+  <div class="shead">
+    <span class="n">1-1</span>
+    <h2>여러 에이전트 + 루프 엔지니어링 구조 (사용자 요청)</h2>
+    <span class="cnt">0 / 3</span>
+  </div>
+  <div class="sbar"><i style="width:0%"></i></div>
+  <ul><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">루프 엔지니어링 조사</span></li><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">에이전트 넷(implementer · tester · balancer · reviewer) 정의, 고칠 수 있는 곳·손대면 안 되는 곳</span></li><li class="item"><span class="box" aria-hidden="true"></span><span class="txt">한 바퀴 흐름(표 → 테스트 → 구현 → 검증 → 리뷰 → 판단·커밋)과 자동 검사</span></li></ul>
+</section>
+
+  <h3>완료 기록</h3>
+  <p class="muted">아직 완료된 항목이 없습니다.</p>
+</div>
+</body>
+</html>

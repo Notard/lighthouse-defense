@@ -1,0 +1,8 @@
+# 태그 설정 (숲 지키기에서 가져옴)
+tags:
+  # 화면을 진짜 글꼴로 그려 그림으로 남기는 테스트. 기본 실행에서는 빠진다.
+  #   flutter test --run-skipped --tags shots --update-goldens
+  shots:
+    skip: "그림 남기기용 (--run-skipped --tags shots --update-goldens)"
+  # 자동 플레이 봇 난이도 확인. 내 PC에서는 돌고, GitHub 배포 빌드에서는 뺀다 (--exclude-tags shots,balance)
+  balance:
