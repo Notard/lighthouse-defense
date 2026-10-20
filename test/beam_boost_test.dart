@@ -78,16 +78,16 @@ void main() {
       final haste = Tables.beam.friendHaste;
       game.aimBeamAt(down);
       place(game, 'crab', 'I3');
-      final blob = spawn(game, 'shadow_jelly', 90);
-      final hp = blob.hp;
+      final jelly = spawn(game, 'shadow_jelly', 90);
+      final hp = jelly.hp;
       final dealt = s.damage * Tables.beam.vulnerable;
       final second = s.interval / haste + windup;
       final at = clockOf(game);
 
       at(second - 0.1);
-      expect(blob.hp, closeTo(hp - dealt, 1e-9));
+      expect(jelly.hp, closeTo(hp - dealt, 1e-9));
       at(second + 0.1);
-      expect(blob.hp, closeTo(hp - 2 * dealt, 1e-9));
+      expect(jelly.hp, closeTo(hp - 2 * dealt, 1e-9));
     },
   );
 
@@ -111,6 +111,8 @@ void main() {
       at(0.5);
       expect(crab.cooldown, closeTo(c0 - 0.5 * haste, 0.05 * haste));
       game.aimBeamAt(up);
+      // 표 전제: 빛 밖 0.3초 동안 쉬는 시간이 0에 닿지 않는다
+      expect(c0 - 0.5 * haste - 0.3, greaterThan(0));
       at(0.8);
       expect(crab.cooldown, closeTo(c0 - 0.5 * haste - 0.3, 0.05 * haste));
     },

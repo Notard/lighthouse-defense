@@ -16,7 +16,7 @@
 | T6-09 | 카드 판, 창 열림 | 멈춤: 연습 판처럼 방울을 0°에 (`spawnEnemy`), 1초 흘림. `aimBeamAt(360, 1000)` | 방울 distance 그대로(spawn_distance), 빛 방향 그대로 270. 첫 친구 고른 뒤(놓기 끝난 뒤) 1초: 방울이 움직였음 |
 | T6-10 | 카드 판, 첫 창에서 해마를 골라 I3에 놓은 뒤 | 방울을 90°에 닿게 두고, `addXp(필요1)`로 창을 연 다음 3초 | 창이 열린 동안 방울 hp 그대로, 불빛 그대로, `bubbles` 위치 그대로 (멈춤). 해마 `cooldown` 그대로 |
 | T6-11 | 연습 판 | `availableCards()` | 처음: friend 셋 + beam 둘 + lighthouse 둘 (upgrade 없음, 표 순서). `placeFriend('crab', I0)` 뒤 upgrade_crab 들어옴. `applyCard('upgrade_crab')`를 max_picks번 하면 빠짐. 18자리 모두 채우면 friend 셋 빠짐. `applyCard('beam_wide')` max_picks번 뒤 beam_wide 빠짐 |
-| T6-12 | 연습 판, 씨앗 3 두 판 | 각각 `drawCards()` 다섯 번 | 두 판의 결과가 같다. 매번 서로 다른 id 3개, 모두 그때의 `availableCards()` 안. 고를 수 있는 카드가 2개뿐인 판(빈 자리 없음, beam·lighthouse 카드 모두 max까지 고르고 upgrade 하나만 남김)에서는 2개 |
+| T6-12 | 연습 판, 씨앗 3 두 판 | 각각 `drawCards()` 다섯 번 | 두 판의 결과가 같다. 매번 서로 다른 id 3개, 모두 그때의 `availableCards()` 안. 고를 수 있는 카드가 2개뿐인 판(해마 1 + 게 17로 빈 자리 없음, beam·lighthouse 카드 모두 max까지 골라 upgrade 둘만 남김)에서는 2개 |
 | T6-13 | 연습 판 | 게를 I3에, 방울을 90°에 닿게, `applyCard('upgrade_crab')` 두 번. windup + 0.05초 | `damageMultiplier('crab')` = value². 방울 hp = 처음 − damage × value² (빛 밖). 다른 종류 `damageMultiplier('seahorse')` = 1 |
 | T6-14 | 연습 판 | `applyCard('beam_wide')`, `applyCard('beam_long')` | `beam.widthDeg` = width_deg + 10(값), `beam.length` = length + 80(값). 빛 270°에서 270 + (새 폭 ÷ 2 − 0.5)° 거리 300은 속, 거리 새 길이 − 1은 속 |
 | T6-15 | 연습 판 | 방울을 0°에 닿게 두고 불빛을 bite만큼 깎이게 (bite_interval + 0.05초). `applyCard('light_up')` | maxLight = hp + value, light = 깎인 값 + value (최대를 넘지 않음) |
