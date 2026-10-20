@@ -90,3 +90,12 @@ Future<void> dragGame(
   await f.moveTo(toX, toY, steps: steps);
   await f.up();
 }
+
+/// [done]이 참이 될 때까지 실제 시간으로 기다린다 (그림 읽기·디코딩은 가짜 시계로는 안 끝난다).
+Future<void> waitUntil(WidgetTester tester, bool Function() done, {Duration timeout = const Duration(seconds: 10)}) async {
+  final end = DateTime.now().add(timeout);
+  while (!done() && DateTime.now().isBefore(end)) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
+  }
+}

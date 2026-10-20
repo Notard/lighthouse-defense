@@ -99,6 +99,7 @@
 - 바다 바탕(`SeaBackdrop`)은 `night_sea` 그림을 판 전체(0, 0, 720 × 1280)에 그린다 (임시 그러데이션 대신)
 - 등대(`LighthouseSpot`)는 `lighthouse` 그림을 가운데 (360, 660)에 **한 변 `GameConfig.lighthouseSize` = 200**으로 그린다 (안쪽 자리 원과 겹치지 않음: 150 − 44 = 106 > 100)
 - 그리는 순서: 바다 → 빛 → 자리 → 등대 → 제목 (2단계와 같음)
+- 코드 이름: `SeaBackdrop`과 `LighthouseSpot`은 읽은 그림을 `Sprite? get sprite`로 보인다 (읽기 전에는 null). `GameConfig.lighthouseSize` (double, 200)
 - `pubspec.yaml` assets에 `assets/images/`
 
 ### 시트 읽기 다지기 (카드 003 리뷰)
