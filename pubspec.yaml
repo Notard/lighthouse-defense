@@ -59,6 +59,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # 그림 (tools/prep_props.py, tools/pack_sheets.py가 만든다)
+  assets:
+    - assets/images/
+
   # 주아 (SIL OFL 1.1, assets/fonts/OFL.txt). 쓰는 글자만 남긴 파일: python tools/subset_font.py <원본>
   fonts:
     - family: Jua

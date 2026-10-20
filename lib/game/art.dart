@@ -3,6 +3,41 @@ import 'dart:ui';
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 
+/// 시트 JSON(`actions.<동작>`)의 동작 하나 (design.md §3-2 시트 읽기 다지기).
+class SheetAction {
+  const SheetAction({required this.frames, this.fps = defaultFps, this.loop = false, this.event});
+
+  /// `fps`가 없을 때 쓰는 값.
+  static const double defaultFps = 12;
+
+  /// `frames`는 꼭 있어야 한다 (없거나 정수가 아니면 [FormatException]). `fps` 없으면 12, `loop` 없으면 false.
+  factory SheetAction.fromJson(Map<String, dynamic> json) {
+    final frames = json['frames'];
+    if (frames is! int || frames < 1) {
+      throw FormatException('frames must be a positive integer', frames);
+    }
+    final fps = json['fps'] ?? defaultFps;
+    final loop = json['loop'] ?? false;
+    final event = json['event'];
+    if (fps is! num || fps <= 0) throw FormatException('fps must be a positive number', fps);
+    if (loop is! bool) throw FormatException('loop must be a bool', loop);
+    if (event != null && event is! int) throw FormatException('event must be an integer', event);
+    return SheetAction(frames: frames, fps: fps.toDouble(), loop: loop, event: event as int?);
+  }
+
+  /// 프레임 수.
+  final int frames;
+
+  /// 초당 프레임.
+  final double fps;
+
+  /// 되풀이하는지.
+  final bool loop;
+
+  /// 이벤트(쏘기·생산·피해)가 일어나는 프레임 번호 (1부터, 없으면 null).
+  final int? event;
+}
+
 /// 캐릭터 하나의 스프라이트 시트 묶음 (tools/pack_sheets.py가 만든 `<캐릭터>.json` + 동작별 WebP, design.md §3).
 ///
 /// 그림 만들기: gen_art.py ref → cut_parts.py → blender_cutout.py → pack_sheets.py (tools/build_sprites.sh).
@@ -23,19 +58,19 @@ class CharacterArt {
   /// 이벤트(쏘기·빛 내기 등)가 일어나는 위치 (없을 수 있음).
   final Vector2? muzzle;
 
-  final Map<String, Map<String, dynamic>> _data;
+  final Map<String, SheetAction> _data;
   final Map<String, Image> _images;
 
   Iterable<String> get actions => _data.keys;
 
   /// 동작의 이벤트 프레임 번호 (1부터, 없으면 null).
-  int? eventFrame(String action) => _data[action]?['event'] as int?;
+  int? eventFrame(String action) => _data[action]?.event;
 
-  bool loops(String action) => _data[action]!['loop'] as bool;
+  bool loops(String action) => _data[action]!.loop;
 
-  int frameCount(String action) => _data[action]!['frames'] as int;
+  int frameCount(String action) => _data[action]!.frames;
 
-  double fps(String action) => (_data[action]!['fps'] as num).toDouble();
+  double fps(String action) => _data[action]!.fps;
 
   /// 발에서 머리 끝까지의 높이 (프레임 px).
   double get characterHeight => anchor.y - bbox.top;
@@ -48,10 +83,10 @@ class CharacterArt {
     return SpriteAnimation.fromFrameData(
       _images[action]!,
       SpriteAnimationData.sequenced(
-        amount: a['frames'] as int,
-        stepTime: 1 / (a['fps'] as num),
+        amount: a.frames,
+        stepTime: 1 / a.fps,
         textureSize: frameSize,
-        loop: a['loop'] as bool,
+        loop: a.loop,
       ),
     );
   }
@@ -75,9 +110,24 @@ class CharacterArt {
   static final Map<String, Future<CharacterArt>> _cache = {};
 
   /// `assets/images/<name>/`을 읽는다. 같은 캐릭터는 한 번만 읽는다.
-  /// (그 폴더를 pubspec.yaml assets에 등록해야 한다. 그림이 생기는 카드 004에서)
-  static Future<CharacterArt> load(FlameGame game, String name) =>
-      _cache.putIfAbsent(name, () => _load(game, name).then((art) => _loaded[name] = art));
+  /// 읽기에 실패하면 캐시에 남기지 않는다 (다음에 다시 읽는다). 그 폴더는 pubspec.yaml assets에 등록해야 한다.
+  static Future<CharacterArt> load(FlameGame game, String name) {
+    final cached = _cache[name];
+    if (cached != null) return cached;
+    late final Future<CharacterArt> future;
+    future = _load(game, name).then(
+      (art) => _loaded[name] = art,
+      onError: (Object error, StackTrace stack) {
+        if (identical(_cache[name], future)) _cache.remove(name);
+        Error.throwWithStackTrace(error, stack);
+      },
+    );
+    _cache[name] = future;
+    return future;
+  }
+
+  /// 읽는 중이거나 다 읽은 그림이 캐시에 있는지.
+  static bool isCached(String name) => _cache.containsKey(name);
 
   /// 다 읽은 그림 (아직이면 null). 기다릴 수 없는 곳(그리기 도중 등)에서 쓴다.
   static CharacterArt? loaded(String name) => _loaded[name];
@@ -86,7 +136,7 @@ class CharacterArt {
   static Future<CharacterArt> _load(FlameGame game, String name) async {
     final json = await game.assets.readJson('images/$name/$name.json');
     final actions = (json['actions'] as Map<String, dynamic>).map(
-      (k, v) => MapEntry(k, v as Map<String, dynamic>),
+      (k, v) => MapEntry(k, SheetAction.fromJson(v as Map<String, dynamic>)),
     );
     final images = <String, Image>{
       for (final action in actions.keys)
