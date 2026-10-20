@@ -13,6 +13,7 @@ JSON (게임이 읽음, lib/game/art.dart CharacterArt)
                               리그의 anchor_point 좌표, 또는 anchor_part 부위 기준점 (없으면 body)
   bbox    [x0, y0, x1, y1]    첫 동작 첫 프레임에서 그림이 있는 영역 (오라 빼고) → 게임 표시 크기·카드 그림에 쓴다
   aura, aura_color            편 오라 (characters.csv kind, data/art/aura.json 색). 오라는 시트 그림에 구워 넣는다
+                              aura.json의 넓이·흐림은 256 px 프레임 기준이라 리그 canvas.frame_px / 256 배로 늘리거나 줄인다
   muzzle  [x, y]              (있으면) 이벤트가 일어나는 위치 (쏘는 곳, 빛이 나오는 곳 …)
                               리그의 muzzle_point 좌표, 또는 muzzle_part 부위 기준점
   actions.<동작>              frames, fps, loop, event(이 프레임에서 발사·생산·피해)
@@ -28,6 +29,7 @@ from art_common import ROOT, add_aura, load_aura, load_characters, setup_console
 
 WEBP_QUALITY = 88
 REQUIRED = ("frames", "fps", "loop")  # 리그 동작에 꼭 있어야 하는 키
+AURA_FRAME_PX = 256  # data/art/aura.json 넓이·흐림의 기준 프레임 한 변 (px)
 
 
 def is_int(v) -> bool:
@@ -115,6 +117,7 @@ def main() -> None:
     # 편 오라: 편은 data/tables/characters.csv의 kind, 색·넓이는 data/art/aura.json (design.md §3-3)
     kind = load_characters().get(name, {}).get("kind")
     aura = load_aura()
+    aura_k = rig["canvas"]["frame_px"] / AURA_FRAME_PX  # 오라 넓이·흐림 배율 (aura.json은 256 px 기준)
     if kind in ("friend", "enemy"):
         meta["aura"] = kind
         meta["aura_color"] = aura[kind]
@@ -131,7 +134,7 @@ def main() -> None:
             sys.exit(f"{action}: 프레임 {len(frames)}장, 리그에는 {spec['frames']}장 (Blender 렌더를 먼저)")
         imgs = raw = [Image.open(f).convert("RGBA") for f in frames]
         if "aura" in meta:  # bbox는 오라를 입히기 전 그림으로 (키에 오라를 넣지 않게)
-            imgs = [add_aura(im, meta["aura_color"], aura["width"], aura["blur"], aura["strength"]) for im in imgs]
+            imgs = [add_aura(im, meta["aura_color"], aura["width"] * aura_k, aura["blur"] * aura_k, aura["strength"]) for im in imgs]
         w, h = imgs[0].size
         sheet = Image.new("RGBA", (w * len(imgs), h))
         for i, im in enumerate(imgs):

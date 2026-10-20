@@ -1,6 +1,7 @@
 {
   "_설명": "먹물 오징어 컷아웃 리그 (적, 빠름, 남청 + 주황 점). art/ref/ink_squid.png(1254×1254) 픽셀 기준 (카드 005 2바퀴 새 그림). parts는 앞 → 뒤 순서. 먹물 방울 둘과 머리(화살촉 몸통·지느러미·눈)를 떼고, 다리는 몸통(body). 머리를 위로 많이 올리면 뒤 채움이 보이므로 dy는 작게.",
   "ref": "art/ref/ink_squid.png",
+  "strip_rim": true,
   "anchor_point": [640, 1190],
   "parts": [
     {"name": "drops_l", "parent": "body", "pivot": [310, 650], "polygon": [[235, 560], [380, 560], [385, 755], [235, 755]]},

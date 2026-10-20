@@ -9,12 +9,15 @@
      (줄마다 `//` 뒤는 주석으로 보고 뺀다. test/font_test.dart T3-04와 같은 규칙)
   2. 영문·숫자·기본 기호 (U+0020~U+007E)
   3. 게임에 쓸 만한 몇몇 기호 (EXTRA_SYMBOLS 중 원본에 있는 것만)
+  4. 캐릭터 이름 (data/tables/characters.csv의 name_ko·name_en). lib/game/tables.g.dart는 이름을 유니코드 이스케이프로
+     적어 1번 규칙에 잡히지 않으므로 표에서 직접 읽는다
 `--all-hangul`을 붙이면 한글 2,350자(KS X 1001 완성형)와 호환 자모(ㄱ~ㅣ)도 모두 남긴다 (파일이 커진다).
 
 문구(lib/game/strings.dart)를 바꾸면 이 스크립트를 다시 돌린다. 빠뜨리면 test/font_test.dart T3-04가 실패한다.
 원본 글꼴은 저장소에 넣지 않는다. 라이선스(OFL.txt)는 assets/fonts/OFL.txt에 함께 둔다.
   받는 곳: https://github.com/google/fonts/tree/main/ofl/jua  (Jua-Regular.ttf, OFL.txt)
 """
+import csv
 import re
 import sys
 from pathlib import Path
@@ -53,6 +56,16 @@ def used_in_code() -> set[str]:
     return chars
 
 
+def used_in_tables() -> set[str]:
+    """캐릭터 이름 글자 (data/tables/characters.csv, 없으면 빈 모음)."""
+    path = ROOT / "data" / "tables" / "characters.csv"
+    if not path.exists():
+        return set()
+    with path.open(encoding="utf-8-sig", newline="") as f:
+        names = "".join(r.get("name_ko", "") + r.get("name_en", "") for r in csv.DictReader(f))
+    return {ch for ch in names if ord(ch) > 0x7E}
+
+
 def main() -> None:
     sys.stdout.reconfigure(encoding="utf-8")
     sys.stderr.reconfigure(encoding="utf-8")
@@ -74,7 +87,7 @@ def main() -> None:
     hangul = ks_x_1001_hangul() if all_hangul else set()
     jamo = {chr(cp) for cp in range(0x3131, 0x3164)} if all_hangul else set()
     ascii_ = {chr(cp) for cp in range(0x20, 0x7F)}
-    code = used_in_code()
+    code = used_in_code() | used_in_tables()
     wanted = hangul | jamo | ascii_ | set(EXTRA_SYMBOLS) | code
 
     font = TTFont(src)

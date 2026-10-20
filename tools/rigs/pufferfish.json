@@ -1,6 +1,7 @@
 {
   "_설명": "복어 컷아웃 리그 (친구, 크게 부풀며 가시). art/ref/pufferfish.png(1254×1254) 픽셀 기준. parts는 앞 → 뒤 순서. 공격은 몸 전체를 키워 가시를 세운다.",
   "ref": "art/ref/pufferfish.png",
+  "strip_rim": true,
   "anchor_point": [650, 1110],
   "parts": [
     {"name": "fin", "parent": "body", "pivot": [470, 610], "polygon": [[295, 485], [480, 485], [492, 600], [472, 722], [350, 728], [292, 640]]},

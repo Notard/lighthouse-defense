@@ -8,6 +8,8 @@
            name, parent(없으면 null), pivot [x, y], polygon [[x, y], …], fill_band(선택), color_key(선택)
   variants (선택) 부위 조각 위에 선을 그려 바꿔 끼울 그림 (예: 금 간 몸통)
            {"name": "body_cracked", "base": "body", "lines": [[[x, y], …], …], "width": 10, "color": "#1B2340"}
+  strip_rim (선택) true면 그림 둘레의 청록 테두리 빛을 걷는다 (그림체 기준 해마에서 옮겨 온 빛, 친구 셋).
+           새로 그리는 그림은 테두리 빛 없이 그리므로 빼 둔다 (design.md §3-3·§4)
   canvas, actions …  Blender 렌더·시트 묶기에서 쓴다 (tools/blender_cutout.py, tools/pack_sheets.py)
   좌표는 모두 기준 그림 픽셀 기준
 
@@ -101,10 +103,12 @@ def main() -> None:
 
     rig = json.loads(rig_path.read_text(encoding="utf-8"))
     src = load_rgba(ROOT / rig["ref"])
-    # 그림체 기준(해마)에서 옮겨 온 청록 테두리 빛은 걷는다. 편 오라는 pack_sheets.py가 굽는다 (design.md §3-3)
-    src, rim = strip_rim(src)
-    if rim:
-        print(f"청록 테두리 빛 걷음: {rim:,} 픽셀")
+    # 그림체 기준(해마)에서 옮겨 온 청록 테두리 빛은 리그에 "strip_rim": true일 때만 걷는다.
+    # 편 오라는 pack_sheets.py가 굽는다 (design.md §3-3·§4)
+    if rig.get("strip_rim") is True:
+        src, rim = strip_rim(src)
+        if rim:
+            print(f"청록 테두리 빛 걷음: {rim:,} 픽셀")
     rgba = np.array(src)
     alpha = rgba[..., 3]
     rgb = rgba[..., :3]

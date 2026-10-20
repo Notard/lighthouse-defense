@@ -9,7 +9,7 @@ void main() {
   runApp(const LighthouseApp());
 }
 
-/// 앱 루트 (1단계: 판 하나만).
+/// 앱 루트 (판 하나만, 7단계 웨이브 전까지 연습 스폰을 켠다).
 class LighthouseApp extends StatelessWidget {
   const LighthouseApp({super.key});
 
@@ -18,7 +18,7 @@ class LighthouseApp extends StatelessWidget {
     return MaterialApp(
       title: Strings.title,
       debugShowCheckedModeBanner: false,
-      home: ColoredBox(color: GameConfig.deepSea, child: GameWidget(game: LighthouseGame())),
+      home: ColoredBox(color: GameConfig.deepSea, child: GameWidget(game: LighthouseGame(practice: true))),
     );
   }
 }
