@@ -216,6 +216,9 @@ void main() {
       await finger.moveTo(365, 660);
       // 가운데 빈 곳에서는 바뀌지 않는다
       expect(game.beam.angleDeg, closeTo(0, 1));
+      await finger.moveTo(360, 690);
+      // 빈 곳 규칙이 없으면 90이 된다
+      expect(game.beam.angleDeg, closeTo(0, 1));
       await finger.up();
       expect(game.beam.angleDeg, closeTo(0, 1));
     },
@@ -231,13 +234,23 @@ void main() {
   );
 
   GameTester(LighthouseGame.new).testGameWidget(
-    'T2-21 I3 가운데를 누르고 8 px 움직인 뒤 떼면 I3을 고르고 빛은 270 그대로',
+    'T2-21 I3 가운데를 누르고 화면 8 px 움직인 뒤 떼면 I3을 고르고 빛은 270 그대로',
     verify: (game, tester) async {
       final finger = await Finger.down(tester, game, 360, 810);
-      await finger.moveTo(368, 810, steps: 1);
+      await finger.moveByScreen(8, 0);
       await finger.up();
       expect(game.selectedSlot?.id, 'I3');
-      expect(game.beam.angleDeg, closeTo(270, 1));
+      expect(game.beam.angleDeg, closeTo(270, 0.01));
+    },
+  );
+
+  GameTester(LighthouseGame.new).testGameWidget(
+    'T2-23 I3 가운데를 누르고 화면 13 px 움직인 뒤 떼면 고른 자리 없음 (끌기)',
+    verify: (game, tester) async {
+      final finger = await Finger.down(tester, game, 360, 810);
+      await finger.moveByScreen(13, 0);
+      await finger.up();
+      expect(game.selectedSlot, isNull);
     },
   );
 

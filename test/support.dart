@@ -8,10 +8,16 @@ import 'package:lighthouse_defense/game/config.dart';
 /// (800 x 600 화면이면 배율 600/1280, 왼쪽 여백 231.25)
 Offset gameToScreen(FlameGame game, Vector2 p) {
   final screen = game.canvasSize;
-  final scale = _min(screen.x / GameConfig.width, screen.y / GameConfig.height);
+  final scale = gameScale(game);
   final left = (screen.x - GameConfig.width * scale) / 2;
   final top = (screen.y - GameConfig.height * scale) / 2;
   return Offset(left + p.x * scale, top + p.y * scale);
+}
+
+/// 게임 좌표 1이 화면에서 차지하는 길이 (배율).
+double gameScale(FlameGame game) {
+  final screen = game.canvasSize;
+  return _min(screen.x / GameConfig.width, screen.y / GameConfig.height);
 }
 
 double _min(double a, double b) => a < b ? a : b;
@@ -51,6 +57,15 @@ class Finger {
       await _tester.pump(const Duration(milliseconds: 16));
     }
     position = to;
+  }
+
+  /// 누른 채 화면(논리) 좌표로 (dx, dy)만큼 한 번에 움직인다.
+  Future<void> moveByScreen(double dx, double dy) async {
+    final scale = gameScale(_game);
+    final target = gameToScreen(_game, position) + Offset(dx, dy);
+    await _gesture.moveTo(target);
+    await _tester.pump(const Duration(milliseconds: 16));
+    position = position + Vector2(dx / scale, dy / scale);
   }
 
   /// 손을 뗀다.
