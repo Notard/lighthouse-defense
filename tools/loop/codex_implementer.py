@@ -8,7 +8,7 @@
 - 안전 관문: 실행 앞뒤의 HEAD·stash 목록·스테이징을 비교한다. Codex가 커밋·stash·`git add`를 했으면 종료 코드 3
 - 끝나면 `tools/loop/gate.py implementer`로 범위를 보고, Codex의 마지막 메시지(보고서)를 출력한다
 - 기록: `logs/codex/<시각>-implementer.jsonl`(이벤트), `...-report.md`(마지막 메시지)
-- 모델은 `~/.codex/config.toml` 기본. 바꾸려면 환경 변수 CODEX_MODEL
+- 모델: 기본 `gpt-5.6-sol` (그림 도구와 같음. 사용자 config의 gpt-6.1-sol은 ChatGPT 계정 Codex에서 지원 안 됨). 바꾸려면 환경 변수 CODEX_MODEL
 """
 from __future__ import annotations
 
@@ -21,6 +21,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 TIMEOUT = 60 * 60  # 한 번 실행 최대 1시간
+MODEL = os.environ.get("CODEX_MODEL", "gpt-5.6-sol")
 
 
 def git(*args: str) -> str:
@@ -39,6 +40,7 @@ def role_text() -> str:
 
 
 def main() -> int:
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows 콘솔 기본(cp949)에서 한글이 깨지지 않게
     if len(sys.argv) != 2:
         print(__doc__)
         return 2
@@ -61,10 +63,7 @@ def main() -> int:
     events = logs / f"{stamp}-implementer.jsonl"
     report = logs / f"{stamp}-report.md"
 
-    cmd = [codex, "exec", "-C", str(ROOT), "-s", "workspace-write", "--json", "-o", str(report)]
-    if os.environ.get("CODEX_MODEL"):
-        cmd += ["-m", os.environ["CODEX_MODEL"]]
-    cmd.append("-")
+    cmd = [codex, "exec", "-m", MODEL, "-C", str(ROOT), "-s", "workspace-write", "--json", "-o", str(report), "-"]
 
     before = snapshot()
     with events.open("w", encoding="utf-8") as out:
