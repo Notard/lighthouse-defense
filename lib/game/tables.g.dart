@@ -19,9 +19,9 @@ class EnemyStats {
   final double radius;
 }
 
-/// 등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율.
+/// 등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율, friend_haste는 빛 속 친구의 쉬는 시간이 흐르는 배율.
 class BeamStats {
-  const BeamStats({required this.widthDeg, required this.length, required this.slow, required this.vulnerable});
+  const BeamStats({required this.widthDeg, required this.length, required this.slow, required this.vulnerable, required this.friendHaste});
 
   /// `width_deg`
   final double widthDeg;
@@ -31,6 +31,8 @@ class BeamStats {
   final double slow;
   /// `vulnerable`
   final double vulnerable;
+  /// `friend_haste`
+  final double friendHaste;
 }
 
 /// 등대 (lighthouse.csv). hp는 처음 불빛, spawn_distance는 적이 나타나는 거리.
@@ -97,7 +99,7 @@ abstract final class Tables {
   };
 
   /// beam.csv
-  static const BeamStats beam = BeamStats(widthDeg: 40.0, length: 640.0, slow: 0.5, vulnerable: 1.5);
+  static const BeamStats beam = BeamStats(widthDeg: 40.0, length: 640.0, slow: 0.5, vulnerable: 1.5, friendHaste: 1.5);
 
   /// lighthouse.csv
   static const LighthouseStats lighthouse = LighthouseStats(hp: 100.0, spawnDistance: 780.0);
