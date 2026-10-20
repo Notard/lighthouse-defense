@@ -1,0 +1,42 @@
+{
+  "character": "crab",
+  "anchor": [
+    131.9,
+    200.1
+  ],
+  "actions": {
+    "idle": {
+      "frames": 12,
+      "fps": 12,
+      "loop": true
+    },
+    "attack": {
+      "frames": 8,
+      "fps": 12,
+      "loop": false,
+      "event": 5
+    },
+    "hit": {
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "death": {
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    }
+  },
+  "aura": "friend",
+  "aura_color": "#FFC85A",
+  "frame": [
+    256,
+    256
+  ],
+  "bbox": [
+    36,
+    49,
+    221,
+    202
+  ]
+}

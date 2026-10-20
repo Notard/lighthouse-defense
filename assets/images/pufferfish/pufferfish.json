@@ -1,0 +1,42 @@
+{
+  "character": "pufferfish",
+  "anchor": [
+    132.1,
+    211.4
+  ],
+  "actions": {
+    "idle": {
+      "frames": 12,
+      "fps": 12,
+      "loop": true
+    },
+    "attack": {
+      "frames": 8,
+      "fps": 12,
+      "loop": false,
+      "event": 5
+    },
+    "hit": {
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "death": {
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    }
+  },
+  "aura": "friend",
+  "aura_color": "#FFC85A",
+  "frame": [
+    256,
+    256
+  ],
+  "bbox": [
+    32,
+    46,
+    226,
+    216
+  ]
+}

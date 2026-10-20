@@ -1,0 +1,42 @@
+{
+  "character": "shadow_jelly",
+  "anchor": [
+    128.9,
+    242.0
+  ],
+  "actions": {
+    "move": {
+      "frames": 12,
+      "fps": 12,
+      "loop": true
+    },
+    "attack": {
+      "frames": 6,
+      "fps": 10,
+      "loop": true,
+      "event": 3
+    },
+    "hit": {
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "death": {
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    }
+  },
+  "aura": "enemy",
+  "aura_color": "#FF3C8C",
+  "frame": [
+    256,
+    256
+  ],
+  "bbox": [
+    45,
+    39,
+    211,
+    244
+  ]
+}

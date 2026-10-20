@@ -30,7 +30,7 @@
 import json
 import sys
 
-from art_common import ROOT, setup_console, load_rgba, usage, wants_help
+from art_common import ROOT, load_rgba, setup_console, strip_rim, usage, wants_help
 
 INSET = 30  # 채움이 전체 실루엣 바깥 테두리에서 떨어져야 하는 거리 (px)
 COLORS = [(255, 80, 80), (80, 200, 255), (120, 220, 90), (255, 200, 60), (200, 120, 255), (255, 140, 200)]
@@ -101,6 +101,10 @@ def main() -> None:
 
     rig = json.loads(rig_path.read_text(encoding="utf-8"))
     src = load_rgba(ROOT / rig["ref"])
+    # 그림체 기준(해마)에서 옮겨 온 청록 테두리 빛은 걷는다. 편 오라는 pack_sheets.py가 굽는다 (design.md §3-3)
+    src, rim = strip_rim(src)
+    if rim:
+        print(f"청록 테두리 빛 걷음: {rim:,} 픽셀")
     rgba = np.array(src)
     alpha = rgba[..., 3]
     rgb = rgba[..., :3]

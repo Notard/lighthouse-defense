@@ -1,0 +1,7 @@
+id,kind,name_ko,name_en,display_height
+seahorse,friend,해마,Seahorse,84
+crab,friend,게,Crab,72
+pufferfish,friend,복어,Pufferfish,76
+shadow_blob,enemy,그림자 방울,Shadow Blob,64
+ink_squid,enemy,먹물 오징어,Ink Squid,70
+shadow_jelly,enemy,그림자 해파리,Shadow Jelly,74
