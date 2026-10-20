@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 import 'beam.dart';
@@ -68,9 +69,15 @@ class LighthouseGame extends FlameGame {
   }
 }
 
-/// 밤바다 바탕: 위는 조금 밝고 아래로 깊어진다 (3단계에서 그림으로 바꾼다).
-class SeaBackdrop extends PositionComponent {
+/// 밤바다 바탕: `night_sea` 그림을 판 전체에 그린다. 그림을 읽기 전(또는 읽기에 실패하면)에는 그러데이션.
+class SeaBackdrop extends PositionComponent with HasGameReference<LighthouseGame> {
   SeaBackdrop() : super(size: Vector2(GameConfig.width, GameConfig.height));
+
+  static const imageFile = 'night_sea.webp';
+
+  /// 읽은 그림 (읽기 전에는 null).
+  Sprite? get sprite => _sprite;
+  Sprite? _sprite;
 
   final _paint = Paint()
     ..shader = const LinearGradient(
@@ -80,23 +87,62 @@ class SeaBackdrop extends PositionComponent {
     ).createShader(const Rect.fromLTWH(0, 0, GameConfig.width, GameConfig.height));
 
   @override
-  void render(Canvas canvas) => canvas.drawRect(size.toRect(), _paint);
+  void onLoad() {
+    // 판이 그림을 기다리지 않게 읽기만 시작한다 (다 읽으면 그때부터 그림으로 그린다)
+    _loadSprite(game, imageFile).then((s) => _sprite = s);
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final s = _sprite;
+    if (s == null) {
+      canvas.drawRect(size.toRect(), _paint);
+    } else {
+      s.render(canvas, size: size);
+    }
+  }
 }
 
-/// 등대 자리 (임시 원). 그림은 3단계에서.
-class LighthouseSpot extends PositionComponent {
+/// 등대: `lighthouse` 그림을 등대 가운데에 한 변 [GameConfig.lighthouseSize]로 그린다. 읽기 전에는 임시 원.
+class LighthouseSpot extends PositionComponent with HasGameReference<LighthouseGame> {
   LighthouseSpot()
-      : super(position: lighthouseCenter(), size: Vector2.all(120), anchor: Anchor.center);
+      : super(position: lighthouseCenter(), size: Vector2.all(GameConfig.lighthouseSize), anchor: Anchor.center);
 
-  static const double radius = 60;
+  static const imageFile = 'lighthouse.webp';
+
+  /// 읽은 그림 (읽기 전에는 null).
+  Sprite? get sprite => _sprite;
+  Sprite? _sprite;
+
   final _glow = Paint()..color = const Color(0x55FFE9A8);
   final _body = Paint()..color = const Color(0xFFEFE6D2);
 
   @override
+  void onLoad() {
+    _loadSprite(game, imageFile).then((s) => _sprite = s);
+  }
+
+  @override
   void render(Canvas canvas) {
+    final s = _sprite;
+    if (s != null) {
+      s.render(canvas, size: size);
+      return;
+    }
     final c = Offset(size.x / 2, size.y / 2);
-    canvas.drawCircle(c, radius * 1.6, _glow);
-    canvas.drawCircle(c, radius, _body);
+    final r = size.x * 0.3;
+    canvas.drawCircle(c, r * 1.6, _glow);
+    canvas.drawCircle(c, r, _body);
+  }
+}
+
+/// `assets/images/<file>`을 읽어 그림으로. 실패하면 null (임시 모양으로 계속 그린다).
+Future<Sprite?> _loadSprite(LighthouseGame game, String file) async {
+  try {
+    return Sprite(await game.images.load(file));
+  } catch (e) {
+    debugPrint('image load failed: $file ($e)');
+    return null;
   }
 }
 

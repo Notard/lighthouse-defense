@@ -9,6 +9,9 @@ abstract final class GameConfig {
   static const double lighthouseX = width / 2;
   static const double lighthouseY = 660;
 
+  /// 등대 그림 한 변 (안쪽 자리 원과 겹치지 않음: 150 - 44 = 106 > 100).
+  static const double lighthouseSize = 200;
+
   /// 밤바다 색 (화면 밖 여백도 이 색).
   static const Color nightSea = Color(0xFF0B1A33);
   static const Color deepSea = Color(0xFF050D1F);

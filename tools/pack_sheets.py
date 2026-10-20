@@ -15,6 +15,9 @@ JSON (게임이 읽음, lib/game/art.dart CharacterArt)
   muzzle  [x, y]              (있으면) 이벤트가 일어나는 위치 (쏘는 곳, 빛이 나오는 곳 …)
                               리그의 muzzle_point 좌표, 또는 muzzle_part 부위 기준점
   actions.<동작>              frames, fps, loop, event(이 프레임에서 발사·생산·피해)
+
+리그 동작마다 frames·fps·loop가 꼭 있어야 한다 (없으면 어느 동작의 무엇이 빠졌는지 알리고 멈춘다).
+첫 동작 첫 프레임이 완전히 투명하면 알리고, 그림이 있는 첫 프레임으로 bbox를 정한다.
 """
 import json
 import sys
@@ -22,6 +25,35 @@ import sys
 from art_common import ROOT, setup_console, usage, wants_help
 
 WEBP_QUALITY = 88
+REQUIRED = ("frames", "fps", "loop")  # 리그 동작에 꼭 있어야 하는 키
+
+
+def check_actions(name: str, actions: dict) -> None:
+    """리그 동작의 필수 키를 확인한다. 빠지면 알아보기 쉬운 오류로 멈춘다."""
+    if not actions:
+        sys.exit(f"tools/rigs/{name}.json에 actions가 없습니다")
+    problems = []
+    for action, spec in actions.items():
+        missing = [k for k in REQUIRED if k not in spec]
+        if missing:
+            problems.append(f"{action}: {', '.join(missing)} 없음")
+        elif not isinstance(spec["frames"], int) or isinstance(spec["frames"], bool) or spec["frames"] < 1:
+            problems.append(f"{action}: frames는 1 이상 정수여야 함 ({spec['frames']!r})")
+    if problems:
+        sys.exit(f"tools/rigs/{name}.json 동작 오류 (필수: {', '.join(REQUIRED)})\n  " + "\n  ".join(problems))
+
+
+def first_bbox(name: str, action: str, imgs: list) -> list[int] | None:
+    """그림이 있는 첫 프레임의 영역. 첫 프레임이 완전히 투명하면 알린다."""
+    for i, im in enumerate(imgs):
+        box = im.getchannel("A").point(lambda v: 255 if v >= 128 else 0).getbbox()
+        if box is None:
+            print(f"알림: {name}/{action} {i + 1}번 프레임이 완전히 투명합니다 (리그·렌더 확인)")
+            continue
+        if i > 0:
+            print(f"알림: bbox는 {action} {i + 1}번 프레임으로 정했습니다")
+        return list(box)
+    return None
 
 
 def main() -> None:
@@ -38,6 +70,7 @@ def main() -> None:
     from PIL import Image
 
     rig = json.loads(rig_path.read_text(encoding="utf-8"))
+    check_actions(name, rig.get("actions", {}))
     left, top, right, bottom = rig["canvas"]["box"]
     scale = rig["canvas"]["frame_px"] / max(right - left, bottom - top)
 
@@ -68,10 +101,14 @@ def main() -> None:
         sheet.save(out_dir / f"{action}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
         meta["frame"] = [w, h]
         if "bbox" not in meta:
-            meta["bbox"] = list(imgs[0].getchannel("A").point(lambda v: 255 if v >= 128 else 0).getbbox())
+            box = first_bbox(name, action, imgs)
+            if box is not None:
+                meta["bbox"] = box
         meta["actions"][action] = {k: spec[k] for k in ("frames", "fps", "loop", "event") if k in spec}
         print(f"{name}/{action}.webp  {sheet.width}×{sheet.height}  {(out_dir / f'{action}.webp').stat().st_size / 1024:,.0f} KB")
 
+    if "bbox" not in meta:
+        sys.exit(f"{name}: 모든 프레임이 완전히 투명합니다 (리그·렌더 확인). JSON을 쓰지 않았습니다")
     (out_dir / f"{name}.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"{name}/{name}.json  anchor {meta['anchor']}  muzzle {meta.get('muzzle')}")
 
