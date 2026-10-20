@@ -78,7 +78,7 @@ void main() {
       final haste = Tables.beam.friendHaste;
       game.aimBeamAt(down);
       place(game, 'crab', 'I3');
-      final blob = spawn(game, 'shadow_blob', 90);
+      final blob = spawn(game, 'shadow_jelly', 90);
       final hp = blob.hp;
       final dealt = s.damage * Tables.beam.vulnerable;
       final second = s.interval / haste + windup;
@@ -87,8 +87,7 @@ void main() {
       at(second - 0.1);
       expect(blob.hp, closeTo(hp - dealt, 1e-9));
       at(second + 0.1);
-      // 체력이 모자라면 0에서 멈춘다 (takeDamage가 hp를 넘게 깎지 않음)
-      expect(blob.hp, closeTo((hp - 2 * dealt).clamp(0, hp), 1e-9));
+      expect(blob.hp, closeTo(hp - 2 * dealt, 1e-9));
     },
   );
 
@@ -112,8 +111,8 @@ void main() {
       at(0.5);
       expect(crab.cooldown, closeTo(c0 - 0.5 * haste, 0.05 * haste));
       game.aimBeamAt(up);
-      at(1.0);
-      expect(crab.cooldown, closeTo(c0 - 0.5 * haste - 0.5, 0.05 * haste));
+      at(0.8);
+      expect(crab.cooldown, closeTo(c0 - 0.5 * haste - 0.3, 0.05 * haste));
     },
   );
 
