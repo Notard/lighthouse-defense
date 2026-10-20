@@ -381,18 +381,19 @@ void main() {
   );
 
   testWithGame<LighthouseGame>(
-    'T5-16 꺼진 판에서는 친구가 공격하지 않는다',
+    'T5-16 꺼진 판에서는 친구를 놓을 수 없고 친구가 공격하지 않는다',
     () => LighthouseGame(),
     (game) async {
       lightOut(game);
       final jelly90 = game.enemies.firstWhere((e) => (e.angleDeg - 90).abs() < 1);
       final hp = jelly90.hp;
       final crab = game.placeFriend('crab', slotOf(game, 'I3'));
+      expect(crab, isNull);
       game.update(0);
       tickGame(game, 3);
+      expect(slotOf(game, 'I3').friend, isNull);
+      expect(game.friends, isEmpty);
       expect(jelly90.hp, hp);
-      expect(crab?.isAttacking, isNot(isTrue));
-      expect(game.bubbles, isEmpty);
     },
   );
 
@@ -402,6 +403,63 @@ void main() {
       lightOut(game);
       await tapButton(tester, game, 'crab');
       expect(game.tray.held, isNull);
+    },
+  );
+
+  testWithGame<LighthouseGame>(
+    'T5-18 시간이 흐르지 않는 update(0)에서는 공격이 시작되지 않는다',
+    () => LighthouseGame(),
+    (game) async {
+      final crab = place(game, 'crab', 'I3');
+      final blob = spawn(game, 'shadow_blob', 90);
+      final hp = blob.hp;
+      for (var i = 0; i < 5; i++) {
+        game.update(0);
+      }
+      expect(crab.target, isNull);
+      expect(crab.isAttacking, isFalse);
+      expect(crab.cooldown, 0);
+      expect(blob.hp, hp);
+      game.update(0.05);
+      expect(crab.isAttacking, isTrue);
+      expect(crab.target, same(blob));
+    },
+  );
+
+  testWithGame<LighthouseGame>(
+    'T5-19 꺼지면 모든 것이 멈춘다 (적 체력, 친구, 거품, 쓰러지는 적의 사라짐)',
+    () => LighthouseGame(),
+    (game) async {
+      place(game, 'crab', 'I3');
+      place(game, 'seahorse', 'I0');
+      for (final a in const [18.0, 90.0, 162.0, 234.0, 306.0]) {
+        spawn(game, 'shadow_jelly', a);
+      }
+      var shot = false;
+      var t = 0.0;
+      while (game.light > 0 && t < 120) {
+        game.update(0.05);
+        t += 0.05;
+        if (game.bubbles.isNotEmpty) shot = true;
+      }
+      expect(game.isOver, isTrue);
+      expect(shot, isTrue, reason: '꺼지기 전 해마가 거품을 쏘았어야 한다');
+
+      final hps = [for (final e in game.enemies) e.hp];
+      final count = game.enemies.length;
+      final friendState = [for (final f in game.friends) (f.cooldown, f.isAttacking)];
+      final bubblePos = [for (final b in game.bubbles) b.position.clone()];
+
+      tickGame(game, 3);
+
+      expect([for (final e in game.enemies) e.hp], hps);
+      expect(game.enemies, hasLength(count));
+      expect([for (final f in game.friends) (f.cooldown, f.isAttacking)], friendState);
+      expect(game.bubbles, hasLength(bubblePos.length));
+      for (var i = 0; i < bubblePos.length; i++) {
+        expect(game.bubbles[i].position.x, closeTo(bubblePos[i].x, 1e-6));
+        expect(game.bubbles[i].position.y, closeTo(bubblePos[i].y, 1e-6));
+      }
     },
   );
 }
