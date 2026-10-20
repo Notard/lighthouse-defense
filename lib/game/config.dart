@@ -79,14 +79,41 @@ abstract final class GameConfig {
   static const double bubbleShineOffset = 0.35;
   static const double bubbleShineSize = 0.25;
 
-  /// 빛 속 친구 발밑의 은은한 금빛 (design.md §5-2, 그리기만): 타원 너비·높이, 색(가운데 → 가장자리),
-  /// 숨쉬듯 밝아졌다 어두워지는 한 바퀴(초)와 가장 어두울 때 세기(0~1).
-  static const double beamGlowWidth = 84;
-  static const double beamGlowHeight = 30;
-  static const Color beamGlowInner = Color(0x80FFD66B);
-  static const Color beamGlowOuter = Color(0x00FFD66B);
+  /// 빛 속 친구의 금빛 (design.md §5-2, 그리기만). 빛줄기의 옅은 노란빛 위에서도 보이게, 진한 주황 금빛과 흰 금빛을 쓴다.
+  /// 모두 숨쉬듯 밝아졌다 어두워진다: 한 바퀴(초)와 가장 어두울 때 세기(0~1).
   static const double beamGlowPeriod = 1.6;
-  static const double beamGlowMinStrength = 0.55;
+  static const double beamGlowMinStrength = 0.7;
+
+  /// 발밑 타원: 너비·높이, 색(가운데 → 가장자리).
+  static const double beamGlowWidth = 92;
+  static const double beamGlowHeight = 32;
+  static const Color beamGlowInner = Color(0xD0FFB020);
+  static const Color beamGlowOuter = Color(0x00FFB020);
+
+  /// 몸 뒤 후광: 반지름, 색(가운데 → 가장자리).
+  static const double beamHaloRadius = 60;
+  static const Color beamHaloInner = Color(0xA0FFC640);
+  static const Color beamHaloOuter = Color(0x00FFA020);
+
+  /// 자리 원 둘레 고리: 반지름(자리 원과 같음), 선 굵기, 바깥 번짐 굵기·흐림, 색(선·번짐).
+  static const double beamRingRadius = slotRadius;
+  static const double beamRingWidth = 5;
+  static const double beamRingGlowWidth = 10;
+  static const double beamRingGlowBlur = 6;
+  static const Color beamRingColor = Color(0xFFFFF0B0);
+  static const Color beamRingGlowColor = Color(0xE0FFA818);
+
+  /// 떠오르는 반짝이 (네 갈래 별): 개수, 한 번 떠오르는 높이(발에서 위로), 좌우로 퍼지는 폭,
+  /// 별 끝까지 반지름, 허리 반지름(끝 반지름에 곱함), 테두리 굵기, 색(속·테두리).
+  /// 한 바퀴(beamGlowPeriod) 동안 아래에서 위로 오르며 나타났다 사라지고, 개수만큼 시차를 두고 나온다.
+  static const int beamSparkleCount = 4;
+  static const double beamSparkleRise = 70;
+  static const double beamSparkleSpread = 56;
+  static const double beamSparkleSize = 7;
+  static const double beamSparkleWaist = 0.25;
+  static const double beamSparkleEdgeWidth = 1.5;
+  static const Color beamSparkleColor = Color(0xFFFFFBE6);
+  static const Color beamSparkleEdge = Color(0xFFFFA818);
 
   // ---- 친구 쟁반 (design.md §5, 판 아래쪽 y 1100~1260) ----
 

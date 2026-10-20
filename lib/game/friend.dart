@@ -162,40 +162,114 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
 
   @override
   void render(Canvas canvas) {
-    if (inBeam) _renderGlow(canvas);
+    final lit = inBeam;
+    if (lit) _renderGlowBehind(canvas);
     final art = _art;
     final ticker = _tickers[_action];
     if (art == null || ticker == null) {
       canvas.drawCircle(Offset.zero, Tables.characters[id]!.displayHeight / 2, _placeholder);
-      return;
+    } else {
+      // 몸 가운데가 위치(자리 가운데)에 오게, 키 display_height로. 앞을 본다 (뒤집지 않음)
+      final s = art.scaleForHeight(Tables.characters[id]!.displayHeight);
+      ticker.getSprite().render(canvas, position: -_bodyOf(art) * s, size: art.frameSize * s);
     }
-    // 몸 가운데가 위치(자리 가운데)에 오게, 키 display_height로. 앞을 본다 (뒤집지 않음)
-    final s = art.scaleForHeight(Tables.characters[id]!.displayHeight);
-    ticker.getSprite().render(canvas, position: -_bodyOf(art) * s, size: art.frameSize * s);
+    if (lit) _renderSparkles(canvas);
   }
 
-  /// 빛 속 친구 발밑의 은은한 금빛 타원 (그리기만). 발은 그림의 기준점, 그림 전에는 임시 원의 아래 끝.
-  void _renderGlow(Canvas canvas) {
+  // ---- 빛 속 금빛 (design.md §5-2, 그리기만. 숫자는 GameConfig.beam*) ----
+
+  /// 숨쉬는 세기 (beamGlowMinStrength ~ 1).
+  double get _glowStrength {
+    final phase = (_glowClock / GameConfig.beamGlowPeriod).clamp(0.0, 1.0);
+    final wave = (1 - math.cos(phase * 2 * math.pi)) / 2;
+    return GameConfig.beamGlowMinStrength + (1 - GameConfig.beamGlowMinStrength) * wave;
+  }
+
+  /// 발 높이 (몸 가운데 기준 아래로). 발은 그림의 기준점, 그림 전에는 임시 원의 아래 끝.
+  double get _footY {
     final art = _art;
     final height = Tables.characters[id]!.displayHeight;
-    final footY = art == null ? height / 2 : (art.anchor.y - _bodyOf(art).y) * art.scaleForHeight(height);
-    final phase = _glowClock / GameConfig.beamGlowPeriod; // 0~1
-    final wave = (1 - math.cos(phase * 2 * math.pi)) / 2; // 0~1
-    final strength = GameConfig.beamGlowMinStrength + (1 - GameConfig.beamGlowMinStrength) * wave;
-    final inner = GameConfig.beamGlowInner;
-    final paint = Paint()
+    return art == null ? height / 2 : (art.anchor.y - _bodyOf(art).y) * art.scaleForHeight(height);
+  }
+
+  static Color _fade(Color c, double t) => c.withValues(alpha: c.a * t);
+
+  /// 몸 뒤: 자리 둘레 고리(번짐 + 밝은 선), 후광, 발밑 타원.
+  void _renderGlowBehind(Canvas canvas) {
+    final k = _glowStrength;
+    // 자리 원 둘레 고리: 바깥으로 번지는 주황 금빛 위에 밝은 선
+    final ringGlow = Paint()
+      ..color = _fade(GameConfig.beamRingGlowColor, k)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = GameConfig.beamRingGlowWidth
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, GameConfig.beamRingGlowBlur);
+    canvas.drawCircle(Offset.zero, GameConfig.beamRingRadius, ringGlow);
+    final ring = Paint()
+      ..color = _fade(GameConfig.beamRingColor, k)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = GameConfig.beamRingWidth;
+    canvas.drawCircle(Offset.zero, GameConfig.beamRingRadius, ring);
+
+    // 몸 뒤 후광
+    final halo = Paint()
       ..shader = Gradient.radial(
-        Offset(0, footY),
-        GameConfig.beamGlowWidth / 2,
-        [inner.withValues(alpha: inner.a * strength), GameConfig.beamGlowOuter],
+        Offset.zero,
+        GameConfig.beamHaloRadius,
+        [_fade(GameConfig.beamHaloInner, k), GameConfig.beamHaloOuter],
       );
+    canvas.drawCircle(Offset.zero, GameConfig.beamHaloRadius, halo);
+
+    // 발밑 타원: 둥근 빛을 납작하게 눌러서
+    final footY = _footY;
+    const r = GameConfig.beamGlowWidth / 2;
+    final foot = Paint()
+      ..shader = Gradient.radial(Offset(0, footY), r, [_fade(GameConfig.beamGlowInner, k), GameConfig.beamGlowOuter]);
     canvas.save();
-    // 둥근 빛을 납작하게 눌러 타원으로
     canvas.translate(0, footY);
     canvas.scale(1, GameConfig.beamGlowHeight / GameConfig.beamGlowWidth);
     canvas.translate(0, -footY);
-    canvas.drawOval(Rect.fromCircle(center: Offset(0, footY), radius: GameConfig.beamGlowWidth / 2), paint);
+    canvas.drawCircle(Offset(0, footY), r, foot);
     canvas.restore();
+  }
+
+  /// 몸 앞: 발에서 위로 떠오르며 사라지는 작은 반짝이 (네 갈래 별).
+  void _renderSparkles(Canvas canvas) {
+    const n = GameConfig.beamSparkleCount;
+    final footY = _footY;
+    final base = (_glowClock / GameConfig.beamGlowPeriod).clamp(0.0, 1.0);
+    for (var i = 0; i < n; i++) {
+      final t = (base + i / n) % 1; // 이 반짝이가 떠오른 정도 0~1
+      // 좌우 자리는 폭 안에 고르게 두되, 바깥 왼쪽·바깥 오른쪽·안 왼쪽… 차례로 번갈아 나오게
+      final slot = i.isEven ? i ~/ 2 : n - 1 - i ~/ 2;
+      final x = ((slot + 0.5) / n - 0.5) * GameConfig.beamSparkleSpread;
+      final y = footY - t * GameConfig.beamSparkleRise;
+      final alpha = math.sin(t * math.pi); // 나타났다 사라짐
+      _drawStar(canvas, Offset(x, y), alpha);
+    }
+  }
+
+  /// 네 갈래 별: 끝까지 반지름 beamSparkleSize, 허리는 그 beamSparkleWaist배.
+  static void _drawStar(Canvas canvas, Offset c, double alpha) {
+    const r = GameConfig.beamSparkleSize;
+    const w = r * GameConfig.beamSparkleWaist;
+    final path = Path()
+      ..moveTo(c.dx, c.dy - r)
+      ..lineTo(c.dx + w, c.dy - w)
+      ..lineTo(c.dx + r, c.dy)
+      ..lineTo(c.dx + w, c.dy + w)
+      ..lineTo(c.dx, c.dy + r)
+      ..lineTo(c.dx - w, c.dy + w)
+      ..lineTo(c.dx - r, c.dy)
+      ..lineTo(c.dx - w, c.dy - w)
+      ..close();
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = _fade(GameConfig.beamSparkleEdge, alpha)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = GameConfig.beamSparkleEdgeWidth,
+    );
+    canvas.drawPath(path, Paint()..color = _fade(GameConfig.beamSparkleColor, alpha));
   }
 
   static final _placeholder = Paint()..color = GameConfig.friendPlaceholder;
