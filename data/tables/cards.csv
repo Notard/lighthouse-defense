@@ -1,0 +1,11 @@
+id,kind,target,value,max_picks,weight,name_ko,name_en,desc_ko,desc_en
+friend_seahorse,friend,seahorse,1,0,10,해마,Seahorse,거품을 쏘는 친구를 놓아요,Place a bubble-shooting friend
+friend_crab,friend,crab,1,0,10,게,Crab,가까운 적을 집는 친구를 놓아요,Place a pinching friend
+friend_pufferfish,friend,pufferfish,1,0,10,복어,Pufferfish,둘레를 찌르는 친구를 놓아요,Place a spiky friend
+upgrade_seahorse,upgrade,seahorse,1.3,2,8,해마 강화,Seahorse Up,해마 모두 피해 +30%,All seahorses +30% damage
+upgrade_crab,upgrade,crab,1.3,2,8,게 강화,Crab Up,게 모두 피해 +30%,All crabs +30% damage
+upgrade_pufferfish,upgrade,pufferfish,1.3,2,8,복어 강화,Pufferfish Up,복어 모두 피해 +30%,All pufferfish +30% damage
+beam_wide,beam,width_deg,10,3,6,넓은 빛,Wide Beam,빛줄기 폭 +10°,Beam width +10°
+beam_long,beam,length,80,3,6,먼 빛,Long Beam,빛줄기 길이 +80,Beam length +80
+light_up,lighthouse,max_hp,20,5,6,밝은 등대,Brighter Light,불빛 최대 +20 (그만큼 채움),Max light +20 (and refill that much)
+light_regen,lighthouse,regen,0.5,3,5,되살아나는 불빛,Light Regen,불빛이 1초에 0.5씩 차요,Light recovers 0.5 per second
