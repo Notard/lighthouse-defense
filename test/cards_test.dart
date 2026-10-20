@@ -524,7 +524,7 @@ void main() {
     () => LighthouseGame(cards: true),
     (game) async {
       game.update(0);
-      firstFriend(game, 0, 'I3');
+      firstFriend(game, 1, 'O1');
       lightOut(game);
       final level = game.level;
       game.addXp(game.xpNeeded);

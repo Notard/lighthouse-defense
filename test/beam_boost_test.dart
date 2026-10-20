@@ -112,7 +112,7 @@ void main() {
       expect(crab.cooldown, closeTo(c0 - 0.5 * haste, 0.05 * haste));
       game.aimBeamAt(up);
       // 표 전제: 빛 밖 0.3초 동안 쉬는 시간이 0에 닿지 않는다
-      expect(c0 - 0.5 * haste - 0.3, greaterThan(0));
+      expect(c0 - 0.5 * haste - 0.3, greaterThan(0), reason: '표 전제: 빛 밖 구간이 끝나기 전에 쉬는 시간이 0이 되면 새 공격이 시작되어 값이 어긋난다');
       at(0.8);
       expect(crab.cooldown, closeTo(c0 - 0.5 * haste - 0.3, 0.05 * haste));
     },
