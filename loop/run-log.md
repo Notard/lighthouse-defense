@@ -42,3 +42,6 @@
 | 2026-10-20 | 007 | tester | friends_test.dart | 빨간 불 (모호 2 → 설계) | implementer로 |
 | 2026-10-20 | 007 | implementer | 친구·쟁반·공격·거품·dt 상한·006 작은 일 | 통과 82/82 (판단 3 → 설계) | 리드 웹 확인 |
 | 2026-10-20 | 007 | reviewer | 리뷰 | Friend dt ≤ 0, T5-16 느슨 | **거절** → 2바퀴 |
+| 2026-10-20 | 007 | 리드·tester | T5-16·18·19, A5-7 | T5-18 빨간 불 | implementer로 |
+| 2026-10-20 | 007 | implementer | Friend dt ≤ 0, 그리기 숫자, attack 검사 | 통과 84/84 | reviewer |
+| 2026-10-20 | 007 | reviewer | 2바퀴 리뷰 | — | **승인** → 사용자 확인 |
