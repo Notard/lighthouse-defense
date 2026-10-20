@@ -63,8 +63,11 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("role", choices=sorted(table["roles"]))
     ap.add_argument("--base", help="이 브랜치와 비교 (예: main)")
+    ap.add_argument("--max-files", type=int, help="이번 카드만 파일 수 상한을 바꾼다 (리드가 카드에 적은 값, 예: 그림 시트가 많은 카드)")
     args = ap.parse_args()
     files = changed_files(args.base)
+    if args.max_files:
+        table["maxFiles"] = args.max_files
     problems = check(args.role, files, table)
     print(f"[gate] {args.role}: 바꾼 파일 {len(files)}개")
     for f in files:

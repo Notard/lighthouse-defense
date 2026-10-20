@@ -6,7 +6,7 @@
 - **맡는 순서**: tester → implementer(도구 다지기 → 리그 여섯 → 시트 → GIF) → 사용자 움직임 확인 → reviewer
 - **끝내는 조건**:
   - [ ] T3-17~24 테스트 있고 통과
-  - [ ] `bash tools/loop/check.sh implementer` 통과
+  - [ ] `bash tools/loop/check.sh implementer --max-files 70` 통과 (시트·리그·GIF가 많아 이 카드만 상한 70)
   - [ ] 사용자 움직임 승인 (A3-13·14)
   - [ ] reviewer 승인
 - **바퀴**: 1 / 3
