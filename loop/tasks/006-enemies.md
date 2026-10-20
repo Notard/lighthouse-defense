@@ -8,7 +8,7 @@
   - [x] T4-01~15 테스트 있고 통과
   - [x] `bash tools/loop/check.sh implementer` 통과
   - [x] `python tools/gen_tables.py --check` 통과
-  - [ ] 사용자 확인 (A4-3~6)
+  - [x] 사용자 확인 (A4-3~6, "응": 정면 그대로, 갉기 맞추기는 다음으로)
   - [x] reviewer 승인
 - **바퀴**: 1 / 3
 
