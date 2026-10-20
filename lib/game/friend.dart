@@ -85,6 +85,7 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
   @override
   void update(double dt) {
     if (game.isOver) return; // 판이 멈춤: 공격·그림 모두 그대로
+    if (dt <= 0) return; // 시간이 흐르지 않은 프레임에는 공격을 시작하지도 진행하지도 않는다 (design.md §5 프레임 시간)
     cooldown = math.max(0, cooldown - dt);
     if (_attacking) {
       _windup += dt;

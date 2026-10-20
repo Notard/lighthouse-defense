@@ -65,12 +65,12 @@ class TrayButton extends PositionComponent with HasGameReference<LighthouseGame>
   static final _edge = Paint()
     ..color = GameConfig.trayButtonEdge
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 2;
+    ..strokeWidth = GameConfig.trayButtonEdgeWidth;
   static final _heldFill = Paint()..color = GameConfig.trayHeldFill;
   static final _heldEdge = Paint()
     ..color = GameConfig.trayHeldEdge
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 5;
+    ..strokeWidth = GameConfig.trayHeldEdgeWidth;
   static final _placeholder = Paint()..color = GameConfig.friendPlaceholder;
 
   TextPaint _text(Color color) => TextPaint(
@@ -91,13 +91,13 @@ class TrayButton extends PositionComponent with HasGameReference<LighthouseGame>
   @override
   void render(Canvas canvas) {
     final held = _held;
-    final box = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(24));
+    final box = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(GameConfig.trayButtonCorner));
     canvas.drawRRect(box, held ? _heldFill : _fill);
     canvas.drawRRect(box, held ? _heldEdge : _edge);
 
     // 그림: 단추 위쪽에 발이 오게, 키 trayArtHeight
     const artH = GameConfig.trayArtHeight;
-    final foot = Vector2(size.x / 2, 16 + artH);
+    final foot = Vector2(size.x / 2, GameConfig.trayArtTop + artH);
     final art = _art;
     final sprite = _sprite;
     if (art == null || sprite == null) {
@@ -108,6 +108,6 @@ class TrayButton extends PositionComponent with HasGameReference<LighthouseGame>
     }
 
     final name = Strings.characterName(Tables.characters[friendId]!);
-    (held ? _heldName : _name).render(canvas, name, Vector2(size.x / 2, size.y - 12), anchor: Anchor.bottomCenter);
+    (held ? _heldName : _name).render(canvas, name, Vector2(size.x / 2, size.y - GameConfig.trayNameBottom), anchor: Anchor.bottomCenter);
   }
 }

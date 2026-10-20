@@ -13,7 +13,7 @@
   friends.csv     id, attack, range, damage, interval, projectile_speed → Tables.friends (Map<String, FriendStats>)
 
 - 숫자 열은 double, max_alive만 int. 표에 열이 빠졌거나 숫자가 아니거나 비었거나 inf·nan이면
-  어느 표·줄·열인지 알리고 멈춘다 (종료 코드 1)
+  어느 표·줄·열인지 알리고 멈춘다 (종료 코드 1). friends.csv의 attack이 shot·melee·burst가 아니어도 멈춘다
 - 줄 순서는 표 그대로 (Map도 그 순서)
 - 글은 ASCII 밖 글자를 \\uXXXX로 적는다 (lib/ 문자열에 한글을 바로 쓰지 않는 규칙, test/font_test.dart T3-09)
 - 만든 파일은 줄바꿈 LF. 비교(--check)는 줄바꿈(CRLF/LF)을 무시한다
@@ -114,11 +114,18 @@ def single(cls: str, fields: list, table: str) -> str:
     return construct(cls, fields, table, 2, rows[0])
 
 
+# 글 칸 중 정해진 값만 받는 칸: (표, 열) → 받는 값
+CHOICES = {("friends.csv", "attack"): ("shot", "melee", "burst")}
+
+
 def keyed(cls: str, fields: list, table: str) -> list[str]:
     rows = read(table)
     seen = set()
     entries = []
     for i, row in enumerate(rows, start=2):
+        for (t, column), allowed in CHOICES.items():
+            if t == table and column in row and row[column] not in allowed:
+                sys.exit(f"data/tables/{table} {i}번째 줄: '{column}' 값 {row[column]!r}은 {'·'.join(allowed)} 중 하나여야 합니다")
         key = row.get("id", "")
         if key in seen:
             sys.exit(f"data/tables/{table} {i}번째 줄: id '{key}'가 겹칩니다")

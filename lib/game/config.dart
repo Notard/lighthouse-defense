@@ -74,6 +74,11 @@ abstract final class GameConfig {
   static const Color bubbleFill = Color(0x6699E6FF);
   static const Color bubbleEdge = Color(0xCCE8FBFF);
 
+  /// 거품 테두리 굵기, 반짝이 점의 자리(가운데에서 왼쪽 위로, 반지름에 곱함)와 크기(반지름에 곱함).
+  static const double bubbleEdgeWidth = 2;
+  static const double bubbleShineOffset = 0.35;
+  static const double bubbleShineSize = 0.25;
+
   // ---- 친구 쟁반 (design.md §5, 판 아래쪽 y 1100~1260) ----
 
   /// 단추 셋을 가로로: 위쪽 y, 단추 크기, 단추 사이 간격 (가로 가운데 맞춤: x 104~616).
@@ -82,6 +87,15 @@ abstract final class GameConfig {
   static const double trayButtonWidth = 160;
   static const double trayButtonHeight = 160;
   static const double trayButtonGap = 16;
+
+  /// 단추 모서리 반지름과 테두리 굵기 (보통·든 단추).
+  static const double trayButtonCorner = 24;
+  static const double trayButtonEdgeWidth = 2;
+  static const double trayHeldEdgeWidth = 5;
+
+  /// 단추 안 여백: 위에서 그림 머리까지, 아래에서 이름 글자 바닥까지.
+  static const double trayArtTop = 16;
+  static const double trayNameBottom = 12;
 
   /// 단추 안 친구 그림 키와 이름 글자 크기.
   static const double trayArtHeight = 80;

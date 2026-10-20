@@ -69,7 +69,7 @@ class Bubble extends Component with HasGameReference<LighthouseGame> {
   static final _edge = Paint()
     ..color = GameConfig.bubbleEdge
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 2;
+    ..strokeWidth = GameConfig.bubbleEdgeWidth;
   static final _shine = Paint()..color = GameConfig.bubbleEdge;
 
   @override
@@ -78,6 +78,7 @@ class Bubble extends Component with HasGameReference<LighthouseGame> {
     final c = position.toOffset();
     canvas.drawCircle(c, r, _fill);
     canvas.drawCircle(c, r, _edge);
-    canvas.drawCircle(c + const Offset(-r * 0.35, -r * 0.35), r * 0.25, _shine);
+    const shine = r * GameConfig.bubbleShineOffset;
+    canvas.drawCircle(c + const Offset(-shine, -shine), r * GameConfig.bubbleShineSize, _shine);
   }
 }
