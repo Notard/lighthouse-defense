@@ -6,7 +6,7 @@
 | 번호 | 주어진 것 | 행동 | 기대값 |
 |---|---|---|---|
 | T4-01 | `data/tables/*.csv` | `Tables`와 비교 | `enemies.csv` 모든 줄의 값이 `Tables.enemies[id]`와 같고 그 수도 같다. `beam.csv`·`lighthouse.csv`·`practice.csv`의 한 줄이 `Tables.beam`·`lighthouse`·`practice`와 같다. `characters.csv` 모든 줄이 `Tables.characters[id]`와 같다 |
-| T4-02 | `enemies.csv`, `characters.csv` | 표끼리 | enemies의 id 모음 = characters에서 kind가 enemy인 id 모음. hp·speed·bite·bite_interval·radius 모두 0보다 큼. beam의 slow는 0보다 크고 1 이하, vulnerable은 1 이상. lighthouse의 spawn_distance는 등대 가운데(360, 660)에서 판 네 귀퉁이까지 거리 중 가장 먼 것보다 큼 |
+| T4-02 | `enemies.csv`, `characters.csv` | 표끼리 | enemies에서 boss 0인 id 모음 = characters에서 kind가 enemy인 id 모음 (카드 010에서 보스 줄이 생겨 고침). hp·speed·bite·bite_interval·radius 모두 0보다 큼. beam의 slow는 0보다 크고 1 이하, vulnerable은 1 이상. lighthouse의 spawn_distance는 등대 가운데(360, 660)에서 판 네 귀퉁이까지 거리 중 가장 먼 것보다 큼 |
 | T4-03 | 새 판 | `spawnEnemy('shadow_blob', 0)`, `spawnEnemy('ink_squid', 90)` 뒤 한 번 update(0) | 판의 `enemies`에 둘. 첫째 위치 = (360 + spawn_distance, 660), 둘째 = (360, 660 + spawn_distance). 둘 다 상태 moving, hp = 표의 hp, `distance` = spawn_distance |
 | T4-04 | 새 판 (빛 270°) | 그림자 방울을 0°에 (빛 밖), 1초 흘림 | distance = spawn_distance − speed × 1, 위치의 y는 660 그대로, 각도 그대로 |
 | T4-05 | 새 판 | 오징어를 0°에, 거리 = 닿는 거리 + 10에서. 1초 흘림 | distance = 닿는 거리(100 + radius) 정확히(넘어가지 않음), 상태 biting. `contactDistance` = 100 + radius |

@@ -77,7 +77,7 @@ void main() {
     'T4-02 표끼리 맞는다 (id 모음, 양수, 빛 숫자 범위, 나타나는 거리)',
     () => LighthouseGame(),
     (game) async {
-      final enemyIds = readCsv('enemies.csv').map((r) => r['id']!).toSet();
+      final enemyIds = readCsv('enemies.csv').where((r) => r['boss'] == '0').map((r) => r['id']!).toSet();
       final enemyKinds = readCsv('characters.csv').where((r) => r['kind'] == 'enemy').map((r) => r['id']!).toSet();
       expect(enemyIds, enemyKinds);
 

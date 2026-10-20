@@ -170,6 +170,7 @@ abstract final class GameConfig {
   static const double cardTitleY = 260;
   static const double cardTitleFontSize = 56;
   static const Color cardTitleColor = Color(0xFFFFE9A8);
+  static const double cardTitleShadowBlur = 12;
 
   /// 카드 (세로로 쌓음): 첫 카드 위쪽 y, 카드 크기, 카드 사이 간격 (가로 가운데 맞춤).
   static const double cardTop = 340;
@@ -201,6 +202,9 @@ abstract final class GameConfig {
   /// 그림 없는 카드(빛·등대)의 그림 칸 표시: 부채꼴 반지름·폭(도), 등대 불빛 원 반지름.
   static const double cardIconRadius = 56;
   static const double cardIconFanDeg = 50;
+
+  /// 빛 카드 부채꼴이 뻗는 쪽 (도, §2 각도 규칙: 270 = 위).
+  static const double cardIconFanAngle = 270;
   static const double cardIconGlowRadius = 40;
 
   /// 업그레이드 카드 그림 위 "+" 표시 크기와 굵기.
@@ -213,6 +217,67 @@ abstract final class GameConfig {
   static const double placeHintY = 230;
   static const double placeHintFontSize = 40;
   static const Color placeHintColor = Color(0xFFFFE9A8);
+  static const double placeHintShadowBlur = 10;
+
+  // ---- 웨이브 (design.md §7, 규칙 숫자는 data/tables/waves.csv·wave_rules.csv → Tables.waves·waveRules) ----
+
+  /// 제목 자리의 웨이브 글: 위쪽 y(가운데 맞춤), 글자 크기, 색, 그림자 흐림.
+  static const double waveLabelY = 112;
+  static const double waveLabelFontSize = 44;
+  static const Color waveLabelColor = Color(0xFFFFF4DC);
+  static const double waveLabelShadowBlur = 8;
+
+  /// 웨이브 알림 (가운데): y, 글자 크기, 색, 그림자 흐림, 바탕 띠 높이·색.
+  static const double bannerY = 440;
+  static const double bannerFontSize = 60;
+  static const Color bannerColor = Color(0xFFFFE9A8);
+  static const Color bannerBossColor = Color(0xFFFF8A8A);
+  static const double bannerShadowBlur = 14;
+  static const double bannerBandHeight = 110;
+  static const Color bannerBand = Color(0x90050D1F);
+
+  // ---- 보스 (design.md §7) ----
+
+  /// 보스 머리 위 체력 막대: 너비, 높이, 머리 끝에서 띄우는 거리, 색(채움·빈 쪽·테두리).
+  static const double bossBarWidth = 110;
+  static const double bossBarHeight = 12;
+  static const double bossBarGap = 10;
+  static const Color bossBarFill = Color(0xFFFF5C7A);
+  static const Color bossBarEmpty = Color(0xA0101C38);
+  static const Color bossBarBorder = Color(0xE0FFF4DC);
+  static const double bossBarBorderWidth = 2;
+
+  // ---- 결과 창 (design.md §7) ----
+
+  /// 판을 덮는 색, 창(가운데 맞춤) 위쪽 y·크기, 모서리, 테두리 굵기, 색(바탕·테두리: 이김·짐).
+  static const Color resultDim = Color(0xC0050D1F);
+  static const double resultTop = 300;
+  static const double resultWidth = 560;
+  static const double resultHeight = 620;
+  static const double resultCorner = 32;
+  static const double resultEdgeWidth = 5;
+  static const Color resultFill = Color(0xF0142A52);
+  static const Color resultWonEdge = Color(0xFFFFD66B);
+  static const Color resultLostEdge = Color(0xFF8FA6C8);
+
+  /// 창 안: 제목 y(창 위에서), 제목 글자 크기, 첫 줄 y, 줄 사이, 줄 글자 크기, 색(제목·줄), 그림자 흐림.
+  static const double resultTitleY = 70;
+  static const double resultTitleFontSize = 52;
+  static const double resultLineTop = 170;
+  static const double resultLineGap = 62;
+  static const double resultLineFontSize = 34;
+  static const Color resultTitleColor = Color(0xFFFFE9A8);
+  static const Color resultLineColor = Color(0xFFFFF4DC);
+  static const double resultShadowBlur = 10;
+
+  /// 다시 하기 단추: 크기, 창 아래에서 띄우는 거리, 모서리, 색(바탕·글자), 글자 크기.
+  static const double restartWidth = 320;
+  static const double restartHeight = 100;
+  static const double restartBottom = 50;
+  static const double restartCorner = 50;
+  static const Color restartFill = Color(0xFFFFD66B);
+  static const Color restartTextColor = Color(0xFF142A52);
+  static const double restartFontSize = 42;
 
   // ---- 위쪽 표시 (design.md §4 등대 불빛) ----
 
@@ -236,6 +301,7 @@ abstract final class GameConfig {
   static const double xpBarWidth = 500;
   static const double xpBarHeight = 18;
   static const double xpLevelFontSize = 30;
+  static const double xpLevelShadowBlur = 6;
 
   /// 조각 막대 색: 채운 쪽(맑은 하늘빛), 빈 쪽, 테두리, 레벨 글자.
   static const Color xpBarFill = Color(0xFF8FE3FF);
@@ -245,5 +311,6 @@ abstract final class GameConfig {
 
   /// 꺼짐 문구 글자 크기와 색.
   static const double lightOutFontSize = 56;
+  static const double lightOutShadowBlur = 12;
   static const Color lightOutColor = Color(0xFFFFF4DC);
 }

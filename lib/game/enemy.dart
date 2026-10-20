@@ -90,6 +90,7 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
       _flash = 0;
       // 쓰러지는 순간 그 자리에 빛 조각 하나 (쓰러진 적은 피해를 더 받지 않으니 한 번만, design.md §6)
       game.dropShard(position, stats.xp);
+      game.countDefeat();
     } else {
       _flash = GameConfig.enemyHitFlashSeconds;
       // 그림을 읽기 전에 받은 피해의 hit는 그림이 온 뒤 재생하지 않는다 (번쩍만)
@@ -105,7 +106,9 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
   @override
   void onLoad() {
     // 판이 그림을 기다리지 않게 읽기만 시작한다 (읽기 전에는 보라 원)
-    CharacterArt.load(game, id).then(_useArt, onError: (Object e) => debugPrint('enemy art load failed: $id ($e)'));
+    // 그림은 표의 art (보스는 보통 적의 그림을 크게 쓴다, design.md §7)
+    CharacterArt.load(game, stats.art)
+        .then(_useArt, onError: (Object e) => debugPrint('enemy art load failed: ${stats.art} ($e)'));
   }
 
   void _useArt(CharacterArt art) {
@@ -204,28 +207,51 @@ class Enemy extends Component with HasGameReference<LighthouseGame> {
     ticker.currentIndex = (event + passed) % frames;
   }
 
+  /// 화면 키 = 그림(art)의 display_height × scale (design.md §7, 보통 적은 art = 자기 id, scale 1).
+  double get displayHeight => Tables.characters[stats.art]!.displayHeight * stats.scale;
+
   @override
   void render(Canvas canvas) {
     final art = _art;
     final ticker = _tickers[_action ?? _baseAction];
     if (art == null || ticker == null) {
       canvas.drawCircle(position.toOffset(), stats.radius, _placeholderPaint());
-      return;
+    } else {
+      // 몸 가운데(첫 프레임 그림 영역의 가운데)가 위치에 오게, 키 displayHeight로
+      final s = art.scaleForHeight(displayHeight);
+      final body = Vector2((art.bbox.left + art.bbox.right) / 2, (art.bbox.top + art.bbox.bottom) / 2);
+      canvas.save();
+      canvas.translate(position.x, position.y);
+      if (_flipped) canvas.scale(-1, 1);
+      ticker.getSprite().render(canvas, position: -body * s, size: art.frameSize * s, overridePaint: _flashPaint());
+      canvas.restore();
     }
-    // 몸 가운데(첫 프레임 그림 영역의 가운데)가 위치에 오게, 키 display_height로
-    final s = art.scaleForHeight(Tables.characters[id]!.displayHeight);
-    final body = Vector2((art.bbox.left + art.bbox.right) / 2, (art.bbox.top + art.bbox.bottom) / 2);
-    canvas.save();
-    canvas.translate(position.x, position.y);
-    if (_flipped) canvas.scale(-1, 1);
-    ticker.getSprite().render(canvas, position: -body * s, size: art.frameSize * s, overridePaint: _flashPaint());
-    canvas.restore();
+    if (stats.boss && _state != EnemyState.dying) _renderBossBar(canvas);
   }
+
+  /// 보스 머리 위 작은 체력 막대 (그리기만). 머리 끝은 몸 가운데에서 키의 절반 위.
+  void _renderBossBar(Canvas canvas) {
+    const w = GameConfig.bossBarWidth;
+    const h = GameConfig.bossBarHeight;
+    final top = position.y - displayHeight / 2 - GameConfig.bossBarGap - h;
+    final rect = Rect.fromLTWH(position.x - w / 2, top, w, h);
+    final ratio = (hp / stats.hp).clamp(0.0, 1.0);
+    canvas.drawRect(rect, _bossEmpty);
+    canvas.drawRect(Rect.fromLTWH(rect.left, rect.top, w * ratio, h), _bossFill);
+    canvas.drawRect(rect, _bossBorder);
+  }
+
+  static final _bossEmpty = Paint()..color = GameConfig.bossBarEmpty;
+  static final _bossFill = Paint()..color = GameConfig.bossBarFill;
+  static final _bossBorder = Paint()
+    ..color = GameConfig.bossBarBorder
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = GameConfig.bossBarBorderWidth;
 
   /// 등대 쪽을 보게 좌우를 뒤집는지 (앞을 보는 그림은 뒤집지 않는다).
   bool get _flipped {
     final lighthouseOnRight = math.cos(degToRad(angleDeg)) < 0;
-    return switch (artFacing[id] ?? ArtFacing.front) {
+    return switch (artFacing[stats.art] ?? ArtFacing.front) {
       ArtFacing.front => false,
       ArtFacing.left => lighthouseOnRight,
       ArtFacing.right => !lighthouseOnRight,

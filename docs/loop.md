@@ -19,7 +19,7 @@
 
 | 에이전트 | 맡는 일 | 고칠 수 있는 곳 | 손대면 안 되는 것 | 모델 |
 |---|---|---|---|---|
-| **implementer** | 작업 카드대로 구현, 표 → 코드 변환기 | `lib/`, `tools/`(밸런스·루프 도구 제외), `assets/`, `web/`, `windows/`, `art/` | `test/`, `docs/`, `data/` | Opus 5.5 |
+| **implementer** | 작업 카드대로 구현, 표 → 코드 변환기 | `lib/`, `tools/`(밸런스·루프 도구 제외), `assets/`, `web/`, `windows/`, `art/` | `test/`, `docs/`, `data/` | **Codex** (gpt-5.6-sol, ChatGPT OAuth, 카드 011부터) |
 | **tester** | 사람이 쓴 테스트 표 → 테스트 코드 | `test/`만 | 구현 코드, 기대값 | Sonnet 5.5 |
 | **balancer** | 밸런스 시뮬레이터, `balance/balance.csv` | `tools/balance/`, `test/balance/`, `balance/` | `data/tables/` 숫자 (제안만) | Sonnet 5.5 |
 | **reviewer** | 인수 조건과 대조, 보고만 | 없음 (읽기만) | 모든 파일 | Opus 5.5 |
@@ -78,3 +78,12 @@
 | 릴리스 빌드에서만 `Curve.transform(t>1)` 무한 루프 | 효과 곡선 입력은 0~1로 묶기 (설계 원칙) |
 | 테스트 기대값을 구현 쪽이 맞춰 바꾸는 유혹 | 테스트·기대값은 tester·리드만 |
 | 밸런스 숫자를 감으로 | 봇 결과(balance.csv)와 목표 표로 |
+
+## implementer를 Codex로 (2026-10-20, 사용자: "에이전트를 codex oauth 로 하자" → "implementer만 Codex")
+- 리드가 지시를 `logs/codex/<이름>.md`(지시 파일, gitignore)에 쓰고 `python tools/loop/codex_implementer.py <지시 파일>`
+- 실행기는 역할 설명(`.claude/agents/implementer.md` 본문) + `CLAUDE.md` + 지시를 `codex exec -s workspace-write`에 넘긴다
+- 안전 관문: 실행 앞뒤 HEAD·stash·스테이징 비교 (바뀌면 종료 3). **Codex가 도는 동안 리드는 커밋하지 않는다** (오탐이 난다)
+- 끝나면 `gate.py implementer` 범위 검사와 Codex 보고(`logs/codex/<시각>-report.md`). 그 뒤는 전과 같다: 리드 관문 → reviewer(Claude)
+- 샌드박스는 다른 Windows 사용자(CodexSandboxOffline)로 돈다: flutter 캐시 폴더 쓰기 허용과 git safe.directory 환경 변수를 실행기가 준다
+- tester·reviewer·balancer는 Claude 그대로 (만든 쪽과 검사하는 쪽의 모델이 달라 서로의 실수를 더 잘 잡는다)
+

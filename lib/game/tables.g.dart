@@ -1,9 +1,9 @@
 // 만든 파일, 고치지 말 것. data/tables/*.csv를 바꾸고 `python tools/gen_tables.py`로 다시 만든다.
 // (design.md §4 "숫자 표와 변환기". 뜻은 data/tables/README.md)
 
-/// 적 하나 (enemies.csv 한 줄). speed는 게임 px/초, bite_interval은 초, xp는 떨어뜨리는 빛 조각 값.
+/// 적 하나 (enemies.csv 한 줄). speed는 게임 px/초, bite_interval은 초, xp는 떨어뜨리는 빛 조각 값, art는 그림(characters의 id), scale은 그 그림 키에 곱하는 배율, boss는 보스인지.
 class EnemyStats {
-  const EnemyStats({required this.id, required this.hp, required this.speed, required this.bite, required this.biteInterval, required this.radius, required this.xp});
+  const EnemyStats({required this.id, required this.hp, required this.speed, required this.bite, required this.biteInterval, required this.radius, required this.xp, required this.art, required this.scale, required this.boss});
 
   /// `id`
   final String id;
@@ -19,6 +19,12 @@ class EnemyStats {
   final double radius;
   /// `xp`
   final double xp;
+  /// `art`
+  final String art;
+  /// `scale`
+  final double scale;
+  /// `boss`
+  final bool boss;
 }
 
 /// 등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율, friend_haste는 빛 속 친구의 쉬는 시간이 흐르는 배율.
@@ -133,13 +139,51 @@ class CardStats {
   final String descEn;
 }
 
+/// 웨이브 표 한 줄 (waves.csv). 웨이브 wave가 시작되고 delay + k × interval초에 k번째(0부터) enemy가 나온다 (count개).
+class WaveRow {
+  const WaveRow({required this.wave, required this.enemy, required this.count, required this.interval, required this.delay});
+
+  /// `wave`
+  final int wave;
+  /// `enemy`
+  final String enemy;
+  /// `count`
+  final int count;
+  /// `interval`
+  final double interval;
+  /// `delay`
+  final double delay;
+}
+
+/// 판 시작 (start.csv). free_friend는 카드 판이 첫 친구 창보다 먼저 공짜로 놓는 친구 (없으면 null).
+class StartRules {
+  const StartRules({required this.freeFriend});
+
+  /// `free_friend`
+  final String? freeFriend;
+}
+
+/// 웨이브 규칙 (wave_rules.csv). first_delay는 첫 웨이브까지, rest는 깬 뒤 쉬는 시간, banner_seconds는 알림이 떠 있는 시간 (모두 초).
+class WaveRules {
+  const WaveRules({required this.firstDelay, required this.rest, required this.bannerSeconds});
+
+  /// `first_delay`
+  final double firstDelay;
+  /// `rest`
+  final double rest;
+  /// `banner_seconds`
+  final double bannerSeconds;
+}
+
 /// 숫자 표 전체.
 abstract final class Tables {
   /// enemies.csv (id → 값, 표 순서).
   static const Map<String, EnemyStats> enemies = {
-    'shadow_blob': EnemyStats(id: 'shadow_blob', hp: 30.0, speed: 50.0, bite: 2.0, biteInterval: 1.0, radius: 26.0, xp: 2.0),
-    'ink_squid': EnemyStats(id: 'ink_squid', hp: 20.0, speed: 80.0, bite: 1.0, biteInterval: 0.8, radius: 24.0, xp: 1.0),
-    'shadow_jelly': EnemyStats(id: 'shadow_jelly', hp: 60.0, speed: 35.0, bite: 3.0, biteInterval: 1.2, radius: 28.0, xp: 3.0),
+    'shadow_blob': EnemyStats(id: 'shadow_blob', hp: 30.0, speed: 50.0, bite: 2.0, biteInterval: 1.0, radius: 26.0, xp: 2.0, art: 'shadow_blob', scale: 1.0, boss: false),
+    'ink_squid': EnemyStats(id: 'ink_squid', hp: 20.0, speed: 80.0, bite: 1.0, biteInterval: 0.8, radius: 24.0, xp: 1.0, art: 'ink_squid', scale: 1.0, boss: false),
+    'shadow_jelly': EnemyStats(id: 'shadow_jelly', hp: 60.0, speed: 35.0, bite: 3.0, biteInterval: 1.2, radius: 28.0, xp: 3.0, art: 'shadow_jelly', scale: 1.0, boss: false),
+    'boss_squid': EnemyStats(id: 'boss_squid', hp: 500.0, speed: 28.0, bite: 6.0, biteInterval: 1.0, radius: 44.0, xp: 15.0, art: 'ink_squid', scale: 1.8, boss: true),
+    'boss_jelly': EnemyStats(id: 'boss_jelly', hp: 1100.0, speed: 22.0, bite: 10.0, biteInterval: 1.2, radius: 52.0, xp: 30.0, art: 'shadow_jelly', scale: 2.1, boss: true),
   };
 
   /// beam.csv
@@ -163,7 +207,7 @@ abstract final class Tables {
 
   /// friends.csv (id → 값, 표 순서).
   static const Map<String, FriendStats> friends = {
-    'seahorse': FriendStats(id: 'seahorse', attack: 'shot', range: 260.0, damage: 8.0, interval: 1.0, projectileSpeed: 420.0),
+    'seahorse': FriendStats(id: 'seahorse', attack: 'shot', range: 320.0, damage: 8.0, interval: 1.0, projectileSpeed: 420.0),
     'crab': FriendStats(id: 'crab', attack: 'melee', range: 90.0, damage: 14.0, interval: 1.2, projectileSpeed: 0.0),
     'pufferfish': FriendStats(id: 'pufferfish', attack: 'burst', range: 110.0, damage: 6.0, interval: 1.5, projectileSpeed: 0.0),
   };
@@ -184,4 +228,37 @@ abstract final class Tables {
     'light_up': CardStats(id: 'light_up', kind: 'lighthouse', target: 'max_hp', value: 20.0, maxPicks: 5, weight: 6.0, nameKo: '\uBC1D\uC740 \uB4F1\uB300', nameEn: 'Brighter Light', descKo: '\uBD88\uBE5B \uCD5C\uB300 +20 (\uADF8\uB9CC\uD07C \uCC44\uC6C0)', descEn: 'Max light +20 (and refill that much)'),
     'light_regen': CardStats(id: 'light_regen', kind: 'lighthouse', target: 'regen', value: 0.5, maxPicks: 3, weight: 5.0, nameKo: '\uB418\uC0B4\uC544\uB098\uB294 \uBD88\uBE5B', nameEn: 'Light Regen', descKo: '\uBD88\uBE5B\uC774 1\uCD08\uC5D0 0.5\uC529 \uCC28\uC694', descEn: 'Light recovers 0.5 per second'),
   };
+
+  /// waves.csv (표 순서).
+  static const List<WaveRow> waves = [
+    WaveRow(wave: 1, enemy: 'shadow_blob', count: 6, interval: 2.5, delay: 0.0),
+    WaveRow(wave: 2, enemy: 'shadow_blob', count: 6, interval: 2.2, delay: 0.0),
+    WaveRow(wave: 2, enemy: 'ink_squid', count: 4, interval: 3.0, delay: 4.0),
+    WaveRow(wave: 3, enemy: 'shadow_blob', count: 8, interval: 2.0, delay: 0.0),
+    WaveRow(wave: 3, enemy: 'ink_squid', count: 6, interval: 2.5, delay: 3.0),
+    WaveRow(wave: 4, enemy: 'shadow_blob', count: 8, interval: 1.8, delay: 0.0),
+    WaveRow(wave: 4, enemy: 'ink_squid', count: 6, interval: 2.0, delay: 2.0),
+    WaveRow(wave: 4, enemy: 'shadow_jelly', count: 3, interval: 5.0, delay: 5.0),
+    WaveRow(wave: 5, enemy: 'boss_squid', count: 1, interval: 1.0, delay: 0.0),
+    WaveRow(wave: 5, enemy: 'shadow_blob', count: 6, interval: 3.0, delay: 4.0),
+    WaveRow(wave: 6, enemy: 'ink_squid', count: 10, interval: 1.5, delay: 0.0),
+    WaveRow(wave: 6, enemy: 'shadow_jelly', count: 4, interval: 4.0, delay: 3.0),
+    WaveRow(wave: 7, enemy: 'shadow_blob', count: 12, interval: 1.4, delay: 0.0),
+    WaveRow(wave: 7, enemy: 'ink_squid', count: 8, interval: 2.0, delay: 6.0),
+    WaveRow(wave: 7, enemy: 'shadow_jelly', count: 5, interval: 3.5, delay: 2.0),
+    WaveRow(wave: 8, enemy: 'ink_squid', count: 14, interval: 1.2, delay: 0.0),
+    WaveRow(wave: 8, enemy: 'shadow_jelly', count: 6, interval: 3.0, delay: 4.0),
+    WaveRow(wave: 9, enemy: 'shadow_blob', count: 14, interval: 1.1, delay: 0.0),
+    WaveRow(wave: 9, enemy: 'ink_squid', count: 12, interval: 1.3, delay: 2.0),
+    WaveRow(wave: 9, enemy: 'shadow_jelly', count: 8, interval: 2.5, delay: 5.0),
+    WaveRow(wave: 10, enemy: 'boss_jelly', count: 1, interval: 1.0, delay: 0.0),
+    WaveRow(wave: 10, enemy: 'shadow_jelly', count: 6, interval: 4.0, delay: 6.0),
+    WaveRow(wave: 10, enemy: 'ink_squid', count: 10, interval: 1.8, delay: 3.0),
+  ];
+
+  /// wave_rules.csv
+  static const WaveRules waveRules = WaveRules(firstDelay: 3.0, rest: 5.0, bannerSeconds: 2.5);
+
+  /// start.csv
+  static const StartRules start = StartRules(freeFriend: 'seahorse');
 }

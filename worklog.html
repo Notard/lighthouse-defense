@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 16:00</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 16:36</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -715,6 +715,63 @@ article td img{margin:0 auto}
 <ol>
 <li>미리보기 창이 초당 1~2프레임으로 느려져 프레임 상한(0.1초) 때문에 게임 시간이 느리게 흐름 → 게임 문제 아님 (STATE에 적음)</li>
 <li>표 숫자를 바꾸자 우연에 기대던 테스트가 깨짐 → 친구를 해파리 사거리 밖(O1)에 두게 표를 고침. reviewer의 "미룸" 경고가 바로 들어맞음</li>
+</ol>
+<h2>7. 카드 010: 웨이브·보스·이김과 짐 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "응 다음으로 가자" → (중간에) "처음에 해마를 심었는데, 해마가 아닌 쪽에서 오면 답도 없다." → "그러면 첫 카드는 무조건 해마로 해야겠다." → (선택) "해마는 처음부터 공짜" → "에이전트를 codex oauth 로 하자." → (선택) "implementer만 Codex" → "응"</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>웨이브 10개 (<code>waves.csv</code>): 3초 뒤 시작, 다 나오고 다 쓰러뜨리면 깸, 5초 쉬고 다음. 웨이브 알림과 "웨이브 n / 10"</li>
+<li>보스 둘 (<code>enemies.csv</code> boss): 웨이브 5 큰 먹물 오징어, 웨이브 10 큰 그림자 해파리. 지금 그림을 키워 쓰고 머리 위 체력 막대</li>
+<li>10웨이브를 깨면 "새벽이 왔어요!", 불빛이 꺼지면 짐 → 결과 창(웨이브·쓰러뜨린 수·레벨·시간)과 다시 하기</li>
+<li>사용자 의견: 해마 사거리 260 → 320 (안쪽 고리 어디서든 등대에 붙은 적에 닿음), <strong>공짜 해마로 시작</strong> (<code>start.csv</code>) → 그다음 첫 친구 카드</li>
+<li>표 검사 강화: 웨이브·보스·진행·시작 표의 값과 다른 표 id를 변환기가 확인</li>
+<li>다음 카드부터 <strong>implementer는 Codex</strong> (<code>tools/loop/codex_implementer.py</code>, gpt-5.6-sol, ChatGPT OAuth)</li>
+</ul>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>리드</td>
+<td>표 셋, 설계 §7, T7-01~19</td>
+</tr>
+<tr>
+<td>tester</td>
+<td>테스트 19 + T4-02 보스 반영. 때 맞춤 질문 셋 → 설계에 "때 맞춤"</td>
+</tr>
+<tr>
+<td>사용자 · 리드</td>
+<td>해마 반대편 문제 → 사거리 320, 공짜 해마(설계 §6·§7, T7-20)</td>
+</tr>
+<tr>
+<td>tester</td>
+<td>공짜 해마 도우미. T6-19가 공짜 해마 때문에 다시 우연에 기댐을 계산(해마 320은 72° 간격 해파리 중 하나에 어디서든 닿음) → 리드가 보스 해파리로</td>
+</tr>
+<tr>
+<td>implementer (Claude)</td>
+<td>128/128</td>
+</tr>
+<tr>
+<td>reviewer</td>
+<td>승인 (미룸 넷)</td>
+</tr>
+<tr>
+<td>리드</td>
+<td>Codex 실행기: 모델(gpt-6.1-sol은 ChatGPT 계정 불가 → gpt-5.6-sol), 샌드박스에서 flutter 멈춤 → 캐시 쓰기 허용, 다른 Windows 사용자라 git 소유자 오류 → safe.directory 환경 변수. 시험 실행 통과</td>
+</tr>
+</tbody>
+</table>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>리드가 Codex 실행 중 커밋해 HEAD 관문이 오탐 → Codex가 도는 동안 커밋하지 않기로 (loop.md)</li>
+<li>리드 커밋 하나에 implementer 작업 중 파일이 섞임 (<code>git add -A</code>) → 범위는 implementer 범위 안이라 문제없음, 앞으로는 리드 파일만 골라 담기</li>
 </ol></article>
 </div>
 </body>
