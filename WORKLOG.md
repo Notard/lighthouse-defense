@@ -112,3 +112,32 @@
 2. 폰 크기 흉내에서 화면 찍기가 이상하게 나옴 (숲 지키기 때와 같은 미리보기 문제) → PC 크기로 확인, 폰은 사용자에게
 3. `gate.py` 출력이 Windows 콘솔에서 깨짐 → UTF-8로 출력
 
+## 3. 카드 003: 글꼴·문구·그림 도구 (2026-10-20)
+
+> 사용자: "계속" / 글꼴: "주아 Jua (추천)"
+
+### 결과 요약
+- **주아(Jua)** 글꼴 (Google Fonts, OFL 1.1): 원본 2,070 KB에서 쓰는 글자만 남겨 **42 KB** (111자). 웹 제목 "등대 지키기"가 네모 대신 주아로 보인다
+- 문구 틀 `Strings` (한국어·영어 두 벌, `Lang`), 화면 글은 여기서만
+- 숲 지키기 그림 도구 8개(`gen_art`, `cut_parts`, `blender_cutout`, `pack_sheets`, `build_sprites.sh`, `prep_props`, `make_art_preview`, `rig_helper`) + 공통 `art_common.py` + `lib/game/art.dart`를 세로·밤바다에 맞게 가져옴. 프롬프트는 리드 소유 `data/art/prompts.json`에서 읽기만
+- 루프 **한 바퀴 만에 승인**
+
+![제목이 주아로](preview/03_font.jpg)
+
+### 진행 방식
+| 누가 | 무엇 |
+|---|---|
+| 리드 | 설계 §3, 테스트 표 T3-01~09, 인수 조건 A3-1~6, 카드, `data/art/prompts.json` 뼈대(밤바다 그림체), 주아 원본 받기 |
+| tester | `test/font_test.dart`: 글꼴 파일·등록, 영문 숫자, 두 언어 문구, `lib/` 문자열 글자가 모두 글꼴에 (TrueType cmap 직접 읽기), 제목이 Strings·Jua, `strings.dart` 밖 문자열에 한글 없음 |
+| implementer | `subset_font.py`(테스트와 같은 글자 고르기 규칙, cmap (3,1) 확인), 글꼴·라이선스, `strings.dart`, 제목, 도구 8개 + `art_common.py`(크로마 초록 배경 지우기 포함), `art.dart`. 범위 밖 `.gitignore`는 보고만 |
+| 리드 | `.gitignore`(art 중간 산출물·logs), 웹에서 제목 확인 |
+| reviewer | **승인**. 막지 않는 문제 6개를 카드 004로 (Codex 쓰기 범위, 시트 JSON 필수 키, 캐시, 빈 bbox, 미리보기 숫자, frame_size 뜻) |
+
+### 검증
+- 관문: 분석 문제 없음, 테스트 33/33, 범위 통과(18개), 웹 빌드 통과
+- 도구 `--help` 종료 코드 0, 필수 인자 없으면 사용법 + 2 (implementer 확인, reviewer 코드로 확인)
+
+### 발생한 문제와 해결
+1. 주아는 굵기가 하나라 `fontWeight: w700`이면 가짜 굵게 그려짐 → 굵기를 뺌
+2. reviewer: Codex를 `workspace-write`로 부르면 저장소 어디든 쓸 수 있음 → 카드 004에서 실행 뒤 `git status` 확인을 끝내는 조건에 넣기로
+

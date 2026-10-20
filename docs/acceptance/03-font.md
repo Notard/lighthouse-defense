@@ -6,5 +6,5 @@
 | A3-2 | 글꼴 파일은 쓰는 글자만 남겨 작다 (500 KB 이하), 라이선스 파일이 함께 있다 | 관문 + reviewer |
 | A3-3 | 화면 글은 `Strings`에서만 나오고, 한국어·영어 두 벌이 있다 | 테스트 T3-05·06·09 |
 | A3-4 | 테스트 표 T3-01~09가 모두 같은 번호의 테스트로 있고 통과한다 | 관문 + reviewer |
-| A3-5 | 그림 도구 일곱 개와 `lib/game/art.dart`가 이 프로젝트 경로·세로 화면에 맞게 들어와 있고, 숲 지키기 전용 이름·경로(forest, acorn, 도토리, 레인 등)가 남아 있지 않다. 프롬프트는 `data/art/prompts.json`에서 읽는다 | reviewer |
+| A3-5 | 그림 도구 여덟 개와 `lib/game/art.dart`가 이 프로젝트 경로·세로 화면에 맞게 들어와 있고, 숲 지키기 전용 이름·경로(forest, acorn, 도토리, 레인 등)가 남아 있지 않다. 프롬프트는 `data/art/prompts.json`에서 읽는다 | reviewer |
 | A3-6 | 각 도구는 인자 없이 또는 `--help`로 실행하면 사용법을 보여 주고 오류로 죽지 않는다 (Blender·Codex를 실제로 부르지 않고) | implementer 보고 + reviewer |

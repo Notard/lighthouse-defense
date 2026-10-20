@@ -5,10 +5,10 @@
 - **관련 문서**: `docs/design.md` §3, `docs/tests/03-font.md` (T3-01~09), `docs/acceptance/03-font.md` (A3-1~6)
 - **맡는 순서**: tester → implementer → reviewer
 - **끝내는 조건**:
-  - [ ] T3-01~09가 모두 같은 번호 이름의 테스트로 있고 통과
-  - [ ] `bash tools/loop/check.sh implementer` 통과
-  - [ ] reviewer 승인
-  - [ ] 웹에서 제목 글꼴 (리드)
+  - [x] T3-01~09가 모두 같은 번호 이름의 테스트로 있고 통과
+  - [x] `bash tools/loop/check.sh implementer` 통과
+  - [x] reviewer 승인 (1바퀴)
+  - [x] 웹에서 제목 글꼴 (리드, preview/03_font.jpg)
 - **바퀴**: 1 / 3
 
 ## 참고
@@ -18,3 +18,4 @@
 - Blender: `C:/Program Files/Blender Foundation/Blender 5.2/blender.exe`, Codex CLI 0.158 있음
 
 ## 바퀴 기록
+- **1바퀴** (2026-10-20): tester T3-01~09 (빨간 불) → implementer 글꼴 42 KB(111자)·문구·도구 8개+art_common.py (첫 시도 33/33) → 리드 .gitignore → 관문 통과 → **reviewer 승인**. 카드 004로 넘길 것: ① Codex `workspace-write`라 실행 뒤 `git status`로 art/ref 밖 변경 확인 ② art.dart가 시트 JSON 키를 강제 변환 → pack_sheets가 frames·fps·loop 필수 검사 또는 기본값 ③ art.dart 캐시가 실패한 읽기를 붙잡음 ④ pack_sheets 빈 bbox, gen_art `prompt ref`가 based_on 없으면 끝남 ⑤ make_art_preview의 88·80 숫자를 설계·표로 ⑥ frame_size 뜻(설계에 적음)
