@@ -24,3 +24,4 @@
 | T7-17 | 카드 판 (`cards: true`), 첫 친구 해마를 I3에 놓은 뒤 | 방울을 I3 쪽(90°) 거리 300에 두고 해마가 거품을 쏘게 흘림 (거품이 생길 때까지). 거품이 날 때 `addXp(xpNeeded)`로 창을 열고, 거품 위치를 적은 뒤 2초 | 거품 위치 그대로, `bubbles` 수 그대로 |
 | T7-18 | 카드 판, 첫 친구를 놓은 뒤 | 오징어를 0° 거리 300에서 쓰러뜨려 조각이 날기 시작한 뒤(shard_delay + 0.1초) `addXp(xpNeeded)`로 창을 열고 2초 | 조각 위치 그대로. `applyCard('light_regen')`로 regen을 준 판에서 창을 연 동안 light 그대로 |
 | T7-19 | 카드 판 | 첫 친구 게를 I0에 놓기 전(놓기 상태) 방울을 0°에 두고 2초 / 연습 판에서 `applyCard('upgrade_crab')` 뒤 게를 I3에 놓고 방울을 90°에 닿게 windup + 0.05초 | 놓기 상태에서 방울 distance 그대로 / 방울 hp = 처음 − damage × value (나중에 놓은 친구에도 배율) |
+| T7-20 | 카드 판 (`cards: true`) | 판이 붙은 뒤 | `start.csv`의 free_friend가 있으면: `placing` = 그 id, `choice` null, `isPaused` 참, `picks` 비어 있음. 바다 누르기는 아무 일 없음. O6을 누르면 O6에 그 친구, 곧 `choice` = friend 카드 셋(표 순서). (T6-07·T6-08은 이 뒤의 창을 본다) |

@@ -306,6 +306,7 @@
 - 카드를 누르면 창이 닫히고 효과가 난다. 밀린 고르기가 남았으면 바로 다음 창 (새로 뽑음)
 - 고를 수 있는 카드가 하나도 없으면 창을 열지 않고 그 고르기는 버린다
 - **판 시작**: 카드 판은 시작하자마자 **첫 친구 고르기** 창을 연다: 친구 카드 셋(해마·게·복어 순서)만, 뽑지 않고 그대로. 레벨·쌓인 양은 바꾸지 않음
+- **공짜 친구 (카드 010, 사용자: "해마는 처음부터 공짜")**: `start.csv`의 `free_friend`가 있으면, 카드 판은 첫 친구 창보다 **먼저** 그 친구의 **놓기 상태**로 시작한다 (`placing` = 해마, 창 없음, 고른 횟수 안 셈). 놓으면 그때 첫 친구 고르기 창이 열린다. `free_friend`가 비면 예전처럼 바로 창
 
 ### 카드 효과
 | 종류 | 효과 |
@@ -404,6 +405,10 @@
 | `game.resultPanel` | `ResultPanel?` (`lib/game/result_panel.dart`): `restartButton`의 `position`·`size` (게임 좌표 왼쪽 위), `lines` (`List<String>`, 보이는 글 줄들) |
 | `WaveLabel` (`hud.dart`) | 웨이브 글 컴포넌트, `text` |
 | `Strings.wave(n, total)`, `Strings.bossComing`, `Strings.dawn`, `Strings.restart`, `Strings.resultWave(n, total)`, `Strings.resultDefeated(n)`, `Strings.resultLevel(n)`, `Strings.resultTime(double 초)` | "웨이브 3 / 10" / "Wave 3 / 10", "보스가 와요!" / "A boss is coming!", "새벽이 왔어요!" / "Dawn has come!", "다시 하기" / "Play again", 결과 줄들 (시간은 m:ss) |
+
+### 공짜 해마 (사용자)
+- 게·복어를 첫 친구로 고르면 반대편 적을 막을 수 없어서, 카드 판은 공짜 해마를 놓고 시작한다 (§6 "공짜 친구"). `Tables.start.freeFriend` (`String?`, 빈 칸이면 null)
+- 해마 사거리 320: 안쪽 고리 어디서든 등대에 붙은 적(보스 포함)에 닿는다
 
 ### 카드 009 리뷰에서 온 작은 일
 - `gen_tables.py`: progression의 xp_base·shard_speed·absorb_distance > 0, xp_step ≥ 0, waves의 count ≥ 1·interval > 0·delay ≥ 0·enemy가 enemies에 있음, enemies의 art가 characters에 있음·scale > 0·boss 0/1 — 어기면 표·줄·칸을 짚어 종료 1

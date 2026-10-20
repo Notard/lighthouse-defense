@@ -14,6 +14,7 @@ balancer는 이 숫자를 바꾸지 않고 `balance/proposals.md`에 제안한�
 | `cards.csv` | 레벨업 카드: 종류(friend·upgrade·beam·lighthouse)·대상·값·최대 고르기(0 = 제한 없음)·뽑힐 무게·이름과 설명(두 언어) | 6 |
 | `waves.csv` | 웨이브마다 나오는 적: 웨이브 번호·적 id·수·간격(초)·웨이브 시작에서 첫 적까지(초). 한 웨이브에 여러 줄 | 7 |
 | `wave_rules.csv` | 첫 웨이브 전 기다림·웨이브 사이 쉬는 시간·웨이브 알림이 떠 있는 시간(초) | 7 |
+| `start.csv` | 카드 판 시작에 공짜로 받는 친구 id (`free_friend`, 비우면 없음, 7단계) | 7 |
 | `practice.csv` | 연습 스폰 간격(초)·한꺼번에 있을 수 있는 적 수 (7단계 웨이브가 오면 없앤다) | 4 |
 
 표를 바꾸면 `python tools/gen_tables.py`로 `lib/game/tables.g.dart`를 다시 만든다 (손으로 고치지 않는다).
