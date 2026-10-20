@@ -6,7 +6,7 @@ import 'config.dart';
 import 'geometry.dart';
 import 'tables.g.dart';
 
-/// 등대 빛: 등대 가운데에서 [angleDeg] 쪽으로 뻗는 반투명 부채꼴. 폭·길이는 숫자 표(beam.csv) (design.md §4).
+/// 등대 빛: 등대 가운데에서 [angleDeg] 쪽으로 뻗는 반투명 부채꼴. 폭·길이는 숫자 표(beam.csv) + 카드로 더한 값 (design.md §4·§6).
 class Beam extends PositionComponent {
   Beam() : super(position: lighthouseCenter());
 
@@ -22,11 +22,15 @@ class Beam extends PositionComponent {
   double get angleDeg => _angleDeg;
   set angleDeg(double value) => _angleDeg = normalizeDeg(value);
 
-  /// 부채꼴 폭(도), 표의 `width_deg`.
-  double get widthDeg => Tables.beam.widthDeg;
+  /// 카드(beam)로 더한 폭(도)과 길이 (처음 0).
+  double widthBonus = 0;
+  double lengthBonus = 0;
 
-  /// 부채꼴 길이 (게임 px), 표의 `length`.
-  double get length => Tables.beam.length;
+  /// 부채꼴 폭(도) = 표의 `width_deg` + 카드로 더한 값.
+  double get widthDeg => Tables.beam.widthDeg + widthBonus;
+
+  /// 부채꼴 길이 (게임 px) = 표의 `length` + 카드로 더한 값.
+  double get length => Tables.beam.length + lengthBonus;
 
   /// 점 [p](`Vector2`, 게임 좌표)가 빛 속인지: 등대 가운데에서 거리 ≤ 길이이고,
   /// 각도 차이(360 둘레에서 짧은 쪽) ≤ 폭의 절반. 경계는 속.
@@ -47,24 +51,32 @@ class Beam extends PositionComponent {
     return shortest <= widthDeg / 2 + _epsilon;
   }
 
-  static final _rect = Rect.fromLTRB(-Tables.beam.length, -Tables.beam.length, Tables.beam.length, Tables.beam.length);
+  // 등대 쪽이 밝고 끝으로 갈수록 옅어지는 노란빛. 길이가 바뀔 때만 다시 만든다.
+  double? _paintLength;
+  Paint _paint = Paint();
 
-  // 등대 쪽이 밝고 끝으로 갈수록 옅어지는 노란빛.
-  static final _paint = Paint()
-    ..shader = Gradient.radial(
-      Offset.zero,
-      Tables.beam.length,
-      const [Color(0x99FFE9A0), Color(0x55FFE9A0), Color(0x00FFE9A0)],
-      const [0, 0.6, 1],
-    );
+  Paint _paintFor(double len) {
+    if (_paintLength != len) {
+      _paintLength = len;
+      _paint = Paint()
+        ..shader = Gradient.radial(
+          Offset.zero,
+          len,
+          const [Color(0x99FFE9A0), Color(0x55FFE9A0), Color(0x00FFE9A0)],
+          const [0, 0.6, 1],
+        );
+    }
+    return _paint;
+  }
 
   @override
   void render(Canvas canvas) {
+    final len = length;
     final half = widthDeg / 2;
     final path = Path()
       ..moveTo(0, 0)
-      ..arcTo(_rect, degToRad(_angleDeg - half), degToRad(widthDeg), false)
+      ..arcTo(Rect.fromCircle(center: Offset.zero, radius: len), degToRad(_angleDeg - half), degToRad(widthDeg), false)
       ..close();
-    canvas.drawPath(path, _paint);
+    canvas.drawPath(path, _paintFor(len));
   }
 }

@@ -26,4 +26,20 @@ abstract final class Strings {
 
   /// 캐릭터 이름 (characters.csv의 name_ko·name_en, 지금 언어).
   static String characterName(CharacterStats c) => _pick(c.nameKo, c.nameEn);
+
+  /// 레벨업 카드 창 제목 (design.md §6).
+  static String get levelUp => _pick('레벨 업!', 'Level up!');
+
+  /// 카드 판 시작의 첫 친구 고르기 창 제목.
+  static String get firstPick => _pick('첫 친구를 골라요', 'Pick your first friend');
+
+  /// 놓기 상태의 안내 (판 가운데 위).
+  static String get placeHint => _pick('친구를 놓을 자리를 눌러요', 'Tap a spot for your friend');
+
+  /// 카드 이름·설명 (cards.csv의 name_ko·name_en, desc_ko·desc_en, 지금 언어).
+  static String cardName(CardStats c) => _pick(c.nameKo, c.nameEn);
+  static String cardDesc(CardStats c) => _pick(c.descKo, c.descEn);
+
+  /// 조각 막대 옆 레벨 글자.
+  static String level(int n) => 'Lv $n';
 }

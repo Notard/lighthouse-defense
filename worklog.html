@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 15:23</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 16:00</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -662,6 +662,59 @@ article td img{margin:0 auto}
 <ol>
 <li>테스트 표의 시간 계산 실수 → tester가 숫자로 따져 잡아냄 (표가 정답이어도 표가 틀릴 수 있음: tester의 "모호하면 보고" 규칙이 효과)</li>
 <li>같은 색 계열(빛줄기 노랑 위 금빛)이라 안 보임 → 진한 주황 금빛 + 흰 금빛 선으로 대비</li>
+</ol>
+<h2>6. 카드 009: 빛 조각과 레벨업 카드 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "응" → (직접 플레이) "근데 처음 해마를 고르고 나서 다음 카드가 나오기 전까지 적이 너무 많이 나오네" → (표 조정) "응 다음으로 가자"</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>쓰러진 적이 빛 조각(<code>xp</code>)을 떨어뜨리고, 조각은 잠깐 반짝인 뒤 등대로 빨려 듦. 조각 막대와 <code>Lv n</code></li>
+<li>레벨에 드는 조각 3, 6, 9, … (<code>progression.csv</code>). 오르면 카드 3장 창, 판이 멈춤</li>
+<li>카드 10종 (<code>cards.csv</code>): 친구 셋·친구 강화 셋(피해 ×1.3, 두 번)·넓은 빛·먼 빛·밝은 등대·되살아나는 불빛. 무게에 따라 뽑고 같은 씨앗이면 같은 순서</li>
+<li>카드 판(앱): 시작에 첫 친구 카드 셋 → 놓을 자리 누르기. 연습 판(테스트)에는 쟁반이 남음</li>
+<li>사용자 의견으로 연습 스폰 2초·8마리 → 3.5초·4마리, 첫 레벨 조각 5 → 3</li>
+</ul>
+<p><img alt="첫 친구 고르기" src="preview/09_first_pick.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>리드</td>
+<td>표 셋(enemies xp, progression, cards), 설계 §6 (두 가지 판, 카드 규칙, 멈춤, 코드 이름), T6-01~20</td>
+</tr>
+<tr>
+<td>tester</td>
+<td>테스트 20. "카드가 2장뿐인 판"이 표대로는 만들 수 없음을 짚음 → 표 고침</td>
+</tr>
+<tr>
+<td>implementer</td>
+<td>구현. tray가 nullable이 되어 friends_test가 컴파일되지 않자 범위 밖이라 고치지 않고 보고 (우회 없음). 카드 표의 °가 글꼴에 없음도 보고</td>
+</tr>
+<tr>
+<td>리드 · tester</td>
+<td>° → 도, 표·글꼴 다시 / friends_test <code>tray!</code> → 108/108</td>
+</tr>
+<tr>
+<td>reviewer</td>
+<td>승인 (미룸: 멈춤 테스트 보강, progression 양수 검사, T6-19가 우연에 기댐, 그리기 숫자)</td>
+</tr>
+<tr>
+<td>사용자</td>
+<td>직접 플레이: 적이 너무 많음 → 리드 표 조정 → T6-19가 정말 깨짐(리뷰가 미리 짚은 것) → tester 고침</td>
+</tr>
+</tbody>
+</table>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>미리보기 창이 초당 1~2프레임으로 느려져 프레임 상한(0.1초) 때문에 게임 시간이 느리게 흐름 → 게임 문제 아님 (STATE에 적음)</li>
+<li>표 숫자를 바꾸자 우연에 기대던 테스트가 깨짐 → 친구를 해파리 사거리 밖(O1)에 두게 표를 고침. reviewer의 "미룸" 경고가 바로 들어맞음</li>
 </ol></article>
 </div>
 </body>

@@ -279,4 +279,81 @@
 ### 같이 하는 작은 일 (카드 007 리뷰)
 - T5-11은 다른 적이 없어 "거품이 다른 적을 맞히지 않음"을 확인 못 했다 → T8-05로 다른 적을 두고 다시
 
+## 6. 빛 조각과 레벨업 카드 (6단계, 카드 009)
+
+### 두 가지 판 (테스트를 위해)
+- `LighthouseGame(cards: true)`: **카드 판** (앱). 친구 쟁반 없음 (`tray` null). 친구는 카드로만 얻는다
+- `LighthouseGame()` (`cards: false`, 기본): **연습 판** (테스트·개발). 쟁반이 있고, 레벨이 올라도 카드 창을 열지 않는다 (판이 멈추지 않음). 조각·빛 조각 값·레벨 계산은 같다 (밀린 고르기도 쌓지 않는다, `pendingPicks` 0)
+
+### 빛 조각 (경험치)
+- 적이 **쓰러지는 순간** 그 자리에 빛 조각 하나: 값 = 그 적의 `xp` (`enemies.csv`). 쓰러진 적은 조각을 다시 떨어뜨리지 않는다
+- 조각은 `shard_delay`초 제자리에서 반짝인 뒤, 1초에 `shard_speed`로 등대 가운데를 향해 날아간다. 등대 가운데에서 `absorb_distance` 안에 들면 빨려 들어 **값만큼 빛 조각이 쌓이고** 사라진다 (`progression.csv`)
+- 작은 노란 별빛 (그림 대신 그리기)
+
+### 레벨
+- 처음 레벨 1, 쌓인 조각 0. 레벨 n에서 다음 레벨에 드는 양 `xpNeeded` = `xp_base` + `xp_step` × (n − 1) (지금 5, 8, 11, …)
+- 쌓인 양이 `xpNeeded` 이상이 되면: 쌓인 양 −= `xpNeeded`, 레벨 +1, **카드 고르기 하나가 밀린다**. 한꺼번에 여러 레벨이 오르면 그만큼 밀린다 (남은 양으로 다시 비교)
+- 불빛 막대 아래 **조각 막대**: 채운 비율 = 쌓인 양 ÷ `xpNeeded`, 옆에 `Lv n`. 판 위쪽 0~130 px 안
+
+### 카드 고르기 (카드 판에서만)
+- 밀린 고르기가 있고 열린 창이 없으면 **카드 창**을 바로 연다 (`addXp` 안에서, 다음 프레임을 기다리지 않음. 그림 컴포넌트는 다음 프레임에 붙어도 됨). 창이 열리면 판이 **멈춘다** (아래 "멈춤")
+- 창에는 고를 수 있는 카드 중 **서로 다른 3장**(고를 수 있는 것이 3장보다 적으면 그만큼)을 `weight`에 비례해 뽑아 보인다. 씨앗을 쓰는 무작위 (같은 씨앗이면 같은 순서)
+- **고를 수 있는 카드**
+  - friend: 빈 자리가 하나라도 있을 때
+  - upgrade: 그 친구가 판에 하나라도 있을 때, 그리고 고른 횟수 < `max_picks`
+  - beam·lighthouse: 고른 횟수 < `max_picks`
+  - `max_picks` 0은 제한 없음
+- 카드를 누르면 창이 닫히고 효과가 난다. 밀린 고르기가 남았으면 바로 다음 창 (새로 뽑음)
+- 고를 수 있는 카드가 하나도 없으면 창을 열지 않고 그 고르기는 버린다
+- **판 시작**: 카드 판은 시작하자마자 **첫 친구 고르기** 창을 연다: 친구 카드 셋(해마·게·복어 순서)만, 뽑지 않고 그대로. 레벨·쌓인 양은 바꾸지 않음
+
+### 카드 효과
+| 종류 | 효과 |
+|---|---|
+| friend | **놓기 상태**가 된다 (판은 계속 멈춤, 가운데 위에 "친구를 놓을 자리를 눌러요"). 빈 자리를 누르면 거기에 놓고 놓기 상태가 끝난다 (밀린 고르기가 있으면 다음 창). 친구가 있는 자리·바다·끌기는 아무 일 없음 |
+| upgrade | 그 친구 종류 **모두**의 피해 × `value` (고를 때마다 곱함, 이미 놓인 것과 나중에 놓을 것 모두) |
+| beam `width_deg` | 빛 폭 + `value` (그리기·빛 속 판정 모두) |
+| beam `length` | 빛 길이 + `value` |
+| lighthouse `max_hp` | 불빛 최대 + `value`, 지금 불빛도 + `value` (최대를 넘지 않음) |
+| lighthouse `regen` | 1초에 불빛이 + `value`씩 찬다 (겹치면 더함, 최대를 넘지 않음, 멈춤·꺼짐 때는 안 참) |
+
+### 멈춤
+- 카드 창이 열렸거나 놓기 상태면 **멈춤** (`isPaused`). 꺼짐(`isOver`)과 같이: 적·친구·거품·조각·연습 스폰·불빛 차기 모두 멈추고, 빛 끌기와 누르기는 무시한다. 단 카드 창의 카드 누르기와 놓기 상태의 자리 누르기만 받는다
+- 꺼짐이면 창을 열지 않는다
+
+### 그리기
+- 카드 창: 판을 어둡게 덮고, 가운데에 카드 3장 (각 카드: 이름, 설명, 종류별 색 테두리, 친구 카드는 친구 그림). 위에 "레벨 업!" (첫 고르기는 "첫 친구를 골라요")
+- 그리는 순서: … 거품 → 조각 → 제목 → 불빛 막대·조각 막대 → (연습 판) 쟁반 → 놓기 안내 → 카드 창 → 꺼짐 문구
+- 새 글은 `Strings`(창 제목·안내)와 `cards.csv`(이름·설명). 글꼴 도구가 `cards.csv` 글자도 넣게
+
+### 코드 이름 (tester·implementer가 같이 쓰는 약속)
+| 이름 | 뜻 |
+|---|---|
+| `Tables.enemies[id].xp` | 떨어뜨리는 값 (double) |
+| `Tables.progression` | `ProgressionStats`: `xpBase`, `xpStep`, `shardDelay`, `shardSpeed`, `absorbDistance` (double) |
+| `Tables.cards` | `Map<String, CardStats>` (표 순서): `id`, `kind`, `target`, `value`(double), `maxPicks`(int), `weight`(double), `nameKo`, `nameEn`, `descKo`, `descEn` |
+| `LighthouseGame({bool practice = false, int seed = 0, bool cards = false})` | `main.dart`는 `practice: true, cards: true` |
+| `game.xp`, `game.level`, `game.xpNeeded` | 쌓인 양(double), 레벨(int), 지금 레벨의 필요한 양 |
+| `game.addXp(double v)` | 쌓기 (조각이 빨려 들 때 부르는 것과 같음). 레벨 오름·밀린 고르기 처리 |
+| `game.pendingPicks` | 밀린 고르기 수 (int, 열린 창의 것은 빼고) |
+| `game.shards` | `List<Shard>` (`lib/game/shard.dart`): `position`, `value`, 빨려 들면 빠짐 |
+| `game.choice` | 열린 카드 창의 카드 id 목록 `List<String>?` (닫혔으면 null) |
+| `game.pickCard(int index)` | 창의 index번째 카드를 고른다 (창이 없으면 아무 일 없음) |
+| `game.placing` | 놓기 상태의 친구 id (`String?`) |
+| `game.isPaused` | 멈춤 (창 또는 놓기) |
+| `game.availableCards()` | 지금 고를 수 있는 카드 id (`List<String>`, 표 순서) |
+| `game.drawCards()` | 위 규칙으로 뽑은 카드 id (최대 3, 무작위가 한 번 쓰인다) |
+| `game.applyCard(String id)` | 효과만 바로 (창 없이, 고른 횟수 +1). friend면 놓기 상태 |
+| `game.picks` | 카드마다 고른 횟수 `Map<String, int>` (고른 적 없으면 키 없음 또는 0) |
+| `game.damageMultiplier(String friendId)` | 그 친구 종류의 피해 배율 (처음 1) |
+| `game.beam.widthDeg`, `length` | 표 값 + 카드 더한 값 |
+| `game.maxLight` | 불빛 최대 (카드로 바뀜) |
+| `game.lightRegen` | 1초에 차는 양 (처음 0) |
+| `game.xpBar` | `XpBar` (`hud.dart`): `ratio`, `position`·`size` (막대 전체), `levelText` (String, `Lv n`) |
+| `game.cardPanel` | 열린 창의 `CardPanel` (`lib/game/card_panel.dart`) 또는 null: `views` = `List<CardView>` (`cardId`, `position`·`size`, 게임 좌표 왼쪽 위) |
+| `Strings.levelUp`, `Strings.firstPick`, `Strings.placeHint`, `Strings.cardName(CardStats)`, `Strings.cardDesc(CardStats)` | "레벨 업!" / "Level up!", "첫 친구를 골라요" / "Pick your first friend", "친구를 놓을 자리를 눌러요" / "Tap a spot for your friend" |
+
+### 카드 008 리뷰에서 온 작은 일 (tester)
+- T8-04에 표 전제 단언 한 줄, T8-03 변수 이름 (blob → jelly)
+
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)
