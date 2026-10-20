@@ -79,6 +79,15 @@ abstract final class GameConfig {
   static const double bubbleShineOffset = 0.35;
   static const double bubbleShineSize = 0.25;
 
+  /// 빛 속 친구 발밑의 은은한 금빛 (design.md §5-2, 그리기만): 타원 너비·높이, 색(가운데 → 가장자리),
+  /// 숨쉬듯 밝아졌다 어두워지는 한 바퀴(초)와 가장 어두울 때 세기(0~1).
+  static const double beamGlowWidth = 84;
+  static const double beamGlowHeight = 30;
+  static const Color beamGlowInner = Color(0x80FFD66B);
+  static const Color beamGlowOuter = Color(0x00FFD66B);
+  static const double beamGlowPeriod = 1.6;
+  static const double beamGlowMinStrength = 0.55;
+
   // ---- 친구 쟁반 (design.md §5, 판 아래쪽 y 1100~1260) ----
 
   /// 단추 셋을 가로로: 위쪽 y, 단추 크기, 단추 사이 간격 (가로 가운데 맞춤: x 104~616).

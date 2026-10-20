@@ -6,7 +6,7 @@
 
 표 (리드 소유, 읽기만. 뜻은 data/tables/README.md)
   enemies.csv     id, hp, speed, bite, bite_interval, radius       → Tables.enemies (Map<String, EnemyStats>)
-  beam.csv        width_deg, length, slow, vulnerable (한 줄)      → Tables.beam (BeamStats)
+  beam.csv        width_deg, length, slow, vulnerable, friend_haste (한 줄) → Tables.beam (BeamStats)
   lighthouse.csv  hp, spawn_distance (한 줄)                       → Tables.lighthouse (LighthouseStats)
   practice.csv    interval, max_alive (한 줄)                      → Tables.practice (PracticeStats)
   characters.csv  id, kind, name_ko, name_en, display_height       → Tables.characters (Map<String, CharacterStats>)
@@ -31,7 +31,7 @@ OUT = ROOT / "lib" / "game" / "tables.g.dart"
 ENEMY = [("id", "id", "str"), ("hp", "hp", "double"), ("speed", "speed", "double"), ("bite", "bite", "double"),
          ("biteInterval", "bite_interval", "double"), ("radius", "radius", "double")]
 BEAM = [("widthDeg", "width_deg", "double"), ("length", "length", "double"), ("slow", "slow", "double"),
-        ("vulnerable", "vulnerable", "double")]
+        ("vulnerable", "vulnerable", "double"), ("friendHaste", "friend_haste", "double")]
 LIGHTHOUSE = [("hp", "hp", "double"), ("spawnDistance", "spawn_distance", "double")]
 PRACTICE = [("interval", "interval", "double"), ("maxAlive", "max_alive", "int")]
 CHARACTER = [("id", "id", "str"), ("kind", "kind", "str"), ("nameKo", "name_ko", "str"), ("nameEn", "name_en", "str"),
@@ -42,7 +42,8 @@ FRIEND = [("id", "id", "str"), ("attack", "attack", "str"), ("range", "range", "
 # (클래스, 필드, 설명)
 CLASSES = [
     ("EnemyStats", ENEMY, "적 하나 (enemies.csv 한 줄). speed는 게임 px/초, bite_interval은 초"),
-    ("BeamStats", BEAM, "등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율"),
+    ("BeamStats", BEAM, "등대 빛 (beam.csv). slow는 빛 속 빠르기 배율, vulnerable은 빛 속 받는 피해 배율, "
+                         "friend_haste는 빛 속 친구의 쉬는 시간이 흐르는 배율"),
     ("LighthouseStats", LIGHTHOUSE, "등대 (lighthouse.csv). hp는 처음 불빛, spawn_distance는 적이 나타나는 거리"),
     ("PracticeStats", PRACTICE, "연습 스폰 (practice.csv, 7단계 웨이브가 오면 없앤다)"),
     ("CharacterStats", CHARACTER, "캐릭터 (characters.csv 한 줄). display_height는 화면 키 (게임 px)"),

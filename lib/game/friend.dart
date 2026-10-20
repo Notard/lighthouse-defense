@@ -37,6 +37,9 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
   double _windup = 0;
   Enemy? _target;
 
+  /// 빛 속인지: 자리 가운데가 빛 속 (design.md §5-2, 매 순간 본다).
+  bool get inBeam => game.beam.contains(slot.center);
+
   /// 공격 시작 ~ 효과 사이인지.
   bool get isAttacking => _attacking;
 
@@ -46,6 +49,9 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
   CharacterArt? _art;
   final Map<String, SpriteAnimationTicker> _tickers = {};
   String _action = 'idle';
+
+  /// 발밑 금빛이 숨쉬는 시계 (초, 한 바퀴마다 0으로).
+  double _glowClock = 0;
 
   /// 사거리 안 적: 자리 가운데에서 몸 가운데까지 거리 ≤ range이고 쓰러지는 중이 아닌 적.
   List<Enemy> enemiesInRange() => [
@@ -86,7 +92,9 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
   void update(double dt) {
     if (game.isOver) return; // 판이 멈춤: 공격·그림 모두 그대로
     if (dt <= 0) return; // 시간이 흐르지 않은 프레임에는 공격을 시작하지도 진행하지도 않는다 (design.md §5 프레임 시간)
-    cooldown = math.max(0, cooldown - dt);
+    // 빛 속이면 쉬는 시간이 friend_haste배 빨리 준다 (windup은 그대로, design.md §5-2)
+    cooldown = math.max(0, cooldown - dt * (inBeam ? Tables.beam.friendHaste : 1));
+    _glowClock = (_glowClock + dt) % GameConfig.beamGlowPeriod;
     if (_attacking) {
       _windup += dt;
       if (_windup >= windupSeconds) _strike();
@@ -154,6 +162,7 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
 
   @override
   void render(Canvas canvas) {
+    if (inBeam) _renderGlow(canvas);
     final art = _art;
     final ticker = _tickers[_action];
     if (art == null || ticker == null) {
@@ -163,6 +172,30 @@ class Friend extends PositionComponent with HasGameReference<LighthouseGame> {
     // 몸 가운데가 위치(자리 가운데)에 오게, 키 display_height로. 앞을 본다 (뒤집지 않음)
     final s = art.scaleForHeight(Tables.characters[id]!.displayHeight);
     ticker.getSprite().render(canvas, position: -_bodyOf(art) * s, size: art.frameSize * s);
+  }
+
+  /// 빛 속 친구 발밑의 은은한 금빛 타원 (그리기만). 발은 그림의 기준점, 그림 전에는 임시 원의 아래 끝.
+  void _renderGlow(Canvas canvas) {
+    final art = _art;
+    final height = Tables.characters[id]!.displayHeight;
+    final footY = art == null ? height / 2 : (art.anchor.y - _bodyOf(art).y) * art.scaleForHeight(height);
+    final phase = _glowClock / GameConfig.beamGlowPeriod; // 0~1
+    final wave = (1 - math.cos(phase * 2 * math.pi)) / 2; // 0~1
+    final strength = GameConfig.beamGlowMinStrength + (1 - GameConfig.beamGlowMinStrength) * wave;
+    final inner = GameConfig.beamGlowInner;
+    final paint = Paint()
+      ..shader = Gradient.radial(
+        Offset(0, footY),
+        GameConfig.beamGlowWidth / 2,
+        [inner.withValues(alpha: inner.a * strength), GameConfig.beamGlowOuter],
+      );
+    canvas.save();
+    // 둥근 빛을 납작하게 눌러 타원으로
+    canvas.translate(0, footY);
+    canvas.scale(1, GameConfig.beamGlowHeight / GameConfig.beamGlowWidth);
+    canvas.translate(0, -footY);
+    canvas.drawOval(Rect.fromCircle(center: Offset(0, footY), radius: GameConfig.beamGlowWidth / 2), paint);
+    canvas.restore();
   }
 
   static final _placeholder = Paint()..color = GameConfig.friendPlaceholder;
