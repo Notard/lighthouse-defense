@@ -23,6 +23,12 @@ ROOT = Path(__file__).resolve().parents[2]
 TIMEOUT = 60 * 60  # 한 번 실행 최대 1시간
 MODEL = os.environ.get("CODEX_MODEL", "gpt-5.6-sol")
 
+# flutter·dart가 저장소 밖에 쓰는 곳 (없으면 샌드박스 안에서 flutter analyze·test가 말없이 멈춘다)
+_LOCAL = Path(os.environ.get("LOCALAPPDATA", ""))
+_ROAMING = Path(os.environ.get("APPDATA", ""))
+WRITABLE = [p for p in [Path("C:/flutter/bin/cache"), _LOCAL / "Pub" / "Cache", _LOCAL / ".dartServer",
+                        _ROAMING / ".dart-tool", _LOCAL / "Temp"] if p.exists()]
+
 
 def git(*args: str) -> str:
     return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True, encoding="utf-8").stdout
@@ -63,7 +69,10 @@ def main() -> int:
     events = logs / f"{stamp}-implementer.jsonl"
     report = logs / f"{stamp}-report.md"
 
-    cmd = [codex, "exec", "-m", MODEL, "-C", str(ROOT), "-s", "workspace-write", "--json", "-o", str(report), "-"]
+    roots = "[" + ", ".join('"' + str(p).replace("\\", "/") + '"' for p in WRITABLE) + "]"
+    cmd = [codex, "exec", "-m", MODEL, "-C", str(ROOT), "-s", "workspace-write",
+           "-c", f"sandbox_workspace_write.writable_roots={roots}",
+           "--json", "-o", str(report), "-"]
 
     before = snapshot()
     with events.open("w", encoding="utf-8") as out:
