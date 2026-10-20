@@ -5,12 +5,12 @@
 - **관련 문서**: `docs/design.md` §4, `docs/tests/04-enemies.md` (T4-01~15), `docs/acceptance/04-enemies.md` (A4-1~7), 표 `data/tables/*.csv` (리드 소유, 읽기만)
 - **맡는 순서**: tester → implementer(변환기 → 적·빛·불빛 → 연습 스폰 → 그림 → 도구 일) → 사용자 미리보기 → reviewer
 - **끝내는 조건**:
-  - [ ] T4-01~15 테스트 있고 통과
-  - [ ] `bash tools/loop/check.sh implementer` 통과
-  - [ ] `python tools/gen_tables.py --check` 통과
+  - [x] T4-01~15 테스트 있고 통과
+  - [x] `bash tools/loop/check.sh implementer` 통과
+  - [x] `python tools/gen_tables.py --check` 통과
   - [ ] 사용자 확인 (A4-3~6)
-  - [ ] reviewer 승인
-- **바퀴**: 0 / 3
+  - [x] reviewer 승인
+- **바퀴**: 1 / 3
 
 ## implementer 참고
 - 글을 더하므로 글꼴을 다시: `python tools/subset_font.py "C:/Users/elbre/AppData/Local/Temp/claude/C--forest-defense/259dfae4-2eb0-4b9b-9b79-e0a74836419c/scratchpad/jua_dl/Jua-Regular.ttf"` (원본은 저장소에 넣지 않음)
@@ -19,3 +19,4 @@
 - 리드가 미리보기로 볼 수 있게 연습 판 스크린숏 `preview/06_practice.jpg`를 남겨도 됨 (허용 경로 아님 → 만들지 말고 보고만, 리드가 찍는다)
 
 ## 바퀴 기록
+- **1바퀴** (2026-10-20): tester T4-01~15 (빨간 불, 모호한 점 둘 → 설계 정리) → implementer 65/65 (결정 요청: 적 리그 strip_rim → 여섯 모두 켬, 빛 여유 1e-6 모자람 → 1e-3, Flame 이름 겹침 둘) → 리드 웹 확인·스크린숏 → reviewer 승인 (꼭 고칠 것 없음, 미룰 것 다섯은 STATE)
