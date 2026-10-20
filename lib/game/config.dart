@@ -33,7 +33,7 @@ abstract final class GameConfig {
 
   // ---- 입력 ----
 
-  /// 누른 곳에서 이만큼 넘게 움직이면 끌기, 아니면 누르기.
+  /// 누른 곳에서 화면(논리) px로 이만큼 넘게 움직이면 끌기, 아니면 누르기 (게임 좌표가 아님).
   static const double dragThreshold = 12;
 
   /// 등대 가운데에서 이 거리 안에서 끌 때는 빛 방향을 바꾸지 않는다.
