@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 10:50</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 11:10</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -223,6 +223,82 @@ article td img{margin:0 auto}
 <h3>발생한 문제와 해결</h3>
 <ol>
 <li>조사 자료 중 wikidocs 글은 403으로 읽지 못함 → 나머지 넷으로 정리. "backpressure"·<code>PROGRESS.md</code> 같은 말은 읽은 자료에 없어 쓰지 않음</li>
+</ol>
+<h2>2. 등대 둘레 자리와 입력: 루프 첫 카드 002 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "응 고고" (루프 구조 확인 → 첫 바퀴 시작)</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>등대 둘레에 자리 18개 (안쪽 6 · 150, 바깥 12 · 270, 15° 엇갈림). 누르면 고르고(흰 테두리), 다시 누르거나 바다를 누르면 풀림</li>
+<li>판 안 어디서든 끌면 등대 빛(폭 40°, 길이 640 부채꼴)이 손가락 쪽을 가리키고 끄는 동안 따라옴. 가운데 40 미만에서는 그대로</li>
+<li>누르기/끌기 경계: <strong>화면(논리) px 12</strong> (1차 리뷰 뒤 바꿈)</li>
+<li><strong>루프가 실제로 돌았다</strong>: tester(빨간 불) → implementer(첫 시도 통과) → 관문에서 테스트 파일 분석 경고 → implementer는 범위 밖이라 <strong>보고만</strong>, tester가 정리 → reviewer <strong>거절</strong>(6가지) → 리드가 설계·표 고침 → 2바퀴 → reviewer <strong>승인</strong></li>
+</ul>
+<p><img alt="PC 마우스: O2를 골라 흰 테두리, 끌어서 빛이 오른쪽 위로" src="preview/02_ring.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>바퀴</th>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>준비</td>
+<td>리드</td>
+<td><code>docs/design.md</code> §2 (각도 0° 오른쪽·90° 아래, 자리 표, 입력 규칙, <strong>코드 이름 표</strong>로 tester·implementer 이름 맞춤), <code>docs/tests/02-ring.md</code> T2-01~22, <code>docs/acceptance/02-ring.md</code>, 카드 <code>loop/tasks/002-ring-input.md</code>, 브랜치 <code>loop/002-ring</code></td>
+</tr>
+<tr>
+<td>1</td>
+<td>tester (Sonnet)</td>
+<td><code>test/ring_test.dart</code> 22개 + <code>test/support.dart</code>(게임 → 화면 좌표, 손가락 도우미). 구현 전이라 컴파일 안 됨</td>
+</tr>
+<tr>
+<td>1</td>
+<td>implementer (Opus)</td>
+<td><code>lib/game/slots.dart</code>, <code>beam.dart</code>, <code>geometry.dart</code>, <code>board_input.dart</code>(판 전체를 덮는 입력 층 하나에서 누르기·끌기 판정), <code>config.dart</code>, <code>lighthouse_game.dart</code>. 첫 시도 23/23</td>
+</tr>
+<tr>
+<td>1</td>
+<td>관문</td>
+<td>분석 실패: <code>test/support.dart</code> 불필요한 import 2개. implementer는 고치지 않고 "테스트 의문"으로 보고 → 리드가 tester에게 되돌림 → 정리 → 모두 통과</td>
+</tr>
+<tr>
+<td>1</td>
+<td>reviewer (Opus, 읽기만)</td>
+<td><strong>거절</strong>: ① T2-21 허용 오차가 표보다 느슨 ② T2-19가 빈 곳 규칙을 검증 못 함(빼도 통과) ③ 12/13 px 경계 없음 ④ 12가 게임 좌표라 폰에서 약 6.5 px로 너무 민감 ⑤ 미만/이하 문구 ⑥ 여백에서 시작한 끌기</td>
+</tr>
+<tr>
+<td>2</td>
+<td>리드</td>
+<td>④ 화면 px 기준으로 설계 변경, ⑤ 40 미만·48 이하, ⑥ 판 안에서 시작한 끌기만. 표: T2-19 보강, T2-21 화면 8 px·±0.01°, T2-23(화면 13 px → 끌기)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>tester → implementer</td>
+<td>T2-21 빨간 불 → 문턱을 캔버스 거리로 (첫 시도)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>reviewer</td>
+<td><strong>승인</strong>: 1~6 해결, 새 문제 없음</td>
+</tr>
+</tbody>
+</table>
+<h3>검증</h3>
+<ul>
+<li>관문(<code>bash tools/loop/check.sh implementer</code>): 분석 문제 없음, 테스트 24/24, 범위 통과, 웹 빌드 통과 (리드가 직접 다시 돌림)</li>
+<li>화면(리드, PC 마우스): 자리 18개 두 고리 색, O2 클릭 강조, 끌기로 빛이 끝점 쪽(약 320°), 끌기가 고르기를 바꾸지 않음</li>
+<li>남음: 폰 세로 터치 (사용자)</li>
+</ul>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>미리보기 도구가 새 폴더의 <code>.claude/launch.json</code>이 아니라 이전 프로젝트 설정을 읽어 숲 지키기 서버를 띄움 → 멈추고 서버를 직접 띄움. 그때 Git Bash가 <code>--base /lighthouse-defense/</code>를 Windows 경로로 바꿔 404 → <code>MSYS_NO_PATHCONV=1</code> (숲 지키기에서도 겪은 것)</li>
+<li>폰 크기 흉내에서 화면 찍기가 이상하게 나옴 (숲 지키기 때와 같은 미리보기 문제) → PC 크기로 확인, 폰은 사용자에게</li>
+<li><code>gate.py</code> 출력이 Windows 콘솔에서 깨짐 → UTF-8로 출력</li>
 </ol></article>
 </div>
 </body>
