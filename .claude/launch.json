@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "lighthouse-web",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["C:/lighthouse_defense/tools/serve_web.py", "8791", "--base", "/lighthouse-defense/"],
+      "port": 8791,
+      "url": "http://localhost:8791"
+    }
+  ]
+}
