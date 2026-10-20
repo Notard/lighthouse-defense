@@ -50,7 +50,7 @@ void main() {
   }
 
   Vector2 buttonCenter(LighthouseGame game, String friendId) {
-    final b = game.tray.buttons.firstWhere((b) => b.friendId == friendId);
+    final b = game.tray!.buttons.firstWhere((b) => b.friendId == friendId);
     return b.position + b.size / 2;
   }
 
@@ -130,7 +130,7 @@ void main() {
   GameTester(LighthouseGame.new).testGameWidget(
     'T5-03 쟁반: 단추 셋 (해마·게·복어), 판 안 아래쪽, 겹치지 않음, 처음 held null',
     verify: (game, tester) async {
-      final buttons = game.tray.buttons;
+      final buttons = game.tray!.buttons;
       expect([for (final b in buttons) b.friendId], ['seahorse', 'crab', 'pufferfish']);
       for (final b in buttons) {
         expect(b.position.x, greaterThanOrEqualTo(0), reason: b.friendId);
@@ -145,7 +145,7 @@ void main() {
           expect(a.overlaps(b), isFalse, reason: '${buttons[i].friendId} / ${buttons[j].friendId}');
         }
       }
-      expect(game.tray.held, isNull);
+      expect(game.tray!.held, isNull);
     },
   );
 
@@ -153,18 +153,18 @@ void main() {
     'T5-04 단추로 들고, 빈 자리에 이어 놓고, 다시 누르면 내려놓는다 (그 뒤 자리 누르기는 고르기)',
     verify: (game, tester) async {
       await tapButton(tester, game, 'seahorse');
-      expect(game.tray.held, 'seahorse');
+      expect(game.tray!.held, 'seahorse');
       expect(game.selectedSlot, isNull);
 
       await tapSlot(tester, game, 'O3');
       await tapSlot(tester, game, 'O4');
       expect(slotOf(game, 'O3').friend?.id, 'seahorse');
       expect(slotOf(game, 'O4').friend?.id, 'seahorse');
-      expect(game.tray.held, 'seahorse');
+      expect(game.tray!.held, 'seahorse');
       expect(game.selectedSlot, isNull);
 
       await tapButton(tester, game, 'seahorse');
-      expect(game.tray.held, isNull);
+      expect(game.tray!.held, isNull);
 
       await tapSlot(tester, game, 'O6');
       expect(slotOf(game, 'O6').friend, isNull);
@@ -182,7 +182,7 @@ void main() {
       await tapSlot(tester, game, 'I0');
       expect(slotOf(game, 'I0').friend?.id, 'crab');
       expect(game.friends, hasLength(1));
-      expect(game.tray.held, 'pufferfish');
+      expect(game.tray!.held, 'pufferfish');
     },
   );
 
@@ -402,7 +402,7 @@ void main() {
     verify: (game, tester) async {
       lightOut(game);
       await tapButton(tester, game, 'crab');
-      expect(game.tray.held, isNull);
+      expect(game.tray!.held, isNull);
     },
   );
 
