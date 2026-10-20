@@ -69,6 +69,24 @@ class CharacterStats {
   final double displayHeight;
 }
 
+/// 친구 하나 (friends.csv 한 줄). attack은 shot·melee·burst, range는 게임 px, interval은 초, projectile_speed는 거품 빠르기 (게임 px/초, shot만).
+class FriendStats {
+  const FriendStats({required this.id, required this.attack, required this.range, required this.damage, required this.interval, required this.projectileSpeed});
+
+  /// `id`
+  final String id;
+  /// `attack`
+  final String attack;
+  /// `range`
+  final double range;
+  /// `damage`
+  final double damage;
+  /// `interval`
+  final double interval;
+  /// `projectile_speed`
+  final double projectileSpeed;
+}
+
 /// 숫자 표 전체.
 abstract final class Tables {
   /// enemies.csv (id → 값, 표 순서).
@@ -95,5 +113,12 @@ abstract final class Tables {
     'shadow_blob': CharacterStats(id: 'shadow_blob', kind: 'enemy', nameKo: '\uADF8\uB9BC\uC790 \uBC29\uC6B8', nameEn: 'Shadow Blob', displayHeight: 64.0),
     'ink_squid': CharacterStats(id: 'ink_squid', kind: 'enemy', nameKo: '\uBA39\uBB3C \uC624\uC9D5\uC5B4', nameEn: 'Ink Squid', displayHeight: 70.0),
     'shadow_jelly': CharacterStats(id: 'shadow_jelly', kind: 'enemy', nameKo: '\uADF8\uB9BC\uC790 \uD574\uD30C\uB9AC', nameEn: 'Shadow Jelly', displayHeight: 74.0),
+  };
+
+  /// friends.csv (id → 값, 표 순서).
+  static const Map<String, FriendStats> friends = {
+    'seahorse': FriendStats(id: 'seahorse', attack: 'shot', range: 260.0, damage: 8.0, interval: 1.0, projectileSpeed: 420.0),
+    'crab': FriendStats(id: 'crab', attack: 'melee', range: 90.0, damage: 14.0, interval: 1.2, projectileSpeed: 0.0),
+    'pufferfish': FriendStats(id: 'pufferfish', attack: 'burst', range: 110.0, damage: 6.0, interval: 1.5, projectileSpeed: 0.0),
   };
 }

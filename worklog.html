@@ -72,7 +72,7 @@ article td img{margin:0 auto}
 </head>
 <body>
 <div class="wrap">
-  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 14:29</p>
+  <p class="muted"><a href="todo.html">← 할 일 목록</a> · <a href="plan.html">계획서</a> · <a href="preview.html">게임 미리보기</a> · <a href="art_preview.html">아트 미리보기</a> · <a href="worklog.html">작업 기록</a> · <a href="report.html">결과 보고서</a> · 마지막 갱신 2026-10-20 15:05</p>
   <article><h1>등대 지키기 작업 기록</h1>
 <h2>0. 기획 (2026-10-20)</h2>
 <blockquote>
@@ -547,7 +547,74 @@ article td img{margin:0 auto}
 <li>웹 첫 실행에서 적이 늦게 보임: 첫 적은 2초 뒤 화면 밖 780에서 출발해 화면에 들어오기까지 시간이 걸림 (정상)</li>
 </ol>
 <h3>다음 카드로 넘긴 것 (reviewer)</h3>
-<p>탭을 숨겼다 돌아올 때 큰 dt, 닿는 거리 안 스폰 시 남은 시간, 그림 전 hit, cut_parts 도움말, gen_tables inf·nan, 갉기 타이머와 attack 이벤트 프레임</p></article>
+<p>탭을 숨겼다 돌아올 때 큰 dt, 닿는 거리 안 스폰 시 남은 시간, 그림 전 hit, cut_parts 도움말, gen_tables inf·nan, 갉기 타이머와 attack 이벤트 프레임</p>
+<h2>5. 카드 007: 친구 놓기와 자동 공격 (2026-10-20)</h2>
+<blockquote>
+<p>사용자: "응" (4단계 승인 뒤 5단계로) → (스크린숏) "응. 등대 빛은 아군을 조금 더 강하게 해주는 효과가 좋지 않을까?" → 카드 008</p>
+</blockquote>
+<h3>결과 요약</h3>
+<ul>
+<li>판 아래 <strong>친구 쟁반</strong>(해마·게·복어): 단추로 들고 빈 자리를 눌러 놓기 (연습용, 6단계 카드가 대신함)</li>
+<li>자동 공격 (<code>data/tables/friends.csv</code>): 사거리 안에서 등대에 가장 가까운 적을 노림, 공격 시작 1/3초 뒤 효과(그림 이벤트 프레임에 맞춤)</li>
+<li>해마: 과녁을 따라가는 거품 / 게: 한 마리 집기(과녁이 먼저 쓰러지면 헛침) / 복어: 둘레 모두</li>
+<li>한 번 update 최대 0.1초 (탭을 숨겼다 돌아와도 불빛이 한꺼번에 꺼지지 않음)</li>
+<li>카드 006 리뷰 작은 일: 닿는 거리 안 스폰, 갉는 그림과 피해 맞춤, 그림 전 hit, 도구 도움말, 표 숫자 검사(inf·nan·빈 값·attack 값)</li>
+</ul>
+<p><img alt="친구 놓기" src="preview/07_friends.jpg" /></p>
+<h3>진행 방식</h3>
+<table>
+<thead>
+<tr>
+<th>바퀴</th>
+<th>누가</th>
+<th>무엇</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>리드</td>
+<td>friends.csv, 설계 §5 (과녁 규칙·windup·거품·쟁반·코드 이름), T5-01~17, A5-1~6</td>
+</tr>
+<tr>
+<td>1</td>
+<td>tester → implementer</td>
+<td>테스트 17 → 구현 82/82. 판단 셋(dt 0 프레임, 거품 맞음 판정 순서, 쟁반 양옆은 바다)을 리드가 설계에</td>
+</tr>
+<tr>
+<td>1</td>
+<td>리드</td>
+<td>웹에서 여섯 마리 놓고 확인: 친구가 적을 쓰러뜨려 불빛이 버팀</td>
+</tr>
+<tr>
+<td>1</td>
+<td>reviewer</td>
+<td><strong>거절</strong>: 친구가 dt 0 update에서도 공격 시작, T5-16이 느슨함(꺼진 뒤 멈춤을 확인 못 함)</td>
+</tr>
+<tr>
+<td>2</td>
+<td>리드 → tester → implementer</td>
+<td>T5-16 엄격히, T5-18(dt 0)·T5-19(꺼짐 멈춤), A5-7 → 한 줄 고침 + 그리기 숫자 config로 + attack 값 검사 → 84/84</td>
+</tr>
+<tr>
+<td>2</td>
+<td>reviewer · 사용자</td>
+<td>승인</td>
+</tr>
+</tbody>
+</table>
+<h3>검증</h3>
+<ul>
+<li>관문: 분석 문제 없음, 테스트 84/84, 범위, 웹 빌드, <code>gen_tables.py --check</code></li>
+<li>커밋별 범위: tester는 test/만, implementer는 lib/·tools/만 (<code>git show --stat</code>)</li>
+</ul>
+<h3>발생한 문제와 해결</h3>
+<ol>
+<li>테스트 도우미의 <code>update(0)</code>이 "첫 update"로 쳐져 경계가 흔들림 → "dt ≤ 0이면 아무것도 안 함" 규칙 (적·친구·거품)</li>
+<li>그 규칙이 친구에 빠짐 → reviewer가 잡음 (2바퀴)</li>
+<li>쟁반 영역이 2단계 테스트의 바다 누르기 점과 겹침 → 단추를 가운데에 모음</li>
+<li>미룸: T5-11(거품이 다른 적을 맞히지 않음)을 다른 적을 두고 더 단단히</li>
+</ol></article>
 </div>
 </body>
 </html>

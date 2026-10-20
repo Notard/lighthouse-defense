@@ -10,13 +10,16 @@
   lighthouse.csv  hp, spawn_distance (한 줄)                       → Tables.lighthouse (LighthouseStats)
   practice.csv    interval, max_alive (한 줄)                      → Tables.practice (PracticeStats)
   characters.csv  id, kind, name_ko, name_en, display_height       → Tables.characters (Map<String, CharacterStats>)
+  friends.csv     id, attack, range, damage, interval, projectile_speed → Tables.friends (Map<String, FriendStats>)
 
-- 숫자 열은 double, max_alive만 int. 표에 열이 빠졌거나 숫자가 아니면 어느 표·줄·열인지 알리고 멈춘다
+- 숫자 열은 double, max_alive만 int. 표에 열이 빠졌거나 숫자가 아니거나 비었거나 inf·nan이면
+  어느 표·줄·열인지 알리고 멈춘다 (종료 코드 1). friends.csv의 attack이 shot·melee·burst가 아니어도 멈춘다
 - 줄 순서는 표 그대로 (Map도 그 순서)
 - 글은 ASCII 밖 글자를 \\uXXXX로 적는다 (lib/ 문자열에 한글을 바로 쓰지 않는 규칙, test/font_test.dart T3-09)
 - 만든 파일은 줄바꿈 LF. 비교(--check)는 줄바꿈(CRLF/LF)을 무시한다
 """
 import csv
+import math
 import sys
 from pathlib import Path
 
@@ -33,6 +36,8 @@ LIGHTHOUSE = [("hp", "hp", "double"), ("spawnDistance", "spawn_distance", "doubl
 PRACTICE = [("interval", "interval", "double"), ("maxAlive", "max_alive", "int")]
 CHARACTER = [("id", "id", "str"), ("kind", "kind", "str"), ("nameKo", "name_ko", "str"), ("nameEn", "name_en", "str"),
              ("displayHeight", "display_height", "double")]
+FRIEND = [("id", "id", "str"), ("attack", "attack", "str"), ("range", "range", "double"), ("damage", "damage", "double"),
+          ("interval", "interval", "double"), ("projectileSpeed", "projectile_speed", "double")]
 
 # (클래스, 필드, 설명)
 CLASSES = [
@@ -41,6 +46,8 @@ CLASSES = [
     ("LighthouseStats", LIGHTHOUSE, "등대 (lighthouse.csv). hp는 처음 불빛, spawn_distance는 적이 나타나는 거리"),
     ("PracticeStats", PRACTICE, "연습 스폰 (practice.csv, 7단계 웨이브가 오면 없앤다)"),
     ("CharacterStats", CHARACTER, "캐릭터 (characters.csv 한 줄). display_height는 화면 키 (게임 px)"),
+    ("FriendStats", FRIEND, "친구 하나 (friends.csv 한 줄). attack은 shot·melee·burst, range는 게임 px, interval은 초, "
+                            "projectile_speed는 거품 빠르기 (게임 px/초, shot만)"),
 ]
 
 DART_TYPE = {"str": "String", "double": "double", "int": "int"}
@@ -81,12 +88,18 @@ def value(table: str, line: int, row: dict, column: str, kind: str) -> str:
         if not raw:
             sys.exit(f"data/tables/{table} {line}번째 줄: '{column}'이 비었습니다")
         return dart_string(raw)
+    where = f"data/tables/{table} {line}번째 줄: '{column}'"
+    if not raw:
+        sys.exit(f"{where}이 비었습니다")
     try:
         if kind == "int":
             return str(int(raw))
-        return repr(float(raw))
+        number = float(raw)
     except ValueError:
-        sys.exit(f"data/tables/{table} {line}번째 줄: '{column}' 값 {raw!r}이 {'정수' if kind == 'int' else '수'}가 아닙니다")
+        sys.exit(f"{where} 값 {raw!r}이 {'정수' if kind == 'int' else '수'}가 아닙니다")
+    if not math.isfinite(number):
+        sys.exit(f"{where} 값 {raw!r}은 쓸 수 없습니다 (inf·nan)")
+    return repr(number)
 
 
 def construct(cls: str, fields: list, table: str, line: int, row: dict) -> str:
@@ -101,11 +114,18 @@ def single(cls: str, fields: list, table: str) -> str:
     return construct(cls, fields, table, 2, rows[0])
 
 
+# 글 칸 중 정해진 값만 받는 칸: (표, 열) → 받는 값
+CHOICES = {("friends.csv", "attack"): ("shot", "melee", "burst")}
+
+
 def keyed(cls: str, fields: list, table: str) -> list[str]:
     rows = read(table)
     seen = set()
     entries = []
     for i, row in enumerate(rows, start=2):
+        for (t, column), allowed in CHOICES.items():
+            if t == table and column in row and row[column] not in allowed:
+                sys.exit(f"data/tables/{table} {i}번째 줄: '{column}' 값 {row[column]!r}은 {'·'.join(allowed)} 중 하나여야 합니다")
         key = row.get("id", "")
         if key in seen:
             sys.exit(f"data/tables/{table} {i}번째 줄: id '{key}'가 겹칩니다")
@@ -150,6 +170,11 @@ def render() -> str:
     lines.append("  /// characters.csv (id → 값, 표 순서).")
     lines.append("  static const Map<String, CharacterStats> characters = {")
     lines += keyed("CharacterStats", CHARACTER, "characters.csv")
+    lines.append("  };")
+    lines.append("")
+    lines.append("  /// friends.csv (id → 값, 표 순서).")
+    lines.append("  static const Map<String, FriendStats> friends = {")
+    lines += keyed("FriendStats", FRIEND, "friends.csv")
     lines.append("  };")
     lines.append("}")
     return "\n".join(lines) + "\n"

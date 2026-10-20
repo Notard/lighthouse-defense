@@ -2,6 +2,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/painting.dart';
 
 import 'config.dart';
+import 'friend.dart';
 import 'geometry.dart';
 
 /// 자리가 놓인 고리.
@@ -25,6 +26,9 @@ class Slot extends PositionComponent {
 
   /// 지금 고른 자리인지 (LighthouseGame이 바꾼다).
   bool selected = false;
+
+  /// 이 자리의 친구 (없으면 null, LighthouseGame.placeFriend가 놓는다).
+  Friend? friend;
 
   /// 게임 좌표 [p]가 이 자리의 누르는 범위 안인지.
   bool touches(Vector2 p) => p.distanceTo(center) <= GameConfig.slotTouchRadius;
