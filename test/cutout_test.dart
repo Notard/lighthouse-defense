@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' show ImageByteFormat, instantiateImageCodec;
 
 import 'package:flame_test/flame_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -158,6 +159,66 @@ void main() {
     }
     expect(rows.where((r) => r[1] == 'friend'), hasLength(3));
     expect(rows.where((r) => r[1] == 'enemy'), hasLength(3));
+  });
+
+  Map<String, String> csvKinds() => {
+        for (final l in File('data/tables/characters.csv').readAsLinesSync().skip(1))
+          if (l.trim().isNotEmpty) l.split(',')[0]: l.split(',')[1],
+      };
+
+  Map<String, dynamic> auraTable() =>
+      jsonDecode(File('data/art/aura.json').readAsStringSync()) as Map<String, dynamic>;
+
+  test('T3-25 시트의 aura는 캐릭터의 kind와 같고 aura_color는 aura.json의 그 편 색과 같다', () {
+    final kinds = csvKinds();
+    final table = auraTable();
+    for (final id in all) {
+      final json = sheet(id);
+      expect(json['aura'], kinds[id], reason: '$id aura');
+      expect((json['aura_color'] as String?)?.toUpperCase(), (table[kinds[id]] as String).toUpperCase(),
+          reason: '$id aura_color');
+    }
+  });
+
+  testWidgets('T3-26 첫 동작 첫 프레임의 반투명 픽셀에 그 편 오라 색이 300개 이상, 반대편 색은 그보다 적다', (tester) async {
+    final kinds = csvKinds();
+    final table = auraTable();
+    List<int> rgb(String hex) => [for (var i = 1; i < 7; i += 2) int.parse(hex.substring(i, i + 2), radix: 16)];
+    bool near(int r, int g, int b, List<int> c) =>
+        (r - c[0]).abs() <= 60 && (g - c[1]).abs() <= 60 && (b - c[2]).abs() <= 60;
+
+    final problems = <String>[];
+    await tester.runAsync(() async {
+      for (final id in all) {
+        final kind = kinds[id]!;
+        final other = kind == 'friend' ? 'enemy' : 'friend';
+        final file = File('assets/images/$id/${friends.contains(id) ? 'idle' : 'move'}.webp');
+        if (!file.existsSync()) {
+          problems.add('${file.path}가 없다');
+          continue;
+        }
+        final frame = nums(sheet(id)['frame']);
+        final codec = await instantiateImageCodec(file.readAsBytesSync());
+        final image = (await codec.getNextFrame()).image;
+        final data = (await image.toByteData(format: ImageByteFormat.rawRgba))!;
+        final own = rgb(table[kind] as String);
+        final opposite = rgb(table[other] as String);
+        var ownCount = 0, otherCount = 0;
+        for (var y = 0; y < image.height; y++) {
+          for (var x = 0; x < frame[0] && x < image.width; x++) {
+            final i = (y * image.width + x) * 4;
+            final a = data.getUint8(i + 3);
+            if (a < 20 || a > 200) continue;
+            final r = data.getUint8(i), g = data.getUint8(i + 1), b = data.getUint8(i + 2);
+            if (near(r, g, b, own)) ownCount++;
+            if (near(r, g, b, opposite)) otherCount++;
+          }
+        }
+        if (ownCount < 300) problems.add('$id: 그 편 오라 색 픽셀 $ownCount개 (300 이상이어야 함)');
+        if (otherCount >= ownCount) problems.add('$id: 반대편 색 픽셀 $otherCount개가 그 편 $ownCount개 이상');
+      }
+    });
+    expect(problems, isEmpty);
   });
 }
 
