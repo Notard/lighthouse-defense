@@ -356,4 +356,56 @@
 ### 카드 008 리뷰에서 온 작은 일 (tester)
 - T8-04에 표 전제 단언 한 줄, T8-03 변수 이름 (blob → jelly)
 
+## 7. 웨이브·보스·이김과 짐·결과 창 (7단계, 카드 010)
+
+### 판의 종류
+- `LighthouseGame(waves: true)`: **웨이브 판** (앱은 `cards: true, waves: true`, 연습 스폰 없음). `waves: false`(기본)는 지금까지와 같다 (웨이브 없음, 이김 없음)
+- 연습 스폰(`practice: true`)은 테스트·개발용으로 남기되 **보스는 뽑지 않는다**
+
+### 웨이브 (`waves.csv`, `wave_rules.csv`)
+- 판이 시작되고(카드 판이면 첫 친구를 놓은 뒤부터, 멈춤 동안은 시간이 안 흐르므로 저절로) `first_delay`초 뒤 웨이브 1 시작
+- 웨이브 n이 시작되면 그 웨이브의 줄마다: 시작에서 `delay` + k × `interval`초에 k번째(0부터) 적이 나온다 (`count`개). 각도는 0 이상 360 미만 고르게, 씨앗 무작위 (같은 씨앗이면 같은 각도)
+- 그 웨이브의 적이 **모두 나왔고** 판에 쓰러지는 중이 아닌 적이 **하나도 없으면** 웨이브를 깸. 그러면 `rest`초 쉬고 다음 웨이브 시작
+- 마지막 웨이브(표의 가장 큰 번호, 지금 10)를 깨면 **이김 (새벽)**
+- 웨이브 시간·쉬는 시간은 멈춤(카드 창·놓기·꺼짐) 동안 흐르지 않는다
+- 웨이브가 시작되면 가운데에 알림 `banner_seconds`초: "웨이브 n" (보스가 있는 웨이브는 "보스가 와요!")
+- 제목 자리에 웨이브 글: "웨이브 n / 10" (첫 웨이브 전에는 n = 1). 웨이브 판에서는 제목(`TitleText`)을 그리지 않는다
+
+### 보스
+- `enemies.csv`의 `boss` 1인 적. 지금: 큰 먹물 오징어(웨이브 5), 큰 그림자 해파리(웨이브 10). 규칙은 다른 적과 같다 (체력·속도·갉기·반지름·xp는 표)
+- 그림: `art`의 시트를, 키 = characters의 그 그림 `display_height` × `scale`로. 보스는 머리 위에 작은 체력 막대 (그리기만)
+- 모든 적의 그림 키는 이제 이 규칙 (보통 적은 art = 자기 id, scale 1이라 지금과 같다)
+
+### 이김과 짐
+- `game.result`: 놀이 중 null, 이기면 `won`, 불빛이 꺼지면 `lost`. **`isOver` = result가 있음** (이겨도 판이 멈춘다: 지금까지의 꺼짐과 같은 멈춤)
+- 웨이브 판이 끝나면 **결과 창**: 제목 ("새벽이 왔어요!" / "불빛이 꺼졌어요"), 다다른 웨이브 `n / 10`, 쓰러뜨린 적 수, 레벨, 시간(m:ss), **다시 하기** 단추. 웨이브 판에서는 `LightOutText` 대신 결과 창
+- 다시 하기: 판이 받은 `onRestart` 콜백을 부른다. 앱(`main.dart`)은 새 판을 만들어 바꿔 끼운다
+- `game.defeated`: 쓰러뜨린 적 수 (쓰러지는 순간 +1, 한 번만). `game.elapsed`: 멈춤이 아닐 때만 흐르는 놀이 시간(초)
+
+### 그리는 순서
+… 거품 → 조각 → 제목 또는 웨이브 글 → 막대들 → (연습 판) 쟁반 → 놓기 안내 → 웨이브 알림 → 카드 창 → 꺼짐 문구 또는 결과 창
+
+### 코드 이름 (tester·implementer가 같이 쓰는 약속)
+| 이름 | 뜻 |
+|---|---|
+| `Tables.enemies[id]`: `art`(String), `scale`(double), `boss`(bool) | 새 칸 |
+| `Tables.waves` | `List<WaveRow>` (표 순서): `wave`(int), `enemy`, `count`(int), `interval`, `delay` (double) |
+| `Tables.waveRules` | `WaveRules`: `firstDelay`, `rest`, `bannerSeconds` |
+| `LighthouseGame({practice, seed, cards, waves = false, void Function()? onRestart})` | |
+| `game.wave` | 지금(또는 막 깬) 웨이브 번호 (int, 첫 웨이브 전 0) |
+| `game.waveCount` | 마지막 웨이브 번호 (표에서) |
+| `game.isResting` | 웨이브를 깨고 다음을 기다리는 중 (첫 웨이브 전 기다림도 참) |
+| `game.waveSpawned` | 이번 웨이브에서 지금까지 나온 적 수 (int) |
+| `game.startWave(int n)` | (테스트·개발) 지금 바로 웨이브 n을 시작 (쉬는 시간·남은 스폰은 버림) |
+| `game.banner` | 떠 있는 알림 글 (`String?`) |
+| `game.result` | `GameResult?` (`won`, `lost`) |
+| `game.defeated`, `game.elapsed` | 위 |
+| `game.resultPanel` | `ResultPanel?` (`lib/game/result_panel.dart`): `restartButton`의 `position`·`size` (게임 좌표 왼쪽 위), `lines` (`List<String>`, 보이는 글 줄들) |
+| `WaveLabel` (`hud.dart`) | 웨이브 글 컴포넌트, `text` |
+| `Strings.wave(n, total)`, `Strings.bossComing`, `Strings.dawn`, `Strings.restart`, `Strings.resultWave(n, total)`, `Strings.resultDefeated(n)`, `Strings.resultLevel(n)`, `Strings.resultTime(초)` | "웨이브 3 / 10" / "Wave 3 / 10", "보스가 와요!" / "A boss is coming!", "새벽이 왔어요!" / "Dawn has come!", "다시 하기" / "Play again", 결과 줄들 (시간은 m:ss) |
+
+### 카드 009 리뷰에서 온 작은 일
+- `gen_tables.py`: progression의 xp_base·shard_speed·absorb_distance > 0, xp_step ≥ 0, waves의 count ≥ 1·interval > 0·delay ≥ 0·enemy가 enemies에 있음, enemies의 art가 characters에 있음·scale > 0·boss 0/1 — 어기면 표·줄·칸을 짚어 종료 1
+- `card_panel.dart`의 그리기 숫자(그림자 흐림, 각도)를 config로, `CardView`가 프레임마다 `Paint()`를 만들지 않게
+
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)
