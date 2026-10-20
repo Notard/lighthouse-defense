@@ -15,8 +15,10 @@
     characters.<이름>  description, based_on (있으면 그 캐릭터 그림을 넣고 고쳐 그리게 함)
     props.<이름>       prompt, size [w, h], opaque (배경처럼 꽉 찬 그림), square, ref (참고 그림 경로)
 - Codex 출력은 logs/03_gen_<이름>.log에 남긴다
-- 안전 관문: Codex를 부르기 전과 후의 `git status --porcelain`(+ 바뀐 파일의 내용 해시)을 비교해
-  art/ 밖에 새로 생기거나 바뀐 파일이 있으면 그 목록을 보여 주고 종료 코드 3으로 멈춘다 (design.md §3-2).
+- 안전 관문: Codex를 부르기 전과 후의 `git rev-parse HEAD`, `git stash list`, `git status --porcelain`
+  (+ 바뀐 파일의 내용 해시)을 비교한다. HEAD·stash가 바뀌었거나, 이번 출력 파일(과 그 _check 그림) 말고
+  다른 파일이 새로 생기거나 바뀌었으면(art/ 안이라도) 목록을 보여 주고 종료 코드 3으로 멈춘다 (design.md §3-2·§3-3).
+  환경 변수 CODEX_BIN으로 codex 대신 다른 명령을 부를 수 있다 (관문 시험용).
   .gitignore로 빠진 파일(logs/*.log 등)은 git이 보지 않으므로 비교하지 않는다
 - 필요: Codex CLI (`npm install -g @openai/codex`), ChatGPT 계정 로그인
 - 모델: 기본 `gpt-5.6-sol`. 바꾸려면 환경 변수 CODEX_MODEL
@@ -110,12 +112,16 @@ def prop_prompt(prompts: dict, name: str) -> tuple[str, list[Path]]:
     return "\n".join(lines), images
 
 
-def git_snapshot() -> dict[str, str]:
-    """git이 보는 바뀐 파일마다 (상태 + 내용 해시). 무시하지 않는 새 파일은 폴더가 아니라 파일 하나하나로."""
-    result = subprocess.run(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"],
-                            cwd=ROOT, capture_output=True, check=True)
-    entries = result.stdout.decode("utf-8").split("\0")
-    snap: dict[str, str] = {}
+def git_snapshot() -> dict:
+    """안전 관문용 저장소 모습: HEAD, stash 목록, git이 보는 바뀐 파일마다 (상태 + 내용 해시).
+
+    무시하지 않는 새 파일은 폴더가 아니라 파일 하나하나로 본다.
+    """
+    def git(*args: str) -> bytes:
+        return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, check=True).stdout
+
+    entries = git("status", "--porcelain=v1", "-z", "--untracked-files=all").decode("utf-8").split("\0")
+    files: dict[str, str] = {}
     i = 0
     while i < len(entries):
         entry = entries[i]
@@ -127,18 +133,36 @@ def git_snapshot() -> dict[str, str]:
             i += 1  # 이름 바꾸기·복사는 원래 이름이 뒤따른다
         file = ROOT / path
         digest = hashlib.sha1(file.read_bytes()).hexdigest() if file.is_file() else "-"
-        snap[path] = f"{status} {digest}"
-    return snap
+        files[path] = f"{status} {digest}"
+    return {
+        "head": git("rev-parse", "HEAD").decode().strip(),
+        "stash": git("stash", "list").decode("utf-8", "replace").strip(),
+        "files": files,
+    }
 
 
-def changed_outside_art(before: dict[str, str], after: dict[str, str]) -> list[str]:
-    """Codex 실행 중에 art/ 밖에서 새로 생기거나 바뀌거나 되돌려진 파일."""
-    paths = set(before) | set(after)
-    return sorted(p for p in paths if not p.startswith("art/") and before.get(p) != after.get(p))
+def gate_problems(before: dict, after: dict, allowed: set[str]) -> list[str]:
+    """Codex 실행 앞뒤 비교. 문제가 없으면 빈 목록.
+
+    - HEAD가 바뀌었거나(커밋·브랜치 바꾸기·되돌리기) stash 목록이 바뀌었으면 문제
+    - 바뀐 파일(새로 생김·바뀜·되돌려짐)은 [allowed](이번 출력 파일과 그 _check 그림)만 괜찮다.
+      art/ 안이라도 다른 그림이 바뀌었으면 문제
+    """
+    problems = []
+    if before["head"] != after["head"]:
+        problems.append(f"HEAD가 바뀜: {before['head'][:10]} → {after['head'][:10]}")
+    if before["stash"] != after["stash"]:
+        problems.append("git stash 목록이 바뀜")
+    paths = set(before["files"]) | set(after["files"])
+    for path in sorted(paths):
+        if path not in allowed and before["files"].get(path) != after["files"].get(path):
+            problems.append(f"바뀐 파일: {path}")
+    return problems
 
 
 def run_codex(prompt: str, out: Path, images: list[Path], log_name: str) -> None:
-    codex = shutil.which("codex") or shutil.which("codex.cmd")
+    # CODEX_BIN: 다른 실행 파일로 바꿔 부른다 (안전 관문을 가짜 명령으로 시험할 때)
+    codex = os.environ.get("CODEX_BIN") or shutil.which("codex") or shutil.which("codex.cmd")
     if codex is None:
         sys.exit("codex CLI를 찾을 수 없습니다 (npm install -g @openai/codex)")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -162,14 +186,16 @@ def run_codex(prompt: str, out: Path, images: list[Path], log_name: str) -> None
         f.write(task + "\n\n=== CODEX OUTPUT ===\n")
         f.flush()
         result = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, input=task.encode("utf-8"))
-    # 안전 관문: Codex가 art/ 밖을 건드렸으면 사람이 보기 전에 멈춘다
-    outside = changed_outside_art(before, git_snapshot())
-    if outside:
-        print("안전 관문: Codex 실행 중에 art/ 밖 파일이 바뀌었습니다 (git diff로 확인하세요):", file=sys.stderr)
-        for path in outside:
-            print(f"  {path}", file=sys.stderr)
+    # 안전 관문: Codex가 이번 출력 말고 다른 것을 건드렸으면 사람이 보기 전에 멈춘다
+    allowed = {rel, f"art/ref/_check/{out.name}"}
+    problems = gate_problems(before, git_snapshot(), allowed)
+    if problems:
+        print("안전 관문: Codex 실행 중에 이번 출력 말고 다른 것이 바뀌었습니다 (git status·git log·git stash list로 확인하세요):",
+              file=sys.stderr)
+        for problem in problems:
+            print(f"  {problem}", file=sys.stderr)
         sys.exit(3)
-    print("안전 관문: art/ 밖 변경 없음")
+    print(f"안전 관문: 통과 (HEAD·stash 그대로, {rel} 말고 바뀐 파일 없음)")
     if result.returncode != 0 or not out.exists():
         sys.exit(f"생성 실패 (종료 코드 {result.returncode}). 로그: {log.relative_to(ROOT).as_posix()}")
     print(f"{rel} 저장 ({out.stat().st_size / 1024:,.0f} KB), 로그: {log.relative_to(ROOT).as_posix()}")

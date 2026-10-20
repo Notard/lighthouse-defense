@@ -3,13 +3,15 @@
     python tools/make_art_preview.py
     python tools/make_art_preview.py --help
 
-캐릭터 한국어 이름은 data/art/prompts.json의 characters.<캐릭터>.name에서 (없으면 영어 이름 그대로).
+캐릭터 한국어 이름과 게임에서 그릴 키(display_height, 발에서 머리 끝까지 게임 px)는
+data/tables/characters.csv에서 읽는다 (표에 없으면 영어 이름, 키는 기본 크기로).
+"게임 크기로 보기"의 자리 원 지름은 lib/game/config.dart의 GameConfig.slotRadius × 2.
 결과는 저장소 뿌리의 art_preview.html (todo.html에서 링크).
 """
 import json
 import sys
 
-from art_common import PROMPTS_PATH, ROOT, setup_console, usage, wants_help
+from art_common import ROOT, game_config, load_characters, setup_console, usage, wants_help
 
 OUT = ROOT / "art_preview.html"
 
@@ -17,9 +19,6 @@ OUT = ROOT / "art_preview.html"
 ACTIONS = {"idle": "기본", "attack": "공격", "hit": "피격", "death": "쓰러짐", "walk": "이동", "swim": "헤엄",
            "fly": "날기", "cast": "빛 쏘기", "produce": "만들기", "spawn": "나타남"}
 
-# 게임에서 캐릭터 키 (px). 자리 원 지름 88(GameConfig.slotRadius × 2) 안에 들어가는 크기.
-GAME_HEIGHT = 80
-SLOT_DIAMETER = 88
 
 PAGE = """<!doctype html>
 <html lang="ko">
@@ -71,7 +70,7 @@ code{background:var(--beam-soft);padding:1px 6px;border-radius:4px;font-size:.88
 <script>
 const DATA = __DATA__;
 const NAMES = __NAMES__, ACTIONS = __ACTIONS__;
-const GAME_HEIGHT = __GAME_HEIGHT__;  // 게임에서 캐릭터 키 (자리 원 안)
+const HEIGHTS = __HEIGHTS__;  // 게임에서 캐릭터 키 (data/tables/characters.csv display_height)
 let speed = 1, paused = false, gameSize = false;
 const players = [];
 document.getElementById('empty').hidden = DATA.length > 0;
@@ -130,9 +129,10 @@ requestAnimationFrame(tick);
 function layout() {
   for (const p of players) {
     p.stage.classList.toggle('small', gameSize);
-    // 게임 크기: 캐릭터 키(발 기준점 위쪽)가 GAME_HEIGHT px가 되게 줄이고, 발을 자리 원 가운데에 둔다
+    // 게임 크기: 캐릭터 키(발 기준점 위쪽)가 표의 키(px)가 되게 줄이고, 발을 자리 원 가운데에 둔다
     const height = p.ch.anchor[1] - p.ch.bbox[1];
-    const s = gameSize ? GAME_HEIGHT / height : 240 / p.ch.frame[1];
+    const want = HEIGHTS[p.ch.character] || height;
+    const s = gameSize ? want / height : 240 / p.ch.frame[1];
     p.cv.style.width = `${p.ch.frame[0] * s}px`; p.cv.style.height = `${p.ch.frame[1] * s}px`;
     p.cv.style.left = gameSize ? `${(p.ch.frame[0] / 2 - p.ch.anchor[0]) * s}px` : '0';
     p.cv.style.top = gameSize ? `${(p.ch.frame[1] / 2 - p.ch.anchor[1]) * s}px` : '0';
@@ -158,15 +158,17 @@ def main() -> None:
         usage(__doc__)
     if len(sys.argv) != 1:
         usage(__doc__, 2)
-    prompts = json.loads(PROMPTS_PATH.read_text(encoding="utf-8")) if PROMPTS_PATH.exists() else {}
-    names = {k: v.get("name", k) for k, v in prompts.get("characters", {}).items()}
+    characters = load_characters()
+    names = {k: v["name_ko"] for k, v in characters.items()}
+    heights = {k: v["display_height"] for k, v in characters.items()}
+    slot = round(game_config("slotRadius") * 2)
     data = [json.loads(p.read_text(encoding="utf-8")) for p in sorted((ROOT / "assets" / "images").glob("*/*.json"))]
     html = (PAGE.replace("__DATA__", json.dumps(data, ensure_ascii=False))
             .replace("__NAMES__", json.dumps(names, ensure_ascii=False))
             .replace("__ACTIONS__", json.dumps(ACTIONS, ensure_ascii=False))
-            .replace("__GAME_HEIGHT__", str(GAME_HEIGHT))
-            .replace("__SLOT__", str(SLOT_DIAMETER))
-            .replace("__HALF__", str(SLOT_DIAMETER // 2)))
+            .replace("__HEIGHTS__", json.dumps(heights))
+            .replace("__SLOT__", str(slot))
+            .replace("__HALF__", str(slot // 2)))
     OUT.write_text(html, encoding="utf-8")
     print(f"{OUT.name}: 캐릭터 {len(data)}개, 동작 {sum(len(d['actions']) for d in data)}개")
 

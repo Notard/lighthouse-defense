@@ -10,13 +10,14 @@
 JSON (게임이 읽음, lib/game/art.dart CharacterArt)
   frame   [너비, 높이]         한 프레임 크기 (px)
   anchor  [x, y]              프레임 안의 발 위치 → 자리 가운데에 맞춘다
-                              리그의 anchor_part 부위 기준점 (없으면 body)
+                              리그의 anchor_point 좌표, 또는 anchor_part 부위 기준점 (없으면 body)
   bbox    [x0, y0, x1, y1]    첫 동작 첫 프레임에서 그림이 있는 영역 → 게임 표시 크기·카드 그림에 쓴다
   muzzle  [x, y]              (있으면) 이벤트가 일어나는 위치 (쏘는 곳, 빛이 나오는 곳 …)
                               리그의 muzzle_point 좌표, 또는 muzzle_part 부위 기준점
   actions.<동작>              frames, fps, loop, event(이 프레임에서 발사·생산·피해)
 
-리그 동작마다 frames·fps·loop가 꼭 있어야 한다 (없으면 어느 동작의 무엇이 빠졌는지 알리고 멈춘다).
+리그 동작마다 frames·fps·loop가 꼭 있어야 하고 형식도 맞아야 한다: frames 1 이상 정수, fps 0보다 큰 수,
+loop 참/거짓, event(있으면) 1~frames 정수 (어기면 어느 동작의 무엇이 틀렸는지 알리고 멈춘다).
 첫 동작 첫 프레임이 완전히 투명하면 알리고, 그림이 있는 첫 프레임으로 bbox를 정한다.
 """
 import json
@@ -28,19 +29,41 @@ WEBP_QUALITY = 88
 REQUIRED = ("frames", "fps", "loop")  # 리그 동작에 꼭 있어야 하는 키
 
 
+def is_int(v) -> bool:
+    return isinstance(v, int) and not isinstance(v, bool)
+
+
+def action_problems(action: str, spec: dict) -> list[str]:
+    """동작 하나의 키와 형식 문제 (없으면 빈 목록).
+
+    frames 1 이상 정수 · fps 0보다 큰 수 · loop 참/거짓 · event(있으면) 1~frames 정수
+    """
+    missing = [k for k in REQUIRED if k not in spec]
+    if missing:
+        return [f"{action}: {', '.join(missing)} 없음"]
+    problems = []
+    frames, fps, loop = spec["frames"], spec["fps"], spec["loop"]
+    if not is_int(frames) or frames < 1:
+        problems.append(f"{action}: frames는 1 이상 정수여야 함 ({frames!r})")
+    if not isinstance(fps, (int, float)) or isinstance(fps, bool) or fps <= 0:
+        problems.append(f"{action}: fps는 0보다 큰 수여야 함 ({fps!r})")
+    if not isinstance(loop, bool):
+        problems.append(f"{action}: loop는 true/false여야 함 ({loop!r})")
+    if "event" in spec:
+        event = spec["event"]
+        top = frames if is_int(frames) else None
+        if not is_int(event) or event < 1 or (top is not None and event > top):
+            problems.append(f"{action}: event는 1~{top if top is not None else 'frames'} 정수여야 함 ({event!r})")
+    return problems
+
+
 def check_actions(name: str, actions: dict) -> None:
-    """리그 동작의 필수 키를 확인한다. 빠지면 알아보기 쉬운 오류로 멈춘다."""
+    """리그 동작의 필수 키와 형식을 확인한다. 어기면 알아보기 쉬운 오류로 멈춘다."""
     if not actions:
         sys.exit(f"tools/rigs/{name}.json에 actions가 없습니다")
-    problems = []
-    for action, spec in actions.items():
-        missing = [k for k in REQUIRED if k not in spec]
-        if missing:
-            problems.append(f"{action}: {', '.join(missing)} 없음")
-        elif not isinstance(spec["frames"], int) or isinstance(spec["frames"], bool) or spec["frames"] < 1:
-            problems.append(f"{action}: frames는 1 이상 정수여야 함 ({spec['frames']!r})")
+    problems = [p for action, spec in actions.items() for p in action_problems(action, spec)]
     if problems:
-        sys.exit(f"tools/rigs/{name}.json 동작 오류 (필수: {', '.join(REQUIRED)})\n  " + "\n  ".join(problems))
+        sys.exit(f"tools/rigs/{name}.json 동작 오류 (필수: {', '.join(REQUIRED)})" + "".join(f"\n  {p}" for p in problems))
 
 
 def first_bbox(name: str, action: str, imgs: list) -> list[int] | None:
@@ -79,11 +102,15 @@ def main() -> None:
 
     parts = {p["name"]: p for p in rig["parts"]}
     anchor_part = rig.get("anchor_part", "body")
-    if anchor_part not in parts:
-        sys.exit(f"발 기준 부위 '{anchor_part}'이 리그에 없습니다 (anchor_part를 정하세요)")
+    if "anchor_point" in rig:
+        anchor = rig["anchor_point"]
+    elif anchor_part in parts:
+        anchor = parts[anchor_part]["pivot"]
+    else:
+        sys.exit(f"발 기준 부위 '{anchor_part}'이 리그에 없습니다 (anchor_point나 anchor_part를 정하세요)")
     out_dir = ROOT / "assets" / "images" / name
     out_dir.mkdir(parents=True, exist_ok=True)
-    meta = {"character": name, "anchor": to_frame(parts[anchor_part]["pivot"]), "actions": {}}
+    meta = {"character": name, "anchor": to_frame(anchor), "actions": {}}
     if "muzzle_point" in rig:
         meta["muzzle"] = to_frame(rig["muzzle_point"])
     elif rig.get("muzzle_part") in parts:

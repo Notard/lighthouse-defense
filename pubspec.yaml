@@ -62,6 +62,13 @@ flutter:
   # 그림 (tools/prep_props.py, tools/pack_sheets.py가 만든다)
   assets:
     - assets/images/
+    # 캐릭터 시트 (tools/build_sprites.sh). assets/images/ 아래 폴더는 따로 등록해야 한다
+    - assets/images/seahorse/
+    - assets/images/crab/
+    - assets/images/pufferfish/
+    - assets/images/shadow_blob/
+    - assets/images/ink_squid/
+    - assets/images/shadow_jelly/
 
   # 주아 (SIL OFL 1.1, assets/fonts/OFL.txt). 쓰는 글자만 남긴 파일: python tools/subset_font.py <원본>
   fonts:

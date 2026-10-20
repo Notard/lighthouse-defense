@@ -6,12 +6,16 @@
   (그림에 둘러싸인 틈은 색이 배경과 거의 같을 때만 지운다. 캐릭터 몸의 초록은 남는다). 이미 투명 배경 PNG면 그대로 쓴다.
 - 알파 정리: 16 미만 → 0, 200 이상 → 255 (옅은 점과 반투명 몸통 정리)
 """
+import csv
 import json
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PROMPTS_PATH = ROOT / "data" / "art" / "prompts.json"
+CHARACTERS_PATH = ROOT / "data" / "tables" / "characters.csv"  # 캐릭터 표 (리드 소유, 읽기만)
+CONFIG_PATH = ROOT / "lib" / "game" / "config.dart"
 
 # 초록 정도 = G - max(R, B). HARD보다 크면 배경 후보, 배경 옆에서 SOFT~HARD 사이면 반투명 가장자리.
 KEY_HARD = 150
@@ -46,6 +50,24 @@ def load_prompts() -> dict:
     if not PROMPTS_PATH.exists():
         sys.exit(f"프롬프트 파일이 없습니다: {PROMPTS_PATH.relative_to(ROOT).as_posix()}")
     return json.loads(PROMPTS_PATH.read_text(encoding="utf-8"))
+
+
+def load_characters() -> dict[str, dict]:
+    """data/tables/characters.csv → {id: {kind, name_ko, name_en, display_height(float)}} (없으면 빈 사전)."""
+    if not CHARACTERS_PATH.exists():
+        return {}
+    with CHARACTERS_PATH.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    return {r["id"]: {**r, "display_height": float(r["display_height"])} for r in rows}
+
+
+def game_config(name: str) -> float:
+    """lib/game/config.dart의 `static const double <name> = <숫자>;` 값을 읽는다 (도구에 같은 숫자를 다시 쓰지 않게)."""
+    text = CONFIG_PATH.read_text(encoding="utf-8")
+    m = re.search(r"static const double " + re.escape(name) + r" = ([0-9.]+);", text)
+    if m is None:
+        sys.exit(f"lib/game/config.dart에서 GameConfig.{name}을 찾지 못했습니다")
+    return float(m.group(1))
 
 
 def clean_alpha(im):

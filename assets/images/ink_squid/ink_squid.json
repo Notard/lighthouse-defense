@@ -1,0 +1,40 @@
+{
+  "character": "ink_squid",
+  "anchor": [
+    124.2,
+    244.7
+  ],
+  "actions": {
+    "move": {
+      "frames": 12,
+      "fps": 12,
+      "loop": true
+    },
+    "attack": {
+      "frames": 6,
+      "fps": 10,
+      "loop": true,
+      "event": 3
+    },
+    "hit": {
+      "frames": 4,
+      "fps": 12,
+      "loop": false
+    },
+    "death": {
+      "frames": 8,
+      "fps": 10,
+      "loop": false
+    }
+  },
+  "frame": [
+    256,
+    256
+  ],
+  "bbox": [
+    44,
+    22,
+    214,
+    247
+  ]
+}
