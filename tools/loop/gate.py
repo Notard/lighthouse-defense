@@ -56,6 +56,9 @@ def check(role: str, files: list[str], table: dict) -> list[str]:
 
 
 def main() -> int:
+    # Windows 콘솔(cp949)에서도 한글이 깨지지 않게
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
     table = json.loads((ROOT / "loop" / "roles.json").read_text(encoding="utf-8"))
     ap = argparse.ArgumentParser()
     ap.add_argument("role", choices=sorted(table["roles"]))
