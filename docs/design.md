@@ -38,7 +38,7 @@
 - 처음 빛 방향은 **270° (위)**, 처음에는 고른 자리 없음
 
 ### 빛 (2단계는 모양만)
-- 등대 가운데에서 빛 방향으로 뻗는 부채꼴, 폭 40°, 길이 640. 반투명 노란빛. 적에게 주는 효과는 4단계 (그때 폭·길이는 `data/tables`로 옮긴다)
+- 등대 가운데에서 빛 방향으로 뻗는 부채꼴, 폭 40°, 길이 640. 반투명 노란빛. 적에게 주는 효과와 표로 옮긴 폭·길이는 §4
 
 ### 코드 이름 (tester·implementer가 같이 쓰는 약속)
 | 이름 | 뜻 |
@@ -148,5 +148,60 @@
 - `pack_sheets.py`: `frames`(1 이상 정수)·`fps`(0보다 큰 수)·`loop`(참/거짓)·`event`(있으면 1~frames 정수)의 **형식**까지 검사
 - 시트 폴더는 `pubspec.yaml`에 캐릭터마다 등록 (`assets/images/` 아래 폴더는 따로 등록해야 한다)
 - 사용자에게 보여 줄 움직이는 그림: 캐릭터마다 동작을 이어 붙인 GIF `preview/05_<id>.gif` (숲 지키기 `make_gifs.py`를 가져와 고쳐도 됨)
+
+## 4. 사방에서 오는 적·등대 불빛·빛줄기 (4단계, 카드 006)
+
+### 숫자 표와 변환기
+- 숫자는 `data/tables/`의 `enemies.csv`, `beam.csv`, `lighthouse.csv`, `practice.csv` (와 `characters.csv`). 뜻은 `data/tables/README.md`
+- `python tools/gen_tables.py`가 표를 읽어 `lib/game/tables.g.dart`를 만든다 (맨 위에 "만든 파일, 고치지 말 것"). 저장소에 넣는다. `--check`를 주면 파일이 표와 같은지만 보고 다르면 종료 코드 1
+- 빛 폭·길이는 `GameConfig`에서 빼고 표로 옮긴다 (`GameConfig.beamWidthDeg`·`beamLength` 없앰)
+
+### 적
+- 나타나기: 등대 가운데에서 `spawn_distance`(780, 화면 네 귀퉁이보다 멂) 떨어진 곳, 주어진 각도 (§2 각도 규칙). 체력은 표의 `hp`
+- 움직이기: 등대 가운데를 향해 **곧장** (각도는 그대로, 거리만 줄어듦). 1초에 `speed` (빛 속이면 × `slow`)
+- **닿는 거리** = 등대 한 변의 절반(100) + 적 `radius`. 거리가 닿는 거리까지 줄면 거기서 멈추고(넘어가지 않음) **갉기** 상태
+- 갉기: 닿은 때부터 `bite_interval`초마다 등대 불빛을 `bite`만큼 깎는다 (첫 갉기는 닿고 `bite_interval`초 뒤). 빛은 갉기 빠르기를 바꾸지 않는다
+- 위치(`position`)는 몸 가운데. 그림은 몸 가운데가 위치에 오게, 키 `display_height`로 그린다. 등대 쪽을 보게 좌우만 뒤집는다 (그림이 원래 어느 쪽을 보는지는 시트를 보고). 그림을 읽기 전에는 반지름 `radius`의 보라 원
+- 동작: 움직일 때 `move`, 갉을 때 `attack`, 피해를 받으면 `hit` 한 번(움찔 + 밝게 번쩍) 뒤 원래 동작, 쓰러지면 `death`
+- 피해 받기 `takeDamage(양)`: 빛 속이면 양 × `vulnerable`. 실제로 깎은 양을 돌려준다. 체력이 0 이하가 되면 **쓰러짐**: 더 움직이거나 갉지 않고, 피해도 더 받지 않으며(0을 돌려줌), **0.8초**(death 8프레임 ÷ 10fps) 뒤 판에서 사라진다. 4단계에는 적을 공격하는 것이 없다 (친구는 5단계) — 피해는 테스트와 다음 단계를 위한 것
+
+### 빛 속
+- 점 p가 빛 속 = 등대 가운데에서 거리 ≤ `length` **이고** p 쪽 각도와 빛 방향의 차이(360 둘레에서 짧은 쪽) ≤ `width_deg / 2`. 경계는 속 (같거나 작으면 속, 계산 오차를 생각해 거리·각도 모두 1e-6 여유)
+- 적이 빛 속인지는 매 순간 몸 가운데(`position`)로 본다. 빛을 돌리면 바로 바뀐다
+
+### 등대 불빛 (체력)
+- 처음 `hp`(100). 0 아래로 내려가지 않는다
+- 화면 위 **불빛 막대**: 판 위쪽 100 px 안, 가로로 길게. 채운 비율 = 지금 불빛 ÷ 처음 불빛. 따뜻한 노란빛
+- 불빛이 0이 되면 **꺼짐**: 판이 멈춘다 (적이 움직이지도 갉지도 않음, 연습 스폰도 멈춤, 끌기·누르기 무시). 가운데에 문구 "불빛이 꺼졌어요" / "The light went out". 결과 창과 다시 하기는 7단계 (지금은 새로 고침)
+
+### 연습 스폰 (7단계 웨이브 전까지, 확인용)
+- 앱에서는 켜고, 테스트의 기본 판(`LighthouseGame()`)에서는 끈다
+- `interval`초마다 (첫 스폰은 `interval`초 뒤) 적 셋 중 하나를 고르게, 각도 0 이상 360 미만 고르게 뽑아 나타나게 한다. 판에 (쓰러지는 중 빼고) 적이 `max_alive` 이상이면 그번은 건너뛴다
+- 무작위는 씨앗(seed)을 받는다: 같은 씨앗이면 같은 순서
+
+### 그리는 순서
+바다 → 빛 → 자리 → 등대 → 적 → 제목 → 불빛 막대 → 꺼짐 문구
+
+### 코드 이름 (tester·implementer가 같이 쓰는 약속)
+| 이름 | 뜻 |
+|---|---|
+| `Tables` (`lib/game/tables.g.dart`) | `Tables.enemies`: `Map<String, EnemyStats>` (`id`, `hp`, `speed`, `bite`, `biteInterval`, `radius`, 모두 double 빼고 id), `Tables.beam`: `BeamStats` (`widthDeg`, `length`, `slow`, `vulnerable`), `Tables.lighthouse`: `LighthouseStats` (`hp`, `spawnDistance`), `Tables.practice`: `PracticeStats` (`interval` double, `maxAlive` int), `Tables.characters`: `Map<String, CharacterStats>` (`id`, `kind`, `nameKo`, `nameEn`, `displayHeight`) |
+| `LighthouseGame({bool practice = false, int seed = 0})` | 연습 스폰 켜기, 씨앗. `main.dart`는 `practice: true` |
+| `game.spawnEnemy(String id, double angleDeg, {double? distance})` → `Enemy` | 적 하나를 바로 판에 넣는다 (거리 없으면 `spawn_distance`). 테스트도 이것으로 |
+| `game.enemies` | 판에 있는 적 (쓰러지는 중 포함, 사라지면 빠짐) `List<Enemy>` |
+| `game.light`, `game.maxLight` | 지금 불빛, 처음 불빛 (double) |
+| `game.isOver` | 불빛이 꺼졌는지 |
+| `game.lightBar` | `LightBar` (`lib/game/hud.dart`): `ratio`(0~1), `position`·`size`(게임 좌표, 왼쪽 위 기준) |
+| `game.spawner` | `PracticeSpawner?` (연습이 꺼져 있으면 null): `spawned` = 지금까지 나타난 것 `List<({String id, double angleDeg})>` |
+| `Enemy` (`lib/game/enemy.dart`) | `id`, `stats`(`EnemyStats`), `hp`, `angleDeg`, `distance`(등대 가운데까지), `contactDistance`, `state`(`EnemyState.moving` / `biting` / `dying`), `inBeam`, `takeDamage(double)` → double, `position` |
+| `Enemy.deathSeconds` = 0.8 | 쓰러진 뒤 사라지기까지 |
+| `game.beam.widthDeg`, `game.beam.length`, `game.beam.contains(Vector2 p)` | 표의 값, 빛 속인지 |
+| `LightOutText` (`lib/game/hud.dart`) | 꺼짐 문구 컴포넌트 (꺼졌을 때만 판에 있음) |
+| `Strings.lightOut` | "불빛이 꺼졌어요" / "The light went out" |
+
+### 카드 005 리뷰에서 온 작은 일 (도구)
+- `pack_sheets.py`: 오라 넓이·흐림을 `frame_px / 256` 배로 (aura.json 값은 256 기준). 지금 시트는 모두 256이라 결과가 같아야 한다
+- 청록 테두리 빛 걷기(`strip_rim`)는 리그 JSON의 옵션 (`"strip_rim": true`)일 때만. 지금 그것이 필요한 캐릭터(친구 셋)의 리그에 켜 둔다. 시트를 다시 만들면 지금과 같아야 한다
+- `gen_art.py`의 `CODEX_BIN` 환경 변수는 **시험 전용**(가짜 Codex로 안전 관문 시연)이라고 도움말·주석에 적는다
 
 ## 난이도 목표 (balancer가 대조, 6·7단계에서 채움)
