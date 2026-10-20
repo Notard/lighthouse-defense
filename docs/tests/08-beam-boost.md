@@ -1,0 +1,11 @@
+# 빛 속 친구 힘 테스트 표 (카드 008)
+
+> 설계: `docs/design.md` §5-2 (와 §4·§5). 숫자는 CSV를 직접 읽어 쓴다. 시간은 `game.update(0.05)` 되풀이, 경계는 ±0.05초 바깥(배율이 곱해지는 곳은 ±0.05 × friend_haste 바깥). 판은 `LighthouseGame()` (빛 270°). `I0` = 위 안쪽 자리 (360, 510), `I3` = 아래 (360, 810). 빛을 아래로: `aimBeamAt(Vector2(360, 1000))`.
+
+| 번호 | 주어진 것 | 행동 | 기대값 |
+|---|---|---|---|
+| T8-01 | `beam.csv` | `Tables.beam` | `friendHaste` = 표의 friend_haste, 1 이상 |
+| T8-02 | 새 판 | 게를 I0, 게를 I3에. 빛을 아래로 돌림 | 처음: I0 게 `inBeam` 참, I3 게 거짓. 돌린 뒤 반대 |
+| T8-03 | 새 판, 빛을 아래로 | 게를 I3에, 방울을 90°에 닿게 (방울도 빛 속). 시간 흘림 | 두 번째 피해가 interval ÷ friend_haste + windup 무렵: 그보다 0.1초 앞에서는 hp = 처음 − damage × vulnerable, 0.1초 뒤에는 처음 − 2 × damage × vulnerable |
+| T8-04 | 새 판, 빛을 아래로 | 게를 I3에, 방울을 90°에 닿게. 공격이 시작된 update 바로 뒤의 `cooldown`을 c0로 적고, 0.5초 흘린 뒤 빛을 위로(`aimBeamAt(Vector2(360, 300))`) 돌리고 0.5초 더 | 0.5초 때 cooldown ≈ c0 − 0.5 × friend_haste, 끝에 ≈ c0 − 0.5 × friend_haste − 0.5 (±0.05 × friend_haste) |
+| T8-05 | 새 판 | 해마를 I3에, 오징어를 90° 거리 400, 방울을 90° 거리 405에 (둘 다 사거리 안, 오징어가 과녁). 거품이 생기면 바로 오징어 `takeDamage(오징어.hp)`. 0.6초 더 | 처음 과녁 = 오징어. 0.6초 뒤 `bubbles` 비어 있고 방울 hp 그대로 (터진 거품이 근처 방울을 맞히지 않음) |
