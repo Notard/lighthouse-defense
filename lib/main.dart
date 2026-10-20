@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'game/config.dart';
 import 'game/lighthouse_game.dart';
+import 'game/strings.dart';
 
 void main() {
   runApp(const LighthouseApp());
@@ -15,7 +16,7 @@ class LighthouseApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: '등대 지키기',
+      title: Strings.title,
       debugShowCheckedModeBanner: false,
       home: ColoredBox(color: GameConfig.deepSea, child: GameWidget(game: LighthouseGame())),
     );

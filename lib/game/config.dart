@@ -13,6 +13,9 @@ abstract final class GameConfig {
   static const Color nightSea = Color(0xFF0B1A33);
   static const Color deepSea = Color(0xFF050D1F);
 
+  /// 글꼴 이름 (pubspec.yaml의 family, 주아. tools/subset_font.py로 쓰는 글자만 남긴다).
+  static const String fontFamily = 'Jua';
+
   // ---- 등대 둘레 자리 (design.md §2) ----
 
   /// 안쪽·바깥 고리의 등대 가운데에서 거리.
