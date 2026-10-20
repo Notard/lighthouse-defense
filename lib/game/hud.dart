@@ -74,7 +74,7 @@ class XpBar extends PositionComponent {
       fontFamily: GameConfig.fontFamily,
       fontSize: GameConfig.xpLevelFontSize,
       color: GameConfig.xpLevelColor,
-      shadows: [Shadow(color: GameConfig.deepSea, blurRadius: 6)],
+      shadows: [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.xpLevelShadowBlur)],
     ),
   );
 
@@ -106,7 +106,7 @@ class PlaceHint extends PositionComponent {
       fontFamily: GameConfig.fontFamily,
       fontSize: GameConfig.placeHintFontSize,
       color: GameConfig.placeHintColor,
-      shadows: [Shadow(color: GameConfig.deepSea, blurRadius: 10)],
+      shadows: [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.placeHintShadowBlur)],
     ),
   );
 
@@ -114,6 +114,61 @@ class PlaceHint extends PositionComponent {
   void render(Canvas canvas) {
     if (!_visible()) return;
     _text.render(canvas, Strings.placeHint, Vector2.zero(), anchor: Anchor.center);
+  }
+}
+
+/// 웨이브 판의 제목 자리 글 (design.md §7): "웨이브 n / 10" (첫 웨이브 전에는 n = 1). 매 프레임 판에서 읽는다.
+class WaveLabel extends TextComponent {
+  WaveLabel(this._read)
+      : super(
+          text: _read(),
+          anchor: Anchor.topCenter,
+          position: Vector2(GameConfig.width / 2, GameConfig.waveLabelY),
+          textRenderer: TextPaint(
+            style: const TextStyle(
+              fontFamily: GameConfig.fontFamily,
+              fontSize: GameConfig.waveLabelFontSize,
+              color: GameConfig.waveLabelColor,
+              shadows: [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.waveLabelShadowBlur)],
+            ),
+          ),
+        );
+
+  final String Function() _read;
+
+  @override
+  void update(double dt) {
+    final t = _read();
+    if (t != text) text = t;
+  }
+}
+
+/// 웨이브가 시작될 때 가운데 알림 (design.md §7): 떠 있는 동안만 어두운 띠 위에 글. 보스 웨이브는 붉은 글.
+class WaveBanner extends PositionComponent {
+  WaveBanner(this._read, this._boss) : super(position: Vector2(0, GameConfig.bannerY));
+
+  final String? Function() _read;
+  final bool Function() _boss;
+
+  static TextPaint _paint(Color color) => TextPaint(
+        style: TextStyle(
+          fontFamily: GameConfig.fontFamily,
+          fontSize: GameConfig.bannerFontSize,
+          color: color,
+          shadows: const [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.bannerShadowBlur)],
+        ),
+      );
+  static final _normal = _paint(GameConfig.bannerColor);
+  static final _bossText = _paint(GameConfig.bannerBossColor);
+  static final _band = Paint()..color = GameConfig.bannerBand;
+
+  @override
+  void render(Canvas canvas) {
+    final text = _read();
+    if (text == null) return;
+    const h = GameConfig.bannerBandHeight;
+    canvas.drawRect(const Rect.fromLTWH(0, -h / 2, GameConfig.width, h), _band);
+    (_boss() ? _bossText : _normal).render(canvas, text, Vector2(GameConfig.width / 2, 0), anchor: Anchor.center);
   }
 }
 
@@ -129,7 +184,7 @@ class LightOutText extends TextComponent {
               fontFamily: GameConfig.fontFamily,
               fontSize: GameConfig.lightOutFontSize,
               color: GameConfig.lightOutColor,
-              shadows: [Shadow(color: GameConfig.deepSea, blurRadius: 12)],
+              shadows: [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.lightOutShadowBlur)],
             ),
           ),
         );

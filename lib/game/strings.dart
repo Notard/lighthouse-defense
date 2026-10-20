@@ -42,4 +42,35 @@ abstract final class Strings {
 
   /// 조각 막대 옆 레벨 글자.
   static String level(int n) => 'Lv $n';
+
+  // ---- 웨이브·결과 (design.md §7) ----
+
+  /// 제목 자리의 웨이브 글: "웨이브 3 / 10".
+  static String wave(int n, int total) => _pick('웨이브 $n / $total', 'Wave $n / $total');
+
+  /// 웨이브가 시작될 때 가운데 알림: "웨이브 3" (보스 웨이브는 [bossComing]).
+  static String waveBanner(int n) => _pick('웨이브 $n', 'Wave $n');
+
+  /// 보스가 있는 웨이브의 알림.
+  static String get bossComing => _pick('보스가 와요!', 'A boss is coming!');
+
+  /// 이겼을 때 결과 창 제목 (졌을 때는 [lightOut]).
+  static String get dawn => _pick('새벽이 왔어요!', 'Dawn has come!');
+
+  /// 결과 창의 다시 하기 단추.
+  static String get restart => _pick('다시 하기', 'Play again');
+
+  /// 결과 창 줄들: 다다른 웨이브, 쓰러뜨린 적 수, 레벨, 놀이 시간(m:ss).
+  static String resultWave(int n, int total) => _pick('다다른 웨이브  $n / $total', 'Wave reached  $n / $total');
+  static String resultDefeated(int n) => _pick('쓰러뜨린 적  $n', 'Enemies defeated  $n');
+  static String resultLevel(int n) => _pick('레벨  $n', 'Level  $n');
+  static String resultTime(double seconds) => _pick('시간  ${clock(seconds)}', 'Time  ${clock(seconds)}');
+
+  /// 초를 m:ss로 (내림).
+  static String clock(double seconds) {
+    final total = seconds.isFinite && seconds > 0 ? seconds.floor() : 0;
+    final m = total ~/ 60;
+    final s = total % 60;
+    return '$m:${s.toString().padLeft(2, '0')}';
+  }
 }

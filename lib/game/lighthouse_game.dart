@@ -15,30 +15,98 @@ import 'enemy.dart';
 import 'friend.dart';
 import 'geometry.dart';
 import 'hud.dart';
+import 'result_panel.dart';
 import 'shard.dart';
 import 'slots.dart';
 import 'strings.dart';
 import 'tables.g.dart';
 import 'tray.dart';
+import 'waves.dart';
+
+/// 판의 결과 (design.md §7): 이김(새벽) 또는 짐(불빛 꺼짐).
+enum GameResult { won, lost }
 
 /// 한 판 (밤바다, 등대, 둘레 자리 18개, 빛 방향 끌기, 사방에서 오는 적과 등대 불빛, 친구 놓기와 자동 공격,
 /// 빛 조각과 레벨업 카드).
 ///
 /// [practice]면 연습 스폰을 켠다 (앱은 켜고 테스트 기본 판은 끈다). [seed]는 연습 스폰·카드 뽑기 무작위 씨앗.
-/// [cards]면 카드 판 (앱): 쟁반 없이 시작하자마자 첫 친구 고르기 창, 레벨이 오르면 카드 창 (design.md §6).
+/// [cards]면 카드 판 (앱): 쟁반 없이, 공짜 친구(start.csv)를 놓은 뒤 첫 친구 고르기 창, 레벨이 오르면 카드 창 (design.md §6).
 /// 아니면 연습 판 (테스트·개발): 쟁반이 있고 레벨이 올라도 창을 열지 않는다.
+/// [waves]면 웨이브 판: 웨이브 10개를 깨면 이김, 끝나면 결과 창과 다시 하기([onRestart]) (design.md §7).
 class LighthouseGame extends FlameGame {
-  LighthouseGame({bool practice = false, int seed = 0, bool cards = false})
+  LighthouseGame({bool practice = false, int seed = 0, bool cards = false, bool waves = false, this.onRestart})
       : spawner = practice ? PracticeSpawner(seed) : null,
         _cards = cards,
         _random = math.Random(seed),
+        _waves = waves ? WaveRunner(seed) : null,
         tray = cards ? null : FriendTray(),
         super(camera: CameraComponent.withFixedResolution(width: GameConfig.width, height: GameConfig.height)) {
     if (cards) {
-      // 첫 친구 고르기: 친구 카드 셋을 표 순서 그대로 (뽑지 않음, 레벨·쌓인 양은 그대로)
-      _openChoice([for (final c in Tables.cards.values) if (c.kind == 'friend') c.id], first: true);
+      final free = Tables.start.freeFriend;
+      if (free != null) {
+        // 공짜 친구: 창보다 먼저 그 친구의 놓기 상태 (고른 횟수는 세지 않음). 놓으면 첫 친구 창
+        _placing = free;
+        _firstPickAfterPlacing = true;
+      } else {
+        _openFirstPick();
+      }
     }
   }
+
+  /// 다시 하기 단추를 누르면 부른다 (앱이 새 판으로 바꿔 끼운다).
+  final void Function()? onRestart;
+
+  /// 웨이브 진행 (웨이브 판이 아니면 null).
+  final WaveRunner? _waves;
+
+  /// 공짜 친구를 놓으면 첫 친구 창을 연다.
+  bool _firstPickAfterPlacing = false;
+
+  /// 첫 친구 고르기: 친구 카드 셋을 표 순서 그대로 (뽑지 않음, 레벨·쌓인 양은 그대로).
+  void _openFirstPick() =>
+      _openChoice([for (final c in Tables.cards.values) if (c.kind == 'friend') c.id], first: true);
+
+  // ---- 웨이브 (design.md §7) ----
+
+  /// 지금(또는 막 깬) 웨이브 번호 (첫 웨이브 전 0, 웨이브 판이 아니면 0).
+  int get wave => _waves?.wave ?? 0;
+
+  /// 마지막 웨이브 번호 (표에서).
+  int get waveCount => WaveRunner.waveCount;
+
+  /// 웨이브를 깨고 다음을 기다리는 중 (첫 웨이브 전 기다림도 참).
+  bool get isResting => _waves?.resting ?? false;
+
+  /// 이번 웨이브에서 지금까지 나온 적 수.
+  int get waveSpawned => _waves?.spawned ?? 0;
+
+  /// 떠 있는 웨이브 알림 글 (없으면 null).
+  String? get banner => _waves?.banner;
+
+  /// (테스트·개발) 지금 바로 웨이브 [n]을 시작한다 (쉬는 시간·남은 스폰은 버림). 웨이브 판이 아니면 아무 일 없음.
+  void startWave(int n) => _waves?.start(n);
+
+  GameResult? _result;
+
+  /// 판의 결과 (놀이 중 null).
+  GameResult? get result => _result;
+
+  /// 결과 창 (웨이브 판이 끝났을 때만, 아니면 null).
+  ResultPanel? get resultPanel => _resultPanel;
+  ResultPanel? _resultPanel;
+
+  int _defeated = 0;
+
+  /// 쓰러뜨린 적 수 (쓰러지는 순간 +1).
+  int get defeated => _defeated;
+
+  /// 적이 쓰러졌다 (Enemy가 쓰러지는 순간 한 번 부른다).
+  void countDefeat() => _defeated++;
+
+  double _elapsed = 0;
+
+  /// 놀이 시간 (초, 멈춤·끝난 뒤에는 흐르지 않는다).
+  double get elapsed => _elapsed;
 
   final bool _cards;
 
@@ -99,10 +167,8 @@ class LighthouseGame extends FlameGame {
   /// 1초에 차는 불빛 (카드 light_regen, 처음 0).
   double lightRegen = 0;
 
-  bool _over = false;
-
-  /// 불빛이 꺼졌는지 (꺼지면 판이 멈춘다).
-  bool get isOver => _over;
+  /// 판이 끝났는지 (= [result]가 있음). 이겨도 져도 판이 멈춘다.
+  bool get isOver => _result != null;
 
   /// 위쪽 불빛 막대.
   late final LightBar lightBar = LightBar(() => _light / _maxLight);
@@ -146,7 +212,7 @@ class LighthouseGame extends FlameGame {
   bool get isPaused => _choice != null || _placing != null;
 
   /// 판이 멈췄는지 (꺼짐 또는 멈춤): 적·친구·거품·조각·연습 스폰·불빛 차기가 모두 멈춘다.
-  bool get isStopped => _over || isPaused;
+  bool get isStopped => isOver || isPaused;
 
   /// 조각 막대 (불빛 막대 아래).
   late final XpBar xpBar = XpBar(() => _xp / xpNeeded, () => _level);
@@ -172,11 +238,12 @@ class LighthouseGame extends FlameGame {
       _enemyLayer,
       _bubbleLayer,
       _shardLayer,
-      TitleText(),
+      if (_waves == null) TitleText() else WaveLabel(() => Strings.wave(math.max(wave, 1), waveCount)),
       lightBar,
       xpBar,
       ?tray,
       PlaceHint(() => _placing != null),
+      if (_waves != null) WaveBanner(() => banner, () => banner == Strings.bossComing),
       BoardInput(),
     ]);
     // 생성자에서 연 첫 친구 창의 그림
@@ -190,8 +257,32 @@ class LighthouseGame extends FlameGame {
     final step = math.min(dt, GameConfig.maxFrameDt);
     super.update(step);
     if (isStopped || step <= 0) return;
+    _elapsed += step;
     spawner?.tick(this, step);
     if (lightRegen > 0) _light = math.min(_maxLight, _light + lightRegen * step);
+    if (_waves?.tick(this, step) ?? false) _finish(GameResult.won);
+  }
+
+  /// 판을 끝낸다: 웨이브 판은 결과 창, 아니면 (짐일 때) 꺼짐 문구.
+  void _finish(GameResult r) {
+    if (_result != null) return;
+    _result = r;
+    if (_waves == null) {
+      if (r == GameResult.lost) world.add(LightOutText());
+      return;
+    }
+    final panel = ResultPanel(
+      title: r == GameResult.won ? Strings.dawn : Strings.lightOut,
+      lines: [
+        Strings.resultWave(wave, waveCount),
+        Strings.resultDefeated(_defeated),
+        Strings.resultLevel(_level),
+        Strings.resultTime(_elapsed),
+      ],
+      won: r == GameResult.won,
+    );
+    _resultPanel = panel;
+    world.add(panel);
   }
 
   /// 적 [id]를 등대 가운데에서 [angleDeg] 쪽, [distance](없으면 표의 spawn_distance)에 바로 넣는다 (판에는 다음 프레임에 붙는다).
@@ -207,7 +298,7 @@ class LighthouseGame extends FlameGame {
 
   /// 친구 [id]를 [slot]에 놓는다 (판에는 다음 프레임에 붙는다). 차 있거나 판이 꺼졌으면 아무 일 없이 null.
   Friend? placeFriend(String id, Slot slot) {
-    if (_over || slot.friend != null) return null;
+    if (isOver || slot.friend != null) return null;
     final f = Friend(id, slot);
     slot.friend = f;
     _friends.add(f);
@@ -320,7 +411,7 @@ class LighthouseGame extends FlameGame {
 
   /// 밀린 고르기가 있고 열린 창·놓기가 없으면(꺼지지 않았으면) 다음 창을 연다. 고를 카드가 없으면 그 고르기는 버린다.
   void _openNext() {
-    if (!_cards || _over) return;
+    if (!_cards || isOver) return;
     while (_pending > 0 && !isPaused) {
       _pending--;
       final ids = drawCards();
@@ -346,10 +437,7 @@ class LighthouseGame extends FlameGame {
   void biteLight(double amount) {
     if (isStopped) return;
     _light = math.max(0, _light - amount);
-    if (_light <= 0) {
-      _over = true;
-      world.add(LightOutText());
-    }
+    if (_light <= 0) _finish(GameResult.lost);
   }
 
   /// 게임 좌표 [p]에 닿는 자리 (누르는 범위 안에서 가장 가까운 것).
@@ -371,7 +459,12 @@ class LighthouseGame extends FlameGame {
   /// - 친구를 든 채 자리: 빈 자리면 놓고(든 것은 그대로, 고른 자리는 없음), 친구가 있으면 아무 일 없음
   /// - 그 밖: 자리를 고르고, 고른 자리를 다시 누르거나 바다를 누르면 고르기를 푼다
   void tapAt(Vector2 p) {
-    if (_over) return; // 꺼진 뒤 입력은 무시
+    if (isOver) {
+      // 끝난 뒤에는 결과 창의 다시 하기 단추만 받는다
+      final b = _resultPanel?.restartButton;
+      if (b != null && b.toRect().contains(p.toOffset())) onRestart?.call();
+      return;
+    }
     // 멈춤 (design.md §6): 카드 창은 카드 누르기만, 놓기 상태는 빈 자리 누르기만 받는다
     if (_choice != null) {
       final i = _panel?.indexAt(p);
@@ -384,7 +477,12 @@ class LighthouseGame extends FlameGame {
       if (s != null && placeFriend(placing, s) != null) {
         _placing = null;
         _select(null);
-        _openNext();
+        if (_firstPickAfterPlacing) {
+          _firstPickAfterPlacing = false;
+          _openFirstPick();
+        } else {
+          _openNext();
+        }
       }
       return;
     }
@@ -502,7 +600,8 @@ class PracticeSpawner {
   PracticeSpawner(int seed) : _random = math.Random(seed);
 
   final math.Random _random;
-  final List<String> _ids = Tables.enemies.keys.toList();
+  /// 뽑을 적 (보스는 뽑지 않는다, design.md §7).
+  final List<String> _ids = [for (final e in Tables.enemies.values) if (!e.boss) e.id];
   double _timer = 0;
 
   /// 지금까지 나타난 것 (차례대로).

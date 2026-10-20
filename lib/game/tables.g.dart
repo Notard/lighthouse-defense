@@ -155,6 +155,14 @@ class WaveRow {
   final double delay;
 }
 
+/// 판 시작 (start.csv). free_friend는 카드 판이 첫 친구 창보다 먼저 공짜로 놓는 친구 (없으면 null).
+class StartRules {
+  const StartRules({required this.freeFriend});
+
+  /// `free_friend`
+  final String? freeFriend;
+}
+
 /// 웨이브 규칙 (wave_rules.csv). first_delay는 첫 웨이브까지, rest는 깬 뒤 쉬는 시간, banner_seconds는 알림이 떠 있는 시간 (모두 초).
 class WaveRules {
   const WaveRules({required this.firstDelay, required this.rest, required this.bannerSeconds});
@@ -250,4 +258,7 @@ abstract final class Tables {
 
   /// wave_rules.csv
   static const WaveRules waveRules = WaveRules(firstDelay: 3.0, rest: 5.0, bannerSeconds: 2.5);
+
+  /// start.csv
+  static const StartRules start = StartRules(freeFriend: 'seahorse');
 }

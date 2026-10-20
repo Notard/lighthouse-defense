@@ -17,13 +17,15 @@
                                                                    → Tables.cards (Map<String, CardStats>)
   waves.csv       wave, enemy, count, interval, delay (여러 줄)    → Tables.waves (List<WaveRow>, 표 순서)
   wave_rules.csv  first_delay, rest, banner_seconds (한 줄)        → Tables.waveRules (WaveRules)
+  start.csv       free_friend (한 줄, 빈 칸이면 null)              → Tables.start (StartRules)
 
-- 숫자 열은 double, max_alive·max_picks·wave·count는 int, enemies의 boss는 bool (0 / 1).
+- 숫자 열은 double, max_alive·max_picks·wave·count는 int, enemies의 boss는 bool (0 / 1), start의 free_friend는
+  String? (빈 칸이면 null).
   표에 열이 빠졌거나 숫자가 아니거나 비었거나 inf·nan이면 어느 표·줄·열인지 알리고 멈춘다 (종료 코드 1)
 - 값 검사도 같이 (어기면 표·줄·칸을 짚어 종료 1): 정해진 값만 받는 칸(CHOICES: friends의 attack,
   cards의 kind), 수의 범위(RANGES: progression의 xp_base·shard_speed·absorb_distance > 0, xp_step ≥ 0,
   waves의 count ≥ 1·interval > 0·delay ≥ 0, enemies의 scale > 0), 다른 표를 가리키는 칸(REFERENCES:
-  waves의 enemy는 enemies의 id, enemies의 art는 characters의 id)
+  waves의 enemy는 enemies의 id, enemies의 art는 characters의 id, start의 free_friend는 (있으면) friends의 id)
 - 줄 순서는 표 그대로 (Map도 그 순서)
 - 글은 ASCII 밖 글자를 \\uXXXX로 적는다 (lib/ 문자열에 한글을 바로 쓰지 않는 규칙, test/font_test.dart T3-09)
 - 만든 파일은 줄바꿈 LF. 비교(--check)는 줄바꿈(CRLF/LF)을 무시한다
@@ -37,7 +39,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TABLES = ROOT / "data" / "tables"
 OUT = ROOT / "lib" / "game" / "tables.g.dart"
 
-# (Dart 이름, CSV 열, 형) — 형: str · double · int · bool(0 / 1)
+# (Dart 이름, CSV 열, 형) — 형: str · str?(빈 칸이면 null) · double · int · bool(0 / 1)
 ENEMY = [("id", "id", "str"), ("hp", "hp", "double"), ("speed", "speed", "double"), ("bite", "bite", "double"),
          ("biteInterval", "bite_interval", "double"), ("radius", "radius", "double"), ("xp", "xp", "double"),
          ("art", "art", "str"), ("scale", "scale", "double"), ("boss", "boss", "bool")]
@@ -56,6 +58,7 @@ WAVE = [("wave", "wave", "int"), ("enemy", "enemy", "str"), ("count", "count", "
         ("delay", "delay", "double")]
 WAVE_RULES = [("firstDelay", "first_delay", "double"), ("rest", "rest", "double"),
               ("bannerSeconds", "banner_seconds", "double")]
+START = [("freeFriend", "free_friend", "str?")]
 FRIEND = [("id", "id", "str"), ("attack", "attack", "str"), ("range", "range", "double"), ("damage", "damage", "double"),
           ("interval", "interval", "double"), ("projectileSpeed", "projectile_speed", "double")]
 
@@ -75,11 +78,12 @@ CLASSES = [
     ("CardStats", CARD, "레벨업 카드 하나 (cards.csv 한 줄). kind는 friend·upgrade·beam·lighthouse, max_picks 0은 제한 없음, "
                         "weight는 뽑힐 무게"),
     ("WaveRow", WAVE, "웨이브 표 한 줄 (waves.csv). 웨이브 wave가 시작되고 delay + k × interval초에 k번째(0부터) enemy가 나온다 (count개)"),
+    ("StartRules", START, "판 시작 (start.csv). free_friend는 카드 판이 첫 친구 창보다 먼저 공짜로 놓는 친구 (없으면 null)"),
     ("WaveRules", WAVE_RULES, "웨이브 규칙 (wave_rules.csv). first_delay는 첫 웨이브까지, rest는 깬 뒤 쉬는 시간, "
                               "banner_seconds는 알림이 떠 있는 시간 (모두 초)"),
 ]
 
-DART_TYPE = {"str": "String", "double": "double", "int": "int", "bool": "bool"}
+DART_TYPE = {"str": "String", "str?": "String?", "double": "double", "int": "int", "bool": "bool"}
 
 
 def read(name: str) -> list[dict[str, str]]:
@@ -87,11 +91,20 @@ def read(name: str) -> list[dict[str, str]]:
     if not path.exists():
         sys.exit(f"표가 없습니다: data/tables/{name}")
     with path.open(encoding="utf-8-sig", newline="") as f:
-        rows = [{(k or "").strip(): (v or "").strip() for k, v in r.items()} for r in csv.DictReader(f)]
+        reader = csv.DictReader(f)
+        rows = [{(k or "").strip(): (v or "").strip() for k, v in r.items()} for r in reader]
+        header = [(k or "").strip() for k in reader.fieldnames or []]
     rows = [r for r in rows if any(r.values())]
+    if not rows and name in BLANK_ROW_OK and header:
+        # 칸이 모두 빈 한 줄 표 (예: start.csv의 free_friend 빈 칸). CSV는 빈 줄을 건너뛰므로 머리줄만 있어도 받는다
+        return [dict.fromkeys(header, "")]
     if not rows:
         sys.exit(f"data/tables/{name}에 줄이 없습니다")
     return rows
+
+
+# 칸이 모두 비어도 되는 한 줄 표 (빈 칸 = 없음)
+BLANK_ROW_OK = {"start.csv"}
 
 
 def dart_string(s: str) -> str:
@@ -113,6 +126,8 @@ def value(table: str, line: int, row: dict, column: str, kind: str) -> str:
     if column not in row:
         sys.exit(f"data/tables/{table}: '{column}' 열이 없습니다")
     raw = row[column]
+    if kind == "str?":
+        return dart_string(raw) if raw else "null"
     if kind == "str":
         if not raw:
             sys.exit(f"data/tables/{table} {line}번째 줄: '{column}'이 비었습니다")
@@ -157,6 +172,7 @@ RANGES = {
 REFERENCES = {
     ("waves.csv", "enemy"): "enemies.csv",
     ("enemies.csv", "art"): "characters.csv",
+    ("start.csv", "free_friend"): "friends.csv",
 }
 
 
@@ -174,7 +190,8 @@ def check(table: str, line: int, row: dict) -> None:
             if op == "ge" and not number >= limit:
                 sys.exit(f"{where(column)}은 {limit} 이상이어야 합니다")
     for (t, column), target in REFERENCES.items():
-        if t == table and column in row and row[column] not in {r.get("id") for r in read(target)}:
+        # 빈 칸(없음을 뜻하는 String? 칸)은 가리키지 않는다
+        if t == table and row.get(column) and row[column] not in {r.get("id") for r in read(target)}:
             sys.exit(f"{where(column)}이 data/tables/{target}의 id에 없습니다")
 
 
@@ -263,6 +280,9 @@ def render() -> str:
     lines.append("")
     lines.append("  /// wave_rules.csv")
     lines.append(f"  static const WaveRules waveRules = {single('WaveRules', WAVE_RULES, 'wave_rules.csv')};")
+    lines.append("")
+    lines.append("  /// start.csv")
+    lines.append(f"  static const StartRules start = {single('StartRules', START, 'start.csv')};")
     lines.append("}")
     return "\n".join(lines) + "\n"
 

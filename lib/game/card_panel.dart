@@ -63,7 +63,7 @@ class _Title extends TextComponent {
               fontFamily: GameConfig.fontFamily,
               fontSize: GameConfig.cardTitleFontSize,
               color: GameConfig.cardTitleColor,
-              shadows: [Shadow(color: GameConfig.deepSea, blurRadius: 12)],
+              shadows: [Shadow(color: GameConfig.deepSea, blurRadius: GameConfig.cardTitleShadowBlur)],
             ),
           ),
         );
@@ -89,6 +89,17 @@ class CardView extends PositionComponent with HasGameReference<LighthouseGame> {
         'beam' => GameConfig.cardBeamColor,
         _ => GameConfig.cardLighthouseColor,
       };
+
+  // 그리기 붓: 프레임마다 만들지 않고 카드 하나에 한 번 (색은 종류로 정해진다)
+  static final _fill = Paint()..color = GameConfig.cardFill;
+  static final _placeholder = Paint()..color = GameConfig.friendPlaceholder;
+  late final Paint _edge = Paint()
+    ..color = _color
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = GameConfig.cardEdgeWidth;
+  late final Paint _ink = Paint()..color = _color;
+  Paint? _glow;
+  Offset? _glowCenter;
 
   late final TextPainter _name = _layout(
     Strings.cardName(stats),
@@ -124,20 +135,13 @@ class CardView extends PositionComponent with HasGameReference<LighthouseGame> {
 
   @override
   void render(Canvas canvas) {
-    final color = _color;
     final box = RRect.fromRectAndRadius(size.toRect(), const Radius.circular(GameConfig.cardCorner));
-    canvas.drawRRect(box, Paint()..color = GameConfig.cardFill);
-    canvas.drawRRect(
-      box,
-      Paint()
-        ..color = color
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = GameConfig.cardEdgeWidth,
-    );
+    canvas.drawRRect(box, _fill);
+    canvas.drawRRect(box, _edge);
 
     // 그림 칸 가운데
     final art = Offset(GameConfig.cardPadding + GameConfig.cardArtBox / 2, size.y / 2);
-    _renderArt(canvas, art, color);
+    _renderArt(canvas, art);
 
     // 이름과 설명: 글 칸에서 위아래 가운데
     const textLeft = GameConfig.cardPadding * 2 + GameConfig.cardArtBox;
@@ -147,15 +151,15 @@ class CardView extends PositionComponent with HasGameReference<LighthouseGame> {
     _desc.paint(canvas, Offset(textLeft, top + _name.height + GameConfig.cardLineGap));
   }
 
-  void _renderArt(Canvas canvas, Offset c, Color color) {
-    final paint = Paint()..color = color;
+  void _renderArt(Canvas canvas, Offset c) {
+    final paint = _ink;
     switch (stats.kind) {
       case 'friend' || 'upgrade':
         const h = GameConfig.cardArtHeight;
         final art = _art;
         final sprite = _sprite;
         if (art == null || sprite == null) {
-          canvas.drawCircle(c, h / 2, Paint()..color = GameConfig.friendPlaceholder);
+          canvas.drawCircle(c, h / 2, _placeholder);
         } else {
           // 몸 가운데(첫 프레임 그림 영역의 가운데)가 그림 칸 가운데에 오게, 키 cardArtHeight
           final s = art.scaleForHeight(h);
@@ -164,23 +168,24 @@ class CardView extends PositionComponent with HasGameReference<LighthouseGame> {
         }
         if (stats.kind == 'upgrade') _renderPlus(canvas, c + const Offset(h / 2, -h / 2), paint);
       case 'beam':
-        // 아래에서 위로 뻗는 부채꼴
+        // 아래에서 위(cardIconFanAngle)로 뻗는 부채꼴
         const r = GameConfig.cardIconRadius;
         const half = GameConfig.cardIconFanDeg / 2;
         final origin = c + const Offset(0, r / 2);
         final path = Path()
           ..moveTo(origin.dx, origin.dy)
-          ..arcTo(Rect.fromCircle(center: origin, radius: r), degToRad(270 - half), degToRad(GameConfig.cardIconFanDeg), false)
+          ..arcTo(Rect.fromCircle(center: origin, radius: r), degToRad(GameConfig.cardIconFanAngle - half),
+              degToRad(GameConfig.cardIconFanDeg), false)
           ..close();
         canvas.drawPath(path, paint);
       default:
         // 등대 불빛: 번지는 원
-        canvas.drawCircle(
-          c,
-          GameConfig.cardIconGlowRadius,
-          Paint()
-            ..shader = Gradient.radial(c, GameConfig.cardIconGlowRadius, [color, color.withValues(alpha: 0)]),
-        );
+        if (_glow == null || _glowCenter != c) {
+          final color = _color;
+          _glowCenter = c;
+          _glow = Paint()..shader = Gradient.radial(c, GameConfig.cardIconGlowRadius, [color, color.withValues(alpha: 0)]);
+        }
+        canvas.drawCircle(c, GameConfig.cardIconGlowRadius, _glow!);
         canvas.drawCircle(c, GameConfig.cardIconGlowRadius / 2, paint);
     }
   }
