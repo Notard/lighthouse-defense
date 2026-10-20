@@ -9,7 +9,7 @@
   - [ ] `bash tools/loop/check.sh implementer --max-files 70` 통과 (시트·리그·GIF가 많아 이 카드만 상한 70)
   - [ ] 사용자 움직임 승인 (A3-13·14)
   - [ ] reviewer 승인
-- **바퀴**: 1 / 3
+- **바퀴**: 2 / 3
 
 ## implementer 참고
 - 흐름: `tools/rigs/<id>.json`(부위 다각형·기준점·동작 키) → `bash tools/build_sprites.sh <id>` (cut_parts → Blender → pack_sheets → 미리보기)
@@ -19,3 +19,6 @@
 - 캐릭터 하나 끝날 때마다 리드가 GIF를 볼 수 있게 `preview/05_<id>.gif`
 
 ## 바퀴 기록
+- **1바퀴** (2026-10-20): tester T3-17~24 → implementer 도구 다지기(안전 관문 시연 5가지 모두 잡음)·리그 6·시트 1.93 MB·GIF (관문 통과 48/48, 49개) → **사용자**: "적의 오징어와 문어가 비슷하게 생겨서 게임에선 구분이 잘 안 갈 것 같다. 적은 테두리에 오라가 다르게" → 시안(preview/05_aura_mock.jpg) → "응 적과 아군은 오라로 구분하고, 적도 컬러풀하게"
+- **2바퀴** 리드: `data/art/aura.json`(금빛·분홍, 얇게, 그림에 굽기), 적 셋 프롬프트 알록달록하게 + 테두리 빛 없이, 설계 §3-3 "편 오라", T3-25·26, A3-19·20. implementer: 적 셋 다시 그리기(Codex, 안전 관문) → 적 리그 다시 → 오라 굽기(청록 빛 걷기) → 해마 꼬리 이음매·오징어 파란 띠 → 시트·GIF
+

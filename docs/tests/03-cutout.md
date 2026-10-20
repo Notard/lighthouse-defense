@@ -11,4 +11,6 @@
 | T3-21 | 새 판 | `CharacterArt.load(game, <id>)` 여섯 개 | 모두 성공. 동작마다 `animation(동작)`의 프레임 수가 frames와 같다 |
 | T3-22 | 여섯 시트 JSON | 발 기준점 `anchor`와 `bbox` | anchor가 프레임 안, bbox 넓이 0보다 큼, anchor의 y가 bbox 위 끝보다 아래 |
 | T3-23 | 해마 시트 JSON | `muzzle` | 있고 프레임 안 |
+| T3-25 | 여섯 시트 JSON, `data/tables/characters.csv`, `data/art/aura.json` | `aura`, `aura_color` | `aura`가 그 캐릭터의 kind와 같고, `aura_color`가 aura.json의 그 편 색과 같다 |
+| T3-26 | 여섯 시트의 첫 동작(친구 `idle`, 적 `move`) 그림 | 첫 프레임에서 반투명(알파 20~200) 픽셀의 색 | 그중 그 편 오라 색에 가까운(RGB 각 차이 60 이하) 픽셀이 300개 이상, **반대편** 오라 색에 가까운 픽셀은 그보다 적다 |
 | T3-24 | `data/tables/characters.csv` | 줄과 칸 | 여섯 id가 한 줄씩, 칸 `id,kind,name_ko,name_en,display_height`, kind는 friend 셋·enemy 셋, display_height는 0보다 크고 친구는 88 미만 |
