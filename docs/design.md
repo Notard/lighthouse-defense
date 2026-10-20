@@ -172,7 +172,7 @@
 ### 등대 불빛 (체력)
 - 처음 `hp`(100). 0 아래로 내려가지 않는다
 - 화면 위 **불빛 막대**: 판 위쪽 100 px 안, 가로로 길게. 채운 비율 = 지금 불빛 ÷ 처음 불빛. 따뜻한 노란빛
-- 불빛이 0이 되면 **꺼짐**: 판이 멈춘다 (적이 움직이지도 갉지도 않음, 연습 스폰도 멈춤, 끌기·누르기 무시). 가운데에 문구 "불빛이 꺼졌어요" / "The light went out". 결과 창과 다시 하기는 7단계 (지금은 새로 고침)
+- 불빛이 0이 되면 **꺼짐**: 판이 멈춘다 (적이 움직이지도 갉지도 않음, 연습 스폰도 멈춤, 끌기·누르기 무시). 가운데에 문구(다음 프레임에 붙어도 됨) "불빛이 꺼졌어요" / "The light went out". 결과 창과 다시 하기는 7단계 (지금은 새로 고침)
 
 ### 연습 스폰 (7단계 웨이브 전까지, 확인용)
 - 앱에서는 켜고, 테스트의 기본 판(`LighthouseGame()`)에서는 끈다
@@ -191,7 +191,7 @@
 | `game.enemies` | 판에 있는 적 (쓰러지는 중 포함, 사라지면 빠짐) `List<Enemy>` |
 | `game.light`, `game.maxLight` | 지금 불빛, 처음 불빛 (double) |
 | `game.isOver` | 불빛이 꺼졌는지 |
-| `game.lightBar` | `LightBar` (`lib/game/hud.dart`): `ratio`(0~1), `position`·`size`(게임 좌표, 왼쪽 위 기준) |
+| `game.lightBar` | `LightBar` (`lib/game/hud.dart`): `ratio`(0~1), `position`·`size`(Vector2, 게임 좌표, 왼쪽 위 기준, **막대 전체** 크기) |
 | `game.spawner` | `PracticeSpawner?` (연습이 꺼져 있으면 null): `spawned` = 지금까지 나타난 것 `List<({String id, double angleDeg})>` |
 | `Enemy` (`lib/game/enemy.dart`) | `id`, `stats`(`EnemyStats`), `hp`, `angleDeg`, `distance`(등대 가운데까지), `contactDistance`, `state`(`EnemyState.moving` / `biting` / `dying`), `inBeam`, `takeDamage(double)` → double, `position` |
 | `Enemy.deathSeconds` = 0.8 | 쓰러진 뒤 사라지기까지 |

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flame/game.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lighthouse_defense/game/config.dart';
@@ -97,5 +99,30 @@ Future<void> waitUntil(WidgetTester tester, bool Function() done, {Duration time
   while (!done() && DateTime.now().isBefore(end)) {
     await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
     await tester.pump();
+  }
+}
+
+/// `data/tables/<file>`을 읽어 줄마다 {열 이름: 값} 으로 (git이 줄바꿈을 CRLF로 바꿔도 \r 은 버린다).
+List<Map<String, String>> readCsv(String file) {
+  final lines = File('data/tables/$file')
+      .readAsStringSync()
+      .replaceAll('\r', '')
+      .split('\n')
+      .where((l) => l.trim().isNotEmpty)
+      .toList();
+  final header = lines.first.split(',').map((s) => s.trim()).toList();
+  return [
+    for (final line in lines.skip(1))
+      {
+        for (final (i, cell) in line.split(',').indexed) header[i]: cell.trim(),
+      },
+  ];
+}
+
+/// 판 시간을 [seconds]초 흘린다: `update(0.05)`를 되풀이 (0.05초 단위로 반올림).
+void tickGame(FlameGame game, double seconds) {
+  final n = (seconds / 0.05).round();
+  for (var i = 0; i < n; i++) {
+    game.update(0.05);
   }
 }
