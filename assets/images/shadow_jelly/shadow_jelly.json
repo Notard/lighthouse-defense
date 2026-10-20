@@ -1,8 +1,8 @@
 {
   "character": "shadow_jelly",
   "anchor": [
-    130.8,
-    247.6
+    128.9,
+    242.0
   ],
   "actions": {
     "move": {
@@ -27,14 +27,16 @@
       "loop": false
     }
   },
+  "aura": "enemy",
+  "aura_color": "#FF3C8C",
   "frame": [
     256,
     256
   ],
   "bbox": [
-    41,
-    34,
-    213,
-    250
+    45,
+    39,
+    211,
+    244
   ]
 }

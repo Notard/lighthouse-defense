@@ -11,7 +11,8 @@ JSON (게임이 읽음, lib/game/art.dart CharacterArt)
   frame   [너비, 높이]         한 프레임 크기 (px)
   anchor  [x, y]              프레임 안의 발 위치 → 자리 가운데에 맞춘다
                               리그의 anchor_point 좌표, 또는 anchor_part 부위 기준점 (없으면 body)
-  bbox    [x0, y0, x1, y1]    첫 동작 첫 프레임에서 그림이 있는 영역 → 게임 표시 크기·카드 그림에 쓴다
+  bbox    [x0, y0, x1, y1]    첫 동작 첫 프레임에서 그림이 있는 영역 (오라 빼고) → 게임 표시 크기·카드 그림에 쓴다
+  aura, aura_color            편 오라 (characters.csv kind, data/art/aura.json 색). 오라는 시트 그림에 구워 넣는다
   muzzle  [x, y]              (있으면) 이벤트가 일어나는 위치 (쏘는 곳, 빛이 나오는 곳 …)
                               리그의 muzzle_point 좌표, 또는 muzzle_part 부위 기준점
   actions.<동작>              frames, fps, loop, event(이 프레임에서 발사·생산·피해)
@@ -23,7 +24,7 @@ loop 참/거짓, event(있으면) 1~frames 정수 (어기면 어느 동작의 �
 import json
 import sys
 
-from art_common import ROOT, setup_console, usage, wants_help
+from art_common import ROOT, add_aura, load_aura, load_characters, setup_console, usage, wants_help
 
 WEBP_QUALITY = 88
 REQUIRED = ("frames", "fps", "loop")  # 리그 동작에 꼭 있어야 하는 키
@@ -111,6 +112,14 @@ def main() -> None:
     out_dir = ROOT / "assets" / "images" / name
     out_dir.mkdir(parents=True, exist_ok=True)
     meta = {"character": name, "anchor": to_frame(anchor), "actions": {}}
+    # 편 오라: 편은 data/tables/characters.csv의 kind, 색·넓이는 data/art/aura.json (design.md §3-3)
+    kind = load_characters().get(name, {}).get("kind")
+    aura = load_aura()
+    if kind in ("friend", "enemy"):
+        meta["aura"] = kind
+        meta["aura_color"] = aura[kind]
+    else:
+        print(f"알림: data/tables/characters.csv에 {name}이 없어 오라를 입히지 않습니다")
     if "muzzle_point" in rig:
         meta["muzzle"] = to_frame(rig["muzzle_point"])
     elif rig.get("muzzle_part") in parts:
@@ -120,7 +129,9 @@ def main() -> None:
         frames = sorted((ROOT / "art" / "render" / name / action).glob("*.png"))
         if len(frames) != spec["frames"]:
             sys.exit(f"{action}: 프레임 {len(frames)}장, 리그에는 {spec['frames']}장 (Blender 렌더를 먼저)")
-        imgs = [Image.open(f).convert("RGBA") for f in frames]
+        imgs = raw = [Image.open(f).convert("RGBA") for f in frames]
+        if "aura" in meta:  # bbox는 오라를 입히기 전 그림으로 (키에 오라를 넣지 않게)
+            imgs = [add_aura(im, meta["aura_color"], aura["width"], aura["blur"], aura["strength"]) for im in imgs]
         w, h = imgs[0].size
         sheet = Image.new("RGBA", (w * len(imgs), h))
         for i, im in enumerate(imgs):
@@ -128,7 +139,7 @@ def main() -> None:
         sheet.save(out_dir / f"{action}.webp", "WEBP", quality=WEBP_QUALITY, method=6)
         meta["frame"] = [w, h]
         if "bbox" not in meta:
-            box = first_bbox(name, action, imgs)
+            box = first_bbox(name, action, raw)
             if box is not None:
                 meta["bbox"] = box
         meta["actions"][action] = {k: spec[k] for k in ("frames", "fps", "loop", "event") if k in spec}

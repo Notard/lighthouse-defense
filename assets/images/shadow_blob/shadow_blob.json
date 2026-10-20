@@ -1,8 +1,8 @@
 {
   "character": "shadow_blob",
   "anchor": [
-    127.1,
-    244.8
+    128.0,
+    230.6
   ],
   "actions": {
     "move": {
@@ -27,14 +27,16 @@
       "loop": false
     }
   },
+  "aura": "enemy",
+  "aura_color": "#FF3C8C",
   "frame": [
     256,
     256
   ],
   "bbox": [
-    58,
-    27,
-    198,
-    248
+    43,
+    60,
+    214,
+    232
   ]
 }

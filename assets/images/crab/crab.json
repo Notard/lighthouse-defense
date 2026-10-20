@@ -27,14 +27,16 @@
       "loop": false
     }
   },
+  "aura": "friend",
+  "aura_color": "#FFC85A",
   "frame": [
     256,
     256
   ],
   "bbox": [
-    35,
-    48,
-    222,
+    36,
+    49,
+    221,
     202
   ]
 }

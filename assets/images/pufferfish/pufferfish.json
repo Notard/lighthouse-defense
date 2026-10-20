@@ -27,6 +27,8 @@
       "loop": false
     }
   },
+  "aura": "friend",
+  "aura_color": "#FFC85A",
   "frame": [
     256,
     256

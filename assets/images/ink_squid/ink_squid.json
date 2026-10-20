@@ -1,8 +1,8 @@
 {
   "character": "ink_squid",
   "anchor": [
-    124.2,
-    244.7
+    131.5,
+    245.5
   ],
   "actions": {
     "move": {
@@ -27,14 +27,16 @@
       "loop": false
     }
   },
+  "aura": "enemy",
+  "aura_color": "#FF3C8C",
   "frame": [
     256,
     256
   ],
   "bbox": [
-    44,
-    22,
-    214,
-    247
+    56,
+    41,
+    201,
+    248
   ]
 }
